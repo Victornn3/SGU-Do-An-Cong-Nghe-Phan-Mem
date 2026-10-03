@@ -1,0 +1,14 @@
+# Môi trường ảo Python
+venv/
+__pycache__/
+*.pyc
+
+# Khóa bí mật & Biến môi trường
+.env
+
+# Thư mục lưu file mp3
+audio_service/media/*.mp3
+
+# Dữ liệu IDE & Docker
+.vscode/
+.idea/
