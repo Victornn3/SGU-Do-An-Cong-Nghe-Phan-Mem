@@ -12,6 +12,33 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+      /* Đảm bảo nút định vị nằm nổi trên mặt bản đồ */
+      .recenter-btn {
+        position: absolute;
+        top: 80px;
+        left: 12px;
+        z-index: 1000;
+        background-color: #ffffff;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+      .recenter-btn:hover {
+        background-color: #f8fafc;
+        transform: scale(1.02);
+      }
+
+      .leaflet-control-attribution {
+        display: none !important;
+      }
+    </style>
   </head>
   <body class="bg-slate-100 p-4">
     <div class="max-w-4xl mx-auto space-y-4">
@@ -23,7 +50,11 @@
           🏛️ Thuyết minh Bảo tàng TP.HCM
         </h1>
         <div class="flex gap-2">
-          <select id="langSelect" class="border p-2 rounded"></select>
+          <select id="langSelect" class="border p-2 rounded">
+            <option value="vi">Tiếng Việt 🇻🇳</option>
+            <option value="en">English 🇬🇧</option>
+            <option value="zh">中文 🇨🇳</option>
+          </select>
         </div>
       </header>
 
@@ -72,9 +103,19 @@
     <script>
       // 1. Khởi tạo bản đồ Leaflet hướng về trung tâm Sài Gòn
       const map = L.map("map").setView([10.7769, 106.7009], 14);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
-        map,
-      );
+      // Dùng Tile Layer của Esri ArcGIS (Miễn phí 100%, không cần API Key, không watermark)
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+        {
+          maxZoom: 19,
+          attribution:
+            "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012",
+        },
+      ).addTo(map);
+      // Cập nhật lại kích thước để tránh lỗi render map màu xám
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 250);
 
       let userMarker = L.marker([10.7769, 106.7009], {
         title: "Vị trí của bạn",
@@ -117,41 +158,91 @@
         }
       }
 
-      window.addEventListener("DOMContentLoaded", async () => {
-        try {
-          // 1. Gọi API lấy danh sách ngôn ngữ từ Gateway (Port 8000)
-          const response = await fetch("http://localhost:8000/audio/languages");
+      // Biến lưu vị trí người dùng đang đứng (mặc định ban đầu ở Bảo tàng Q1)
+      let currentUserPos = [10.7769, 106.6953];
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const languages = await response.json();
-          const langSelect = document.getElementById("langSelect");
-
-          // Làm sạch danh sách cũ
-          langSelect.innerHTML = "";
-
-          // 2. Duyệt qua từng ngôn ngữ Backend trả về và tự động tạo thẻ <option>
-          languages.forEach((lang) => {
-            const option = document.createElement("option");
-
-            // Hỗ trợ cả 2 trường hợp format Backend trả về:
-            // Trường hợp 1: Mảng object [{ code: 'vi', name: 'Tiếng Việt' }, ...]
-            // Trường hợp 2: Mảng string đơn giản ['vi', 'en', 'ja', ...]
-            if (typeof lang === "object" && lang !== null) {
-              option.value = lang.code || lang.id;
-              option.textContent = lang.name || lang.label || lang.code;
-            } else {
-              option.value = lang;
-              option.textContent = lang.toUpperCase();
-            }
-
-            langSelect.appendChild(option);
+      // Hàm định tâm lại bản đồ
+      function recenterMap() {
+        if (map) {
+          map.flyTo(currentUserPos, 17, {
+            animate: true,
+            duration: 1.2,
           });
-        } catch (error) {
-          console.error("Lỗi khi tải danh sách ngôn ngữ:", error);
         }
+      }
+
+      // 1. Tạo kiểu Icon hình ngôi nhà/bảo tàng nổi bật
+      const museumIcon = L.divIcon({
+        className: "custom-museum-marker",
+        html: `
+    <div style="
+      background-color: #ffffff;
+      border: 2px solid #1d4ed8;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+      cursor: pointer;
+      transition: transform 0.2s;
+    " onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+      🏛️
+    </div>
+  `,
+        iconSize: [42, 42],
+        iconAnchor: [21, 21],
+        popupAnchor: [0, -22],
+      });
+
+      // 2. Danh sách các bảo tàng cần hiển thị
+      const museumList = [
+        {
+          name: "Bảo tàng Lịch sử TP.HCM",
+          coords: [10.7876, 106.705],
+          desc: "Số 2 Nguyễn Bỉnh Khiêm, Bến Nghé, Quận 1",
+        },
+        {
+          name: "Bảo tàng Chứng tích Chiến tranh",
+          coords: [10.7788, 106.6923],
+          desc: "28 Võ Văn Tần, Phường 6, Quận 3",
+        },
+        {
+          name: "Bến Nhà Rồng (Bảo tàng Hồ Chí Minh)",
+          coords: [10.7682, 106.7067],
+          desc: "Số 1 Nguyễn Tất Thành, Phường 12, Quận 4",
+        },
+      ];
+
+      // 3. Ghim từng bảo tàng lên bản đồ (Kèm vòng tròn Geofence 30m và Tên bảo tàng nổi sẵn)
+      museumList.forEach((item) => {
+        // Ghim icon ngôi nhà
+        L.marker(item.coords, { icon: museumIcon })
+          .addTo(map)
+          .bindTooltip(`<b>${item.name}</b>`, {
+            permanent: true, // Luôn hiển thị tên trên bản đồ, không cần hover
+            direction: "bottom", // Hiện chữ ở ngay dưới icon ngôi nhà
+            offset: [0, 14],
+            className: "museum-label",
+          }).bindPopup(`
+      <div style="font-size: 13px;">
+        <h3 style="font-weight: bold; color: #1e3a8a;">🏛️ ${item.name}</h3>
+        <p style="margin-top: 4px; color: #475569;">${item.desc}</p>
+        <span style="display: inline-block; margin-top: 6px; padding: 2px 6px; background: #e0f2fe; color: #0369a1; border-radius: 4px; font-size: 11px;">
+          Bán kính quét: 30m
+        </span>
+      </div>
+    `);
+
+        // Vẽ vòng bán kính Geofence 30m xung quanh bảo tàng
+        L.circle(item.coords, {
+          color: "#2563eb",
+          fillColor: "#60a5fa",
+          fillOpacity: 0.25,
+          radius: 30,
+        }).addTo(map);
       });
     </script>
   </body>
