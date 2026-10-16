@@ -75,6 +75,9 @@ services:
     container_name: gateway_container
     ports:
       - "8000:8000"
+    volumes:
+      - audio_media:/app/media
+      - ./frontend:/app/frontend
     depends_on:
       - auth_service
       - museum_service
