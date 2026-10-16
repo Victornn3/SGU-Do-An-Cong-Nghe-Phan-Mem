@@ -27,75 +27,142 @@
         background-color: #cbd5e1;
         border-radius: 4px;
       }
+      /* Nhãn tên bảo tàng kèm hiệu ứng nổi bật */
+      .museum-label {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        padding: 2px 6px;
+        white-space: nowrap;
+        font-weight: 700;
+        font-size: 11px;
+        color: #1e3a8a;
+        pointer-events: auto;
+      }
     </style>
   </head>
   <body class="bg-slate-100 text-slate-800 antialiased font-sans">
     <div class="max-w-6xl mx-auto p-3 md:p-5 space-y-4">
       <!-- 1. Thanh Header & Ngôn ngữ -->
-      <header class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-  <!-- Hàng 1: Nhận diện thương hiệu & Tên ứng dụng -->
-  <div class="px-5 py-4 flex items-center justify-between gap-4 border-b border-slate-100">
-    <div class="flex items-center gap-3.5">
-      <!-- Icon Logo Bảo tàng -->
-      <div class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shadow-sm shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3L2 8h20L12 3z" />
-        </svg>
-      </div>
-
-      <div>
-        <h1 class="text-base sm:text-lg md:text-xl font-extrabold text-slate-800 tracking-tight leading-snug">
-          Hệ thống Thuyết minh Tự động Bảo tàng TP.HCM
-        </h1>
-        <p class="text-xs text-slate-400 font-normal mt-0.5">
-          Trải nghiệm tham quan thông minh qua định vị GPS & tương tác QR Code
-        </p>
-      </div>
-    </div>
-
-    <!-- Badge trạng thái trực tuyến -->
-    <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
-      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-      Sẵn sàng kết nối
-    </div>
-  </div>
-
-  <!-- Hàng 2: Thanh Điều Khiển Tác Vụ (Action Bar) -->
-  <div class="bg-slate-50/80 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3">
-    <!-- Cụm chọn ngôn ngữ -->
-    <div class="flex items-center gap-2">
-      <div class="flex items-center gap-1.5 text-slate-500 text-xs font-semibold uppercase tracking-wider">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-        </svg>
-        <span>Ngôn ngữ</span>
-      </div>
-
-      <div class="relative">
-        <select
-          id="langSelect"
-          class="appearance-none bg-white border border-slate-300 text-slate-700 text-xs font-semibold pl-3 pr-8 py-2 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none cursor-pointer transition"
+      <header
+        class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden"
+      >
+        <!-- Hàng 1: Nhận diện thương hiệu & Tên ứng dụng -->
+        <div
+          class="px-5 py-4 flex items-center justify-between gap-4 border-b border-slate-100"
         >
-          <option value="vi">🇻🇳 Tiếng Việt</option>
-          <option value="en">🇬🇧 English</option>
-          <option value="zh">🇨🇳 中文</option>
-        </select>
-        <span class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">▼</span>
-      </div>
-    </div>
+          <div class="flex items-center gap-3.5">
+            <!-- Icon Logo Bảo tàng -->
+            <div
+              class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shadow-sm shrink-0"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3L2 8h20L12 3z"
+                />
+              </svg>
+            </div>
 
-    <!-- Nút Mở Quét Camera QR -->
-    <button
-      onclick="openQrScanner()"
-      class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm hover:shadow transition-all duration-200 active:scale-95"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-      </svg>
-      <span>Quét mã QR hiện vật</span>
-    </button>
-  </div>
-</header>
+            <div>
+              <h1
+                class="text-base sm:text-lg md:text-xl font-extrabold text-slate-800 tracking-tight leading-snug"
+              >
+                Hệ thống Thuyết minh Tự động Bảo tàng TP.HCM
+              </h1>
+              <p class="text-xs text-slate-400 font-normal mt-0.5">
+                Trải nghiệm tham quan thông minh qua định vị GPS & tương tác QR
+                Code
+              </p>
+            </div>
+          </div>
+
+          <!-- Badge trạng thái trực tuyến -->
+          <div
+            class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium"
+          >
+            <span
+              class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+            ></span>
+            Sẵn sàng kết nối
+          </div>
+        </div>
+
+        <!-- Hàng 2: Thanh Điều Khiển Tác Vụ (Action Bar) -->
+        <div
+          class="bg-slate-50/80 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3"
+        >
+          <!-- Cụm chọn ngôn ngữ -->
+          <div class="flex items-center gap-2">
+            <div
+              class="flex items-center gap-1.5 text-slate-500 text-xs font-semibold uppercase tracking-wider"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                />
+              </svg>
+              <span>Ngôn ngữ</span>
+            </div>
+
+            <div class="relative">
+              <select
+                id="langSelect"
+                onchange="onLanguageSelectChange()"
+                class="appearance-none bg-white border border-slate-300 text-slate-700 text-xs font-semibold pl-3 pr-8 py-2 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none cursor-pointer transition"
+              >
+                <option value="vi">🇻🇳 Tiếng Việt</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="zh">🇨🇳 中文</option>
+              </select>
+              <span
+                class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+                >▼</span
+              >
+            </div>
+          </div>
+
+          <!-- Nút Mở Quét Camera QR -->
+          <button
+            onclick="openQrScanner()"
+            class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm hover:shadow transition-all duration-200 active:scale-95"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+              />
+            </svg>
+            <span>Quét mã QR hiện vật</span>
+          </button>
+        </div>
+      </header>
 
       <!-- 2. Bố cục Trung tâm: Bản đồ & Bảng chi tiết Hiện vật -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -114,8 +181,9 @@
             class="absolute bottom-6 right-6 z-[1000] bg-white text-slate-800 hover:bg-blue-50 hover:text-blue-600 p-3 rounded-full shadow-lg border border-slate-200 flex items-center justify-center transition-all duration-200 group active:scale-95"
             title="Định tâm lại bản đồ"
           >
-            <span class="text-xl group-hover:scale-110 transition-transform"></span>
-            </span>
+            <span class="text-xl group-hover:scale-110 transition-transform"
+              >🎯</span
+            >
           </button>
         </div>
 
@@ -243,263 +311,262 @@
 
     <script>
       // ==========================================
-      // I. CẤU HÌNH DỮ LIỆU 7 BẢO TÀNG VÀ HIỆN VẬT
+      // I. CẤU HÌNH HỆ THỐNG & ĐỊNH VỊ LINH HOẠT CHO LAN/MOBILE
       // ==========================================
       const INITIAL_CENTER = [10.7769, 106.7009];
-      const API_BASE = "http://localhost:8000";
 
-      const MUSEUMS = [
-        {
-          id: "hist_vn",
-          name: "Bảo tàng Lịch sử TP.HCM",
-          coords: [10.7876, 106.705],
-          address: "Số 2 Nguyễn Bỉnh Khiêm, P. Bến Nghé, Q.1",
-          image:
-            "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80",
-          artifacts: [
-            {
-              id: "art_dongson",
-              name: "Trống đồng Đông Sơn",
-              desc: "Niên đại văn hóa Đông Sơn thế kỷ 5 TCN.",
-            },
-            {
-              id: "art_tuong_champa",
-              name: "Tượng thần Shiva Champa",
-              desc: "Tác phẩm điêu khắc đá sa thạch thế kỷ 8.",
-            },
-          ],
-        },
-        {
-          id: "fine_arts",
-          name: "Bảo tàng Mỹ thuật TP.HCM",
-          coords: [10.7698, 106.6997],
-          address: "97A Phó Đức Chính, P. Nguyễn Thái Bình, Q.1",
-          image:
-            "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400&q=80",
-          artifacts: [
-            {
-              id: "art_vuon_xuan",
-              name: "Tranh 'Vườn xuân Bắc Trung Nam'",
-              desc: "Tuyệt phẩm tranh sơn mài của danh họa Nguyễn Gia Trí.",
-            },
-          ],
-        },
-        {
-          id: "hcm_city",
-          name: "Bảo tàng TP.HCM (Gia Long)",
-          coords: [10.776, 106.6995],
-          address: "65 Lý Tự Trọng, P. Bến Nghé, Q.1",
-          image:
-            "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&q=80",
-          artifacts: [
-            {
-              id: "art_co_vat_dia_dao",
-              name: "Hiện vật Địa đạo Củ Chi",
-              desc: "Dụng cụ và vũ khí tự chế thời kỳ kháng chiến.",
-            },
-          ],
-        },
-        {
-          id: "independence_palace",
-          name: "Dinh Độc Lập",
-          coords: [10.777, 106.6953],
-          address: "135 Nam Kỳ Khởi Nghĩa, P. Bến Thành, Q.1",
-          image:
-            "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=400&q=80",
-          artifacts: [
-            {
-              id: "art_xe_tang_390",
-              name: "Xe tăng T-59 số hiệu 390",
-              desc: "Xe tăng húc đổ cổng chính trưa ngày 30/4/1975.",
-            },
-          ],
-        },
-        {
-          id: "geology",
-          name: "Bảo tàng Địa chất TP.HCM",
-          coords: [10.7865, 106.7042],
-          address: "Số 2 Nguyễn Bỉnh Khiêm, P. Bến Nghé, Q.1",
-          image:
-            "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80",
-          artifacts: [
-            {
-              id: "art_thach_anh",
-              name: "Khối khoáng vật Thạch anh vàng",
-              desc: "Mẫu tinh thể tự nhiên quý hiếm phát hiện tại miền Trung.",
-            },
-          ],
-        },
-        {
-          id: "war_remnants",
-          name: "Bảo tàng Chứng tích Chiến tranh",
-          coords: [10.7788, 106.6923],
-          address: "28 Võ Văn Tần, Phường 6, Q.3",
-          image:
-            "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=400&q=80",
-          artifacts: [
-            {
-              id: "art_uh1_huey",
-              name: "Trực thăng UH-1 Huey",
-              desc: "Máy bay trực thăng quân sự tham gia chiến trường Việt Nam.",
-            },
-          ],
-        },
-        {
-          id: "nha_rong",
-          name: "Bến Nhà Rồng (Bảo tàng Hồ Chí Minh)",
-          coords: [10.7682, 106.7067],
-          address: "Số 1 Nguyễn Tất Thành, Phường 12, Q.4",
-          image:
-            "https://images.unsplash.com/photo-1508807526345-15e9b5f4eaff?w=400&q=80",
-          artifacts: [
-            {
-              id: "art_vali_may_quay",
-              name: "Chiếc vali mây lịch sử",
-              desc: "Hành trang gắn liền trong hành trình tìm đường cứu nước.",
-            },
-          ],
-        },
-      ];
+      // Tự động nhận diện host (nếu chạy trực tiếp file:/// sẽ trỏ về localhost:8000)
+      const API_BASE =
+        window.location.origin && window.location.origin.startsWith("http")
+          ? window.location.origin
+          : "http://localhost:8000";
 
-      // ==========================================
-      // II. QUẢN LÝ TRẠNG THÁI & LOGIC NÂNG CAO
-      // ==========================================
+      let MUSEUMS = [];
       let debounceTimer = null;
-      let lastTriggerTimes = {}; // Lưu thời gian kích hoạt theo POI ID để tính Cooldown (5 phút = 300,000ms)
+      let lastTriggerTimes = {};
       const COOLDOWN_MS = 5 * 60 * 1000;
+      let currentInsidePoiId = null; // LƯU BẢO TÀNG HIỆN TẠI ĐỂ KHÔNG BAO GIỜ PHÁT LẶP LẠI KHI Ở LÂU
       let qrCodeScannerInstance = null;
+      let map = null;
+      let userMarker = null;
+      let museumLayerGroup = null;
+      let currentPlayingTarget = null; // Lưu POI/Artifact đang phát để chuyển ngôn ngữ
 
-      // 1. Khởi tạo Bản đồ Leaflet
-      const map = L.map("map").setView(INITIAL_CENTER, 14);
+      // ==========================================
+      // II. KHỞI TẠO BẢN ĐỒ OPENSTREETMAP CHUẨN
+      // ==========================================
+      function initMap() {
+        map = L.map("map").setView(INITIAL_CENTER, 14);
 
-      // Tile Layer Esri ArcGIS miễn phí, sắc nét, không watermark
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 19 },
-      ).addTo(map);
-
-      // Đảm bảo không bị render xám khi trình duyệt tải
-      setTimeout(() => map.invalidateSize(), 300);
-
-      // Marker vị trí người dùng
-      let userMarker = L.marker(INITIAL_CENTER, {
-        title: "Vị trí của bạn",
-        zIndexOffset: 1000,
-      })
-        .addTo(map)
-        .bindTooltip("📍 Vị trí của bạn", {
-          permanent: true,
-          direction: "top",
-          offset: [0, -10],
-        });
-
-      // Định nghĩa icon bảo tàng
-      const customMuseumIcon = L.divIcon({
-        className: "custom-pin",
-        html: `
-          <div style="background-color: #ffffff; border: 2px solid #2563eb; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 8px rgba(0,0,0,0.25); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
-            🏛️️
-          </div>
-        `,
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-        popupAnchor: [0, -18],
-      });
-
-      // Render 7 Bảo tàng lên Bản đồ
-      MUSEUMS.forEach((m) => {
-        // Marker
-        const marker = L.marker(m.coords, { icon: customMuseumIcon }).addTo(
-          map,
-        );
-
-        // Popup tương tác
-        const popupContent = `
-          <div style="width: 210px; font-family: sans-serif;">
-            <img src="${m.image}" alt="${m.name}" style="width: 100%; height: 95px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;" />
-            <h4 style="font-weight: 700; color: #1e3a8a; font-size: 13px; line-height: 1.2;">${m.name}</h4>
-            <p style="font-size: 11px; color: #64748b; margin: 4px 0;">${m.address}</p>
-            <button onclick="displayArtifacts('${m.id}')" style="width: 100%; margin-top: 6px; padding: 5px 8px; background: #2563eb; color: #fff; font-size: 11px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer;">
-              Xem danh sách hiện vật
-            </button>
-          </div>
-        `;
-        marker.bindPopup(popupContent);
-
-        // Vòng tròn Geofence 30m
-        L.circle(m.coords, {
-          color: "#2563eb",
-          fillColor: "#60a5fa",
-          fillOpacity: 0.2,
-          radius: 30,
+        // Tile layer chuẩn OpenStreetMap sắc nét theo yêu cầu
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
         }).addTo(map);
-      });
 
-      // Hàm Recenter định vị 🎯
+        setTimeout(() => map.invalidateSize(), 300);
+
+        // Marker vị trí người dùng
+        userMarker = L.marker(INITIAL_CENTER, {
+          title: "Vị trí của bạn",
+          zIndexOffset: 1000,
+        })
+          .addTo(map)
+          .bindTooltip("📍 Vị trí của bạn", {
+            permanent: true,
+            direction: "top",
+            offset: [0, -10],
+          });
+
+        museumLayerGroup = L.layerGroup().addTo(map);
+      }
+
       function recenterMap() {
-        map.flyTo(INITIAL_CENTER, 15, { animate: true, duration: 1.2 });
+        if (userMarker) {
+          map.flyTo(userMarker.getLatLng(), 15, {
+            animate: true,
+            duration: 1.0,
+          });
+        } else {
+          map.flyTo(INITIAL_CENTER, 15, { animate: true, duration: 1.0 });
+        }
       }
 
       // ==========================================
-      // III. FALLBACK ÂM THANH 3 TẦNG (zh -> en -> vi)
+      // III. KẾT NỐI API BACKEND: TẢI BẢO TÀNG & HIỆN VẬT THẬT
       // ==========================================
-      async function playAudioWithFallback(audioSources, chosenLang) {
-        const player = document.getElementById("audioPlayer");
-        const statusBox =
-          document.getElementById("statusText") ||
-          document.getElementById("statusBox");
+      async function fetchMuseumsFromBackend() {
+        const statusBox = document.getElementById("statusBox");
+        try {
+          const res = await fetch(`${API_BASE}/pois`);
+          if (!res.ok)
+            throw new Error(
+              "Mã phản hồi từ Gateway không hợp lệ: " + res.status,
+            );
+          const data = await res.json();
 
-        // Xác định thứ tự fallback dựa trên ngôn ngữ chọn
+          MUSEUMS = data.map((item) => ({
+            id: item.id,
+            name: item.name,
+            desc: item.description_vi || "",
+            coords: [item.location?.lat || 0, item.location?.lng || 0],
+            address: item.address || "TP. Hồ Chí Minh",
+            image:
+              item.image ||
+              "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80",
+            radius: item.trigger_radius_meters || 30,
+            qr_code: item.qr_code || `qr_${item.id}`,
+            artifacts: (item.artifacts || []).map((a) => ({
+              id: a.artifact_id || a.id,
+              name: a.name || a.artifact_id,
+              desc: a.description_vi || "Hiện vật trưng bày quý giá.",
+              room: a.room || "Khu vực trưng bày",
+              image: a.image || "",
+            })),
+          }));
+
+          // Xóa các marker cũ và vẽ lại toàn bộ danh sách mới nhất
+          renderMuseumsOnMap();
+          statusBox.innerHTML = `✅ Đã kết nối Microservices (${MUSEUMS.length} bảo tàng). Sẵn sàng nhận tín hiệu GPS.`;
+        } catch (err) {
+          console.warn("Lỗi tải POIs từ server:", err);
+          statusBox.innerHTML = `⚠️ <i>Đang chạy chế độ kiểm thử (Không kết nối được Gateway: ${err.message}).</i>`;
+        }
+      }
+      function selectMuseum(museumId) {
+        const m = MUSEUMS.find((x) => x.id === museumId);
+        if (!m) return;
+
+        // 1. Bay tâm bản đồ tới bảo tàng được chọn
+        if (m.coords[0] && m.coords[1]) {
+          map.panTo(m.coords, { animate: true, duration: 0.8 });
+        }
+
+        // 2. Đổ danh sách hiện vật sang bảng bên cạnh
+        displayArtifacts(m.id);
+
+        // 3. Chuẩn bị sẵn file audio vào trình phát (KHÔNG TỰ ĐỘNG PHÁT)
+        const chosenLang = document.getElementById("langSelect").value;
+        const player = document.getElementById("audioPlayer");
+        const statusBox = document.getElementById("statusBox");
+
+        player.pause(); // Dừng bài cũ nếu đang phát
+        player.src = `${API_BASE}/audio/files/${m.id}_${chosenLang}.mp3`;
+
+        statusBox.innerHTML = `🏛️ Đã chọn: <b>${m.name}</b> (Bấm ▶️ trên trình phát để nghe thuyết minh).`;
+        currentPlayingTarget = { id: m.id, name: m.name };
+      }
+
+      function renderMuseumsOnMap() {
+        museumLayerGroup.clearLayers();
+
+        MUSEUMS.forEach((m) => {
+          if (!m.coords[0] || !m.coords[1]) return;
+
+          const customMuseumIcon = L.divIcon({
+            className: "custom-museum-pin",
+            html: `
+              <div style="display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); pointer-events: auto;">
+                <div style="background-color: #ffffff; border: 2px solid #2563eb; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: 0 4px 8px rgba(0,0,0,0.25); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                  🏛️
+                </div>
+                <div class="museum-label" style="margin-top: 3px; max-width: 140px; text-overflow: ellipsis; overflow: hidden;">
+                  ${m.name}
+                </div>
+              </div>
+            `,
+            iconSize: [0, 0],
+            popupAnchor: [0, -20],
+          });
+
+          const marker = L.marker(m.coords, { icon: customMuseumIcon }).addTo(
+            museumLayerGroup,
+          );
+
+          const popupContent = `
+            <div style="width: 200px; font-family: sans-serif; pointer-events: none;">
+              <img src="${m.image}" alt="${m.name}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;" />
+              <h4 style="font-weight: 700; color: #1e3a8a; font-size: 13px; line-height: 1.2;">${m.name}</h4>
+              <p style="font-size: 11px; color: #64748b; margin: 3px 0;">${m.address}</p>
+              <p style="font-size: 10px; color: #2563eb; font-weight: 600; margin-top: 4px;">👉 Nhấp chuột để xem danh sách hiện vật</p>
+            </div>
+          `;
+          marker.bindPopup(popupContent, {
+            closeButton: false,
+            offset: [0, -10],
+          });
+
+          // 1. Rà chuột (Hover) vào thì hiện bảng thông tin
+          marker.on("mouseover", function () {
+            this.openPopup();
+          });
+
+          // Rà chuột ra ngoài thì tự ẩn nếu chưa bấm
+          marker.on("mouseout", function () {
+            this.closePopup();
+          });
+
+          // 2. Click vào icon: Đóng bảng popup ngay lập tức và nạp hiện vật (không tự phát tiếng)
+          marker.on("click", function () {
+            this.closePopup();
+            selectMuseum(m.id);
+          });
+
+          // Vòng tròn bán kính Geofence
+          L.circle(m.coords, {
+            color: "#2563eb",
+            fillColor: "#60a5fa",
+            fillOpacity: 0.2,
+            radius: m.radius || 30,
+          }).addTo(museumLayerGroup);
+        });
+      }
+
+      // ==========================================
+      // IV. PHÁT AUDIO VÀ CƠ CHẾ FALLBACK 3 TẦNG (zh -> en -> vi)
+      // ==========================================
+      async function playAudioTarget(targetId, targetName, preferredLang) {
+        const player = document.getElementById("audioPlayer");
+        const statusBox = document.getElementById("statusBox");
+        const chosenLang =
+          preferredLang || document.getElementById("langSelect").value;
+
+        currentPlayingTarget = { id: targetId, name: targetName };
+
+        // Thứ tự ưu tiên Fallback
         let priorityOrder = ["vi"];
         if (chosenLang === "zh") priorityOrder = ["zh", "en", "vi"];
         else if (chosenLang === "en") priorityOrder = ["en", "vi"];
 
-        let validAudioUrl = null;
-        let finalLang = null;
+        let successfullyPlayed = false;
 
         for (const lang of priorityOrder) {
-          if (audioSources && audioSources[lang]) {
-            validAudioUrl = audioSources[lang];
-            finalLang = lang;
-            break;
+          const testAudioUrl = `${API_BASE}/audio/files/${targetId}_${lang}.mp3`;
+          try {
+            const check = await fetch(testAudioUrl, { method: "HEAD" });
+            if (check.ok) {
+              player.src = testAudioUrl;
+              await player.play();
+              successfullyPlayed = true;
+
+              const langLabel = { vi: "Tiếng Việt", en: "English", zh: "中文" };
+              if (chosenLang !== lang) {
+                statusBox.innerHTML = `✅ <b>Đang phát:</b> ${targetName}<br/><span class="text-amber-600 font-medium">⚠️ Đã fallback sang phát: ${langLabel[lang]}</span>`;
+              } else {
+                statusBox.innerHTML = `✅ <b>Đang phát thuyết minh:</b> ${targetName} (${langLabel[lang]})`;
+              }
+              break;
+            }
+          } catch (e) {
+            // Thử ngôn ngữ tiếp theo trong fallback
           }
         }
 
-        if (validAudioUrl) {
-          player.src = validAudioUrl;
-          try {
-            await player.play();
-            const langLabel = { vi: "Tiếng Việt", en: "English", zh: "中文" };
-            if (chosenLang !== finalLang) {
-              statusBox.innerHTML += `<br/><span class="text-amber-600 font-medium">⚠️ Đã fallback sang phát: ${langLabel[finalLang]}</span>`;
-            }
-          } catch (e) {
-            console.warn(
-              "Autoplay bị chặn bởi chính sách trình duyệt, cần người dùng tương tác.",
-              e,
-            );
-          }
-        } else {
-          statusBox.innerText =
-            "❌ Không tìm thấy file âm thanh thuyết minh phù hợp.";
+        if (!successfullyPlayed) {
+          // Thử phát URL trực tiếp nếu có cấu hình tĩnh hoặc phát báo lỗi
+          player.src = `${API_BASE}/audio/files/${targetId}_vi.mp3`;
+          player.play().catch(() => {
+            statusBox.innerHTML = `❌ File âm thanh cho <b>${targetName}</b> đang được Worker tổng hợp hoặc chưa có trong thư mục media/.`;
+          });
+        }
+      }
+
+      function onLanguageSelectChange() {
+        if (currentPlayingTarget) {
+          playAudioTarget(currentPlayingTarget.id, currentPlayingTarget.name);
         }
       }
 
       // ==========================================
-      // IV. GEOFENCE GPS (Debounce 3s & Cooldown 5m)
+      // V. GEOFENCE GPS (Debounce 3s & Cooldown 5m)
       // ==========================================
       function triggerSimulateGPS(lat, lng) {
-        // Cập nhật ngay Marker trên UI
         userMarker.setLatLng([lat, lng]);
         map.panTo([lat, lng]);
 
         const statusBox = document.getElementById("statusBox");
-        statusBox.innerHTML = `⏱️ Đang lấy tọa độ... Đang chờ ổn định vị trí (Debounce 3s)...`;
+        statusBox.innerHTML = `⏱️ Đang lấy tọa độ (${lat.toFixed(4)}, ${lng.toFixed(4)})... Đang chờ ổn định vị trí (Debounce 3s)...`;
 
-        // Hủy timer trước đó nếu người dùng đổi vị trí liên tục
         if (debounceTimer) clearTimeout(debounceTimer);
-
-        // Kích hoạt sau 3 giây dừng di chuyển (Debounce)
         debounceTimer = setTimeout(() => {
           executeGeofenceCheck(lat, lng);
         }, 3000);
@@ -509,7 +576,7 @@
         const statusBox = document.getElementById("statusBox");
         const chosenLang = document.getElementById("langSelect").value;
         const badge = document.getElementById("cooldownBadge");
-        statusBox.innerHTML = `🔍 Đang gửi yêu cầu kiểm tra Geofence...`;
+        statusBox.innerHTML = `🔍 Đang gửi yêu cầu kiểm tra Geofence tới Server...`;
 
         try {
           const res = await fetch(`${API_BASE}/pois/geofence`, {
@@ -522,74 +589,73 @@
             }),
           });
 
-          if (!res.ok) throw new Error("Mã phản hồi từ Gateway không hợp lệ");
+          if (!res.ok) throw new Error("Lỗi HTTP: " + res.status);
           const data = await res.json();
 
           if (data.inside_geofence) {
-            const now = Date.now();
-            const lastTime = lastTriggerTimes[data.poi_id] || 0;
-            const diff = now - lastTime;
-
-            // Tự động load danh sách hiện vật của bảo tàng này
             displayArtifacts(data.poi_id);
 
-            // Kiểm tra quy tắc Cooldown 5 phút (300.000 ms)
-            if (diff < COOLDOWN_MS) {
-              const remainMinutes = Math.ceil((COOLDOWN_MS - diff) / 60000);
-              badge.classList.remove("hidden");
-              statusBox.innerHTML = `
-                ✅ Đã vào: <b>${data.poi_name}</b> (Cách ${data.distance_meters}m)<br/>
-                <span class="text-amber-600">⏳ Cooldown: Bài phát vừa được phát gần đây (Chờ ${remainMinutes} phút để phát lại).</span>
-              `;
+            // NẾU VẪN ĐANG Ở TRONG CÙNG 1 BẢO TÀNG -> TUYỆT ĐỐI KHÔNG PHÁT LẠI DÙ QUA 5 PHÚT HAY CẢ TIẾNG
+            if (currentInsidePoiId === data.poi_id) {
+              statusBox.innerHTML = `📍 Bạn đang tham quan bên trong: <b>${data.poi_name}</b>`;
               return;
             }
 
-            // Thỏa mãn điều kiện -> Reset Cooldown & phát âm thanh
+            // NẾU BƯỚC SANG MỘT BẢO TÀNG MỚI -> CẬP NHẬT VÀ PHÁT BÀI MỚI
+            currentInsidePoiId = data.poi_id;
+            lastTriggerTimes[data.poi_id] = Date.now();
             badge.classList.add("hidden");
-            lastTriggerTimes[data.poi_id] = now;
-            statusBox.innerHTML = `✅ <b>Đang phát thuyết minh:</b> ${data.poi_name}`;
-
-            // Hỗ trợ Fallback nếu backend trả về map audio { vi, en, zh } hoặc url đơn lẻ
-            const audioMap =
-              typeof data.audio_url === "object"
-                ? data.audio_url
-                : { [chosenLang]: data.audio_url };
-            playAudioWithFallback(audioMap, chosenLang);
+            playAudioTarget(data.poi_id, data.poi_name, chosenLang);
           } else {
+            // Khi bước ra ngoài vùng bảo tàng -> reset trạng thái để lần sau vào lại bảo tàng thì được nghe lại
+            currentInsidePoiId = null;
             badge.classList.add("hidden");
-            statusBox.innerHTML = `❌ Bạn đang ở ngoài vùng Geofence 30m của các bảo tàng.`;
+            statusBox.innerHTML = `❌ Bạn đang ở ngoài vùng Geofence của các bảo tàng.`;
           }
         } catch (err) {
-          // Mock phản hồi mẫu cục bộ nếu chưa mở Backend Port 8000
-          statusBox.innerHTML = `⚠️️ <i>[Demo Mode] Không kết nối được Gateway Port 8000. Đang mô phỏng dữ liệu mẫu.</i>`;
-          fallbackLocalSimulation(lat, lng, chosenLang);
+          // Tính toán Geofence cục bộ nếu Gateway bị gián đoạn
+          fallbackLocalGeofence(lat, lng, chosenLang);
         }
       }
 
-      // Giả lập tính toán Geofence cục bộ phục vụ việc test giao diện khi không có backend
-      function fallbackLocalSimulation(lat, lng, lang) {
+      function fallbackLocalGeofence(lat, lng, lang) {
         const found = MUSEUMS.find((m) => {
           const d = map.distance([lat, lng], m.coords);
-          return d <= 30;
+          return d <= (m.radius || 30);
         });
 
         const statusBox = document.getElementById("statusBox");
         if (found) {
           displayArtifacts(found.id);
-          statusBox.innerHTML += `<br/>✅ <b>Đã vào vùng:</b> ${found.name}`;
-          playAudioWithFallback(
-            {
-              vi: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-            },
-            lang,
-          );
+          statusBox.innerHTML = `✅ [Offline Fallback] Đã vào vùng: <b>${found.name}</b>`;
+          playAudioTarget(found.id, found.name, lang);
         } else {
-          statusBox.innerHTML += `<br/>❌ Ngoài vùng thuyết minh của các bảo tàng.`;
+          statusBox.innerHTML = `❌ Ngoài vùng thuyết minh của các bảo tàng.`;
+        }
+      }
+
+      // Theo dõi vị trí GPS thực tế khi mở trên điện thoại
+      function initRealDeviceGPS() {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.watchPosition(
+            (pos) => {
+              const lat = pos.coords.latitude;
+              const lng = pos.coords.longitude;
+              userMarker.setLatLng([lat, lng]);
+
+              if (debounceTimer) clearTimeout(debounceTimer);
+              debounceTimer = setTimeout(() => {
+                executeGeofenceCheck(lat, lng);
+              }, 3000);
+            },
+            (err) => console.log("GPS Device Notice:", err.message),
+            { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 },
+          );
         }
       }
 
       // ==========================================
-      // V. BẢNG HIỆN VẬT & TTS ON-DEMAND
+      // VI. BẢNG HIỆN VẬT & PHÁT THUYẾT MINH HIỆN VẬT
       // ==========================================
       function displayArtifacts(museumId) {
         const museum = MUSEUMS.find((m) => m.id === museumId);
@@ -600,18 +666,31 @@
         const container = document.getElementById("artifactList");
         container.innerHTML = "";
 
+        if (!museum.artifacts || museum.artifacts.length === 0) {
+          container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-8">Chưa có hiện vật nào thuộc bảo tàng này.</p>`;
+          return;
+        }
+
         museum.artifacts.forEach((item) => {
           const div = document.createElement("div");
           div.className =
-            "p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-200 transition flex flex-col justify-between";
+            "p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-200 transition flex gap-3 items-center justify-between";
+
+          // Ảnh mặc định nếu hiện vật chưa có ảnh
+          const imgSrc =
+            item.image ||
+            "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80";
+
           div.innerHTML = `
-            <div>
-              <h4 class="font-bold text-xs text-slate-800">${item.name}</h4>
-              <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-2">${item.desc}</p>
+            <img src="${imgSrc}" class="w-12 h-12 object-cover rounded-lg border border-slate-200 shrink-0" alt="${item.name}" />
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold text-xs text-slate-800 truncate">${item.name}</h4>
+              <p class="text-[10px] text-blue-600 font-medium">${item.room || "Khu trưng bày"}</p>
+              <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-1">${item.desc}</p>
             </div>
-            <div class="mt-2 flex justify-end">
-              <button onclick="requestTtsOnDemand('${item.id}', '${item.name}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-sm transition flex items-center gap-1 active:scale-95">
-                🔊 Nghe thuyết minh
+            <div class="shrink-0">
+              <button onclick="requestTtsOnDemand('${item.id}', '${item.name}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition flex items-center gap-1 active:scale-95">
+                🔊 Nghe
               </button>
             </div>
           `;
@@ -622,7 +701,7 @@
       async function requestTtsOnDemand(artifactId, artifactName) {
         const lang = document.getElementById("langSelect").value;
         const statusBox = document.getElementById("statusBox");
-        statusBox.innerHTML = `🎙️ Đang yêu cầu TTS cho: <b>${artifactName}</b> (${lang})...`;
+        statusBox.innerHTML = `🎙️ Đang kết nối Audio Service cho: <b>${artifactName}</b> (${lang})...`;
 
         try {
           const res = await fetch(`${API_BASE}/audio/tts-on-demand`, {
@@ -634,27 +713,22 @@
             }),
           });
 
-          if (!res.ok) throw new Error("Lỗi máy chủ TTS");
+          if (!res.ok) throw new Error("Máy chủ TTS trả về mã: " + res.status);
           const data = await res.json();
-          playAudioWithFallback(
-            data.audio_sources || { [lang]: data.audio_url },
-            lang,
-          );
+          const audioPlayer = document.getElementById("audioPlayer");
+          audioPlayer.src =
+            data.audio_url ||
+            `${API_BASE}/audio/files/${artifactId}_${lang}.mp3`;
+          await audioPlayer.play();
           statusBox.innerHTML = `🔊 Đang phát bài thuyết minh hiện vật: <b>${artifactName}</b>`;
         } catch (e) {
-          // Fallback giả lập demo âm thanh mẫu
-          statusBox.innerHTML = `⚠️ <i>[Demo TTS] Đang phát mẫu demo cho: ${artifactName}</i>`;
-          playAudioWithFallback(
-            {
-              vi: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-            },
-            lang,
-          );
+          // Thử phát thẳng file từ audio service
+          playAudioTarget(artifactId, artifactName, lang);
         }
       }
 
       // ==========================================
-      // VI. CAMERA QUÉT QR CODE (html5-qrcode)
+      // VII. CAMERA QUÉT QR CODE TRÊN ĐIỆN THOẠI & LAPTOP
       // ==========================================
       function openQrScanner() {
         document.getElementById("qrModal").classList.remove("hidden");
@@ -666,13 +740,10 @@
             { facingMode: "environment" },
             { fps: 10, qrbox: { width: 220, height: 220 } },
             (decodedText) => {
-              // Khi quét thành công mã QR
               handleQrCodeResult(decodedText);
               closeQrScanner();
             },
-            (errorMessage) => {
-              // Đang quét khung hình thông thường (không throw log)
-            },
+            () => {},
           )
           .catch((err) => {
             alert("Không thể khởi động camera: " + err);
@@ -694,31 +765,97 @@
         document.getElementById("qrModal").classList.remove("flex");
       }
 
-      function handleQrCodeResult(qrData) {
-        // Hỗ trợ mã QR dạng JSON {"artifact_id": "art_dongson"} hoặc mã chuỗi thô "art_dongson"
-        let artifactId = qrData;
+      async function handleQrCodeResult(qrData) {
+        let code = qrData;
         try {
           const parsed = JSON.parse(qrData);
-          if (parsed.artifact_id) artifactId = parsed.artifact_id;
+          if (parsed.artifact_id) code = parsed.artifact_id;
         } catch (e) {}
 
-        // Tìm hiện vật trong cơ sở dữ liệu để kích phát thuyết minh tức thời
-        let foundArtifact = null;
+        const statusBox = document.getElementById("statusBox");
+        statusBox.innerHTML = `📷 Đã quét mã: <b>${code}</b>. Đang tra cứu thông tin...`;
+
+        try {
+          // Gửi tới API tra cứu QR thật
+          const res = await fetch(
+            `${API_BASE}/pois/qr/${encodeURIComponent(code)}`,
+          );
+          if (res.ok) {
+            const result = await res.json();
+            if (
+              result.type === "artifact" &&
+              result.data?.artifacts?.length > 0
+            ) {
+              const art = result.data.artifacts[0];
+              displayArtifacts(result.data.id);
+              requestTtsOnDemand(art.artifact_id || code, art.name || code);
+              return;
+            } else if (result.type === "museum" && result.data) {
+              displayArtifacts(result.data.id);
+              playAudioTarget(result.data.id, result.data.name);
+              return;
+            }
+          }
+        } catch (err) {}
+
+        // Fallback tra cứu trong mảng MUSEUMS đã tải về
+        let foundArt = null;
+        let foundMuseum = null;
         for (const m of MUSEUMS) {
-          const a = m.artifacts.find((item) => item.id === artifactId);
+          const a = (m.artifacts || []).find(
+            (x) => x.id === code || x.qr_code === code,
+          );
           if (a) {
-            foundArtifact = a;
-            displayArtifacts(m.id);
+            foundArt = a;
+            foundMuseum = m;
+            break;
+          }
+          if (m.id === code || m.qr_code === code) {
+            foundMuseum = m;
             break;
           }
         }
 
-        if (foundArtifact) {
-          requestTtsOnDemand(foundArtifact.id, foundArtifact.name);
+        if (foundArt) {
+          displayArtifacts(foundMuseum.id);
+          requestTtsOnDemand(foundArt.id, foundArt.name);
+        } else if (foundMuseum) {
+          displayArtifacts(foundMuseum.id);
+          playAudioTarget(foundMuseum.id, foundMuseum.name);
         } else {
-          requestTtsOnDemand(artifactId, "Hiện vật QR #" + artifactId);
+          requestTtsOnDemand(code, "Hiện vật QR #" + code);
         }
       }
+
+      // Tự động nhận diện ngôn ngữ máy/trình duyệt
+      function detectDeviceLanguage() {
+        const browserLang = (
+          navigator.language ||
+          navigator.userLanguage ||
+          "vi"
+        ).toLowerCase();
+
+        if (browserLang.startsWith("en")) return "en";
+        if (browserLang.startsWith("zh")) return "zh";
+        return "vi";
+      }
+
+      // Khởi tạo chạy ban đầu
+      window.onload = async () => {
+        // Tự động set ngôn ngữ theo region máy của người dùng
+        const detectedLang = detectDeviceLanguage();
+        const langSelect = document.getElementById("langSelect");
+        if (langSelect) {
+          langSelect.value = detectedLang;
+        }
+
+        initMap();
+        await fetchMuseumsFromBackend();
+        initRealDeviceGPS();
+
+        // Tự động đồng bộ cập nhật dữ liệu định kỳ mỗi 15 giây (khi Admin thêm/xóa bảo tàng)
+        setInterval(fetchMuseumsFromBackend, 15000);
+      };
     </script>
   </body>
 </html>

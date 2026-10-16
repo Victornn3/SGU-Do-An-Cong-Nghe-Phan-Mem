@@ -1,10 +1,11 @@
 import os
 import json
 import redis
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.geo import haversine_distance
+from bson import ObjectId
 
 app = FastAPI(title="Museum & GPS Service", version="1.0")
 
@@ -32,6 +33,7 @@ class POICreateSchema(BaseModel):
     lng: float
     trigger_radius_meters: float = 30.0
     qr_code: str
+    image: str = ""
 
 @app.get("/")
 async def root():
@@ -104,6 +106,7 @@ async def add_poi(poi_data: POICreateSchema):
         "location": {"lat": poi_data.lat, "lng": poi_data.lng},
         "trigger_radius_meters": poi_data.trigger_radius_meters,
         "qr_code": poi_data.qr_code,
+        "image": poi_data.image,
         "artifacts": []
     }
     
@@ -121,3 +124,24 @@ async def add_poi(poi_data: POICreateSchema):
         print(f"Lỗi Redis: {e}")
         
     return {"success": True, "message": "Thêm bảo tàng thành công", "poi_id": poi_data.id}
+
+
+@app.delete("/pois/admin/delete/{poi_id}")
+async def delete_poi(poi_id: str):
+    # 1. Thử xóa theo trường id thông thường ("hist_vn", "war_remnants",...)
+    result = await poi_collection.delete_one({"id": poi_id})
+    
+    # 2. Nếu chưa xóa được, thử tìm xóa theo _id ObjectId hoặc chuỗi
+    if result.deleted_count == 0:
+        try:
+            result = await poi_collection.delete_one({"_id": ObjectId(poi_id)})
+        except Exception:
+            pass
+
+    if result.deleted_count == 0:
+        result = await poi_collection.delete_one({"_id": poi_id})
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy bảo tàng có id '{poi_id}' trong MongoDB")
+        
+    return {"success": True, "message": "Đã xóa bảo tàng thành công", "poi_id": poi_id}

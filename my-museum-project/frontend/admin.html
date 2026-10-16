@@ -177,7 +177,7 @@
             onclick="switchTab('poi')"
             class="pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition flex items-center gap-2"
           >
-            📍 Quản lý Điểm Bảo tàng (7 POIs)
+            📍 Quản lý Điểm Bảo tàng (<span id="poiCountLabel">7 POIs</span>)
           </button>
           <button
             id="tabArtifactBtn"
@@ -278,6 +278,7 @@
                   class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-semibold"
                 >
                   <tr>
+                    <th class="p-4">Hình ảnh</th>
                     <th class="p-4">Tên hiện vật</th>
                     <th class="p-4">Khu vực / Phòng</th>
                     <th class="p-4">Mô tả bài thuyết minh</th>
@@ -352,15 +353,36 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1"
-                >Link ảnh đại diện *</label
+                >Ảnh đại diện (Link hoặc Chọn từ máy) *</label
               >
-              <input
-                type="url"
-                id="mImage"
-                required
-                placeholder="https://..."
-                class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+              <div class="space-y-1.5">
+                <input
+                  type="text"
+                  id="mImage"
+                  required
+                  placeholder="Dán link https://... hoặc chọn file từ máy bên dưới"
+                  oninput="
+                    document.getElementById('mImagePreview').src = this.value;
+                    document
+                      .getElementById('mImagePreview')
+                      .classList.remove('hidden');
+                  "
+                  class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <div class="flex items-center gap-2">
+                  <input
+                    type="file"
+                    id="mImageFile"
+                    accept="image/*"
+                    onchange="handleFileUpload(this, 'mImage', 'mImagePreview')"
+                    class="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                  />
+                  <img
+                    id="mImagePreview"
+                    class="w-8 h-8 rounded object-cover border hidden shrink-0"
+                  />
+                </div>
+              </div>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1"
@@ -381,9 +403,32 @@
           <!-- Map Picker Integration -->
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">
-              📍 Chọn tọa độ trên bản đồ (Nhấp chuột trực tiếp để tự động lấy
-              Lat/Lng):
+              📍 Chọn tọa độ trên bản đồ:
             </label>
+
+            <!-- THANH TÌM KIẾM ĐỊA CHỈ/TÊN BẢO TÀNG -->
+            <div class="flex gap-2 mb-2">
+              <input
+                type="text"
+                id="mapSearchInput"
+                placeholder="Nhập tên bảo tàng hoặc địa chỉ (VD: Dinh Độc Lập, Bảo tàng Mỹ thuật...)"
+                class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                onkeypress="
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    searchLocationOnMap();
+                  }
+                "
+              />
+              <button
+                type="button"
+                onclick="searchLocationOnMap()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1 shadow-sm shrink-0"
+              >
+                🔍 Tìm vị trí
+              </button>
+            </div>
+
             <div
               id="pickerMap"
               class="h-48 w-full rounded-xl border border-slate-300 mb-2"
@@ -436,7 +481,7 @@
     </div>
 
     <!-- ==================================================== -->
-    <!-- 4. MODAL THÊM HIỆN VẬT                             -->
+    <!-- 4. MODAL THÊM HIỆN VẬT                               -->
     <!-- ==================================================== -->
     <div
       id="artifactModal"
@@ -497,6 +542,41 @@
               placeholder="Phòng Tiền sử - Tầng 1"
               class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
             />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1"
+              >Ảnh hiện vật (Link hoặc Chọn từ máy)</label
+            >
+            <div class="space-y-1.5">
+              <input
+                type="text"
+                id="artImage"
+                placeholder="Dán link https://... hoặc chọn file bên dưới"
+                oninput="
+                  document.getElementById('artImagePreview').src = this.value;
+                  document
+                    .getElementById('artImagePreview')
+                    .classList.remove('hidden');
+                "
+                class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <div class="flex items-center gap-2">
+                <input
+                  type="file"
+                  id="artImageFile"
+                  accept="image/*"
+                  onchange="
+                    handleFileUpload(this, 'artImage', 'artImagePreview')
+                  "
+                  class="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
+                />
+                <img
+                  id="artImagePreview"
+                  class="w-8 h-8 rounded object-cover border hidden shrink-0"
+                />
+              </div>
+            </div>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1"
@@ -596,52 +676,36 @@
     <!-- JAVASCRIPT: LOGIC QUẢN TRỊ, API GATEWAY, MAP & QR    -->
     <!-- ==================================================== -->
     <script>
-      const API_BASE = "http://localhost:8000";
+      const API_BASE = window.location.origin; // Tự động trỏ về host hiện tại (cổng 8000 của API Gateway)
       let authAction = "login";
       let pickerMap = null;
       let pickerMarker = null;
 
-      // Mock dữ liệu ban đầu
-      let museums = [
-        {
-          id: "hist_vn",
-          name: "Bảo tàng Lịch sử TP.HCM",
-          desc: "Bảo tàng trưng bày di sản văn hóa lịch sử dân tộc từ thời tiền sử đến năm 1945.",
-          coords: [10.7876, 106.705],
-          image:
-            "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80",
-          radius: 30,
-          workerStatus: "synced",
-        },
-        {
-          id: "war_remnants",
-          name: "Bảo tàng Chứng tích Chiến tranh",
-          desc: "Nơi nghiên cứu, sưu tầm, lưu trữ và trưng bày các chứng tích về hậu quả chiến tranh.",
-          coords: [10.7788, 106.6923],
-          image:
-            "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=400&q=80",
-          radius: 30,
-          workerStatus: "synced",
-        },
-      ];
+      let museums = [];
+      let artifacts = [];
 
-      let artifacts = [
-        {
-          id: "art_dongson",
-          museum_id: "hist_vn",
-          name: "Trống đồng Đông Sơn",
-          room: "Phòng Tiền Sử - Tầng 1",
-          desc: "Hiện vật văn hóa Đông Sơn biểu tượng cho kỹ thuật đúc đồng tinh xảo.",
-        },
-        {
-          id: "art_uh1_huey",
-          museum_id: "war_remnants",
-          name: "Trực thăng UH-1 Huey",
-          room: "Khu Trưng bày Ngoài trời",
-          desc: "Trực thăng đa năng được sử dụng nhiều nhất trong chiến tranh Việt Nam.",
-        },
-      ];
+      function handleFileUpload(inputElement, targetInputId, previewImgId) {
+        const file = inputElement.files[0];
+        if (!file) return;
 
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Vui lòng chọn ảnh nhỏ hơn 2MB để hệ thống chạy nhanh!");
+          inputElement.value = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const base64Data = e.target.result;
+          document.getElementById(targetInputId).value = base64Data;
+          const preview = document.getElementById(previewImgId);
+          if (preview) {
+            preview.src = base64Data;
+            preview.classList.remove("hidden");
+          }
+        };
+        reader.readAsDataURL(file);
+      }
       // ==========================================
       // I. XÁC THỰC AUTH & QUẢN LÝ JWT TOKEN
       // ==========================================
@@ -655,9 +719,7 @@
             .getElementById("dashboardSection")
             .classList.remove("hidden");
           document.getElementById("currentAdminName").innerText = username;
-          renderMuseumsTable();
-          populateMuseumSelects();
-          renderArtifactsTable();
+          fetchMuseumsData(); // Gọi API thật lấy dữ liệu từ MongoDB
         } else {
           document.getElementById("authSection").classList.remove("hidden");
           document.getElementById("dashboardSection").classList.add("hidden");
@@ -683,24 +745,31 @@
           });
 
           const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || "Xác thực thất bại");
 
-          // Lưu token
-          localStorage.setItem(
-            "jwt_token",
-            data.access_token || "mock_jwt_token_demo_12345",
-          );
-          localStorage.setItem("admin_username", u);
+          if (!res.ok) {
+            alertBox.className =
+              "mb-4 p-3 rounded-xl text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 block";
+            alertBox.innerText = data.detail || "Xác thực thất bại";
+            return;
+          }
+
+          if (action === "register") {
+            alertBox.className =
+              "mb-4 p-3 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 block";
+            alertBox.innerText = "Đăng ký thành công! Hãy nhấn Đăng nhập.";
+            return;
+          }
+
+          // Đăng nhập thành công thật sự qua JWT Backend
+          localStorage.setItem("jwt_token", data.access_token);
+          localStorage.setItem("admin_username", data.username || u);
+          alertBox.classList.add("hidden");
           checkAuthStatus();
         } catch (err) {
-          // Mock cấp token để vẫn kiểm thử được giao diện khi Backend chưa chạy
-          localStorage.setItem("jwt_token", "mock_jwt_token_demo_12345");
-          localStorage.setItem("admin_username", u);
-          showToast(
-            `⚠️ [Demo Mode] Backend offline, đã cấp Mock JWT Token: ${u}`,
-            "amber",
-          );
-          checkAuthStatus();
+          alertBox.className =
+            "mb-4 p-3 rounded-xl text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 block";
+          alertBox.innerText =
+            "Không thể kết nối đến Auth Service: " + err.message;
         }
       }
 
@@ -745,12 +814,9 @@
       function initPickerMap(initialCoords = [10.7769, 106.7009]) {
         if (!pickerMap) {
           pickerMap = L.map("pickerMap").setView(initialCoords, 14);
-          L.tileLayer(
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-            {
-              maxZoom: 19,
-            },
-          ).addTo(pickerMap);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+          }).addTo(pickerMap);
 
           pickerMarker = L.marker(initialCoords, { draggable: true }).addTo(
             pickerMap,
@@ -782,11 +848,121 @@
       }
 
       // ==========================================
-      // IV. QUẢN LÝ BẢO TÀNG (POIS)
+      // IV. LẤY DỮ LIỆU TỪ MONGODB & QUẢN LÝ BẢO TÀNG (POIS)
       // ==========================================
+      async function fetchMuseumsData() {
+        try {
+          const res = await fetch(`${API_BASE}/pois`);
+          if (!res.ok) throw new Error("Lỗi khi tải dữ liệu bảo tàng");
+          const data = await res.json();
+
+          // Chuyển đổi dữ liệu từ MongoDB sang format hiển thị của giao diện
+          museums = data.map((item) => ({
+            id: item.id,
+            name: item.name,
+            desc: item.description_vi || "",
+            coords: [item.location?.lat || 0, item.location?.lng || 0],
+            image:
+              item.image ||
+              "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80",
+            radius: item.trigger_radius_meters || 30,
+            qr_code: item.qr_code || `qr_${item.id}`,
+            workerStatus: "synced",
+          }));
+
+          // Nạp danh sách artifacts từ MongoDB
+          artifacts = [];
+          data.forEach((poi) => {
+            if (poi.artifacts && Array.isArray(poi.artifacts)) {
+              poi.artifacts.forEach((art) => {
+                artifacts.push({
+                  id: art.artifact_id || art.id,
+                  museum_id: poi.id,
+                  name: art.name || art.artifact_id,
+                  room: art.room || "Khu vực trưng bày",
+                  desc: art.description_vi || "",
+                  qr_code: art.qr_code || art.artifact_id,
+                });
+              });
+            }
+          });
+
+          // Cập nhật số lượng trên tab
+          const countLabel = document.getElementById("poiCountLabel");
+          if (countLabel) countLabel.innerText = `${museums.length} POIs`;
+
+          renderMuseumsTable();
+          populateMuseumSelects();
+          renderArtifactsTable();
+        } catch (err) {
+          showToast(
+            `⚠️ Không thể kết nối Museum Service: ${err.message}`,
+            "rose",
+          );
+        }
+      }
+
+      // Hàm tìm vị trí bằng tên hoặc địa chỉ qua Nominatim OpenStreetMap
+      async function searchLocationOnMap() {
+        let query = document.getElementById("mapSearchInput").value.trim();
+        if (!query) {
+          query = document.getElementById("mName").value.trim();
+        }
+
+        if (!query) {
+          alert("Vui lòng nhập tên bảo tàng hoặc địa chỉ cần tìm!");
+          return;
+        }
+
+        const searchQuery =
+          query.toLowerCase().includes("hồ chí minh") ||
+          query.toLowerCase().includes("hcm")
+            ? query
+            : `${query}, Hồ Chí Minh`;
+
+        showToast(`🔍 Đang định vị "${query}" trên bản đồ...`, "indigo");
+
+        try {
+          // Thêm countrycodes=vn để ưu tiên định vị chuẩn xác tại Việt Nam
+          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=vn&limit=1`;
+          const res = await fetch(url);
+          const data = await res.json();
+
+          if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lng = parseFloat(data[0].lon);
+
+            pickerMap.setView([lat, lng], 17);
+            pickerMarker.setLatLng([lat, lng]);
+
+            // Mở Popup thông báo tên địa chỉ chính xác ngay tại điểm ghim
+            pickerMarker
+              .bindPopup(
+                `<b>${query}</b><br><span style="font-size:11px">${data[0].display_name}</span>`,
+              )
+              .openPopup();
+
+            setCoordsInputs(lat, lng);
+            showToast(` Đã định vị đúng toạ độ cho "${query}"!`, "emerald");
+          } else {
+            showToast(
+              `❌ Không tìm thấy tọa độ của "${query}". Bạn có thể nhấp chuột trực tiếp trên bản đồ để chọn.`,
+              "rose",
+            );
+          }
+        } catch (err) {
+          showToast(`Lỗi khi tìm kiếm tọa độ: ${err.message}`, "rose");
+        }
+      }
+
       function renderMuseumsTable() {
         const tbody = document.getElementById("museumTableBody");
         tbody.innerHTML = "";
+
+        if (museums.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Chưa có bảo tàng nào trong MongoDB.</td></tr>`;
+          return;
+        }
 
         museums.forEach((m) => {
           const tr = document.createElement("tr");
@@ -810,6 +986,7 @@
               </span>
             </td>
             <td class="p-4 text-right space-x-1">
+              <button onclick="viewMuseumDetail('${m.id}')" class="px-2.5 py-1 text-indigo-600 font-semibold text-[11px] bg-indigo-50 hover:bg-indigo-100 rounded-md transition">👁️ Xem</button>
               <button onclick="editMuseum('${m.id}')" class="px-2.5 py-1 text-slate-600 hover:text-indigo-600 font-semibold text-[11px] bg-slate-100 hover:bg-indigo-50 rounded-md transition">Sửa</button>
               <button onclick="deleteMuseum('${m.id}')" class="px-2.5 py-1 text-rose-600 font-semibold text-[11px] bg-rose-50 hover:bg-rose-100 rounded-md transition">Xóa</button>
             </td>
@@ -849,13 +1026,35 @@
         initPickerMap(m.coords);
       }
 
-      function deleteMuseum(id) {
-        if (!confirm("Bạn có chắc chắn muốn xóa bảo tàng này khỏi bản đồ?"))
+      async function deleteMuseum(id) {
+        if (
+          !confirm("Bạn có chắc chắn muốn xóa bảo tàng này khỏi cơ sở dữ liệu?")
+        )
           return;
-        museums = museums.filter((x) => x.id !== id);
-        renderMuseumsTable();
-        populateMuseumSelects();
-        showToast("Đã xóa bảo tàng thành công", "rose");
+
+        try {
+          const res = await fetch(
+            `${API_BASE}/pois/admin/delete/${encodeURIComponent(id)}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: "Bearer " + localStorage.getItem("jwt_token"),
+              },
+            },
+          );
+
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.detail || "Không thể xóa bảo tàng từ máy chủ");
+          }
+
+          showToast("🗑️ Đã xóa bảo tàng khỏi MongoDB thành công!", "rose");
+
+          // Tải lại dữ liệu mới nhất từ backend để cập nhật bảng
+          await fetchMuseumsData();
+        } catch (err) {
+          showToast(`❌ Lỗi xóa: ${err.message}`, "rose");
+        }
       }
 
       async function saveMuseum(event) {
@@ -865,32 +1064,49 @@
         const name = document.getElementById("mName").value.trim();
         const desc = document.getElementById("mDesc").value.trim();
         const image = document.getElementById("mImage").value.trim();
-        const radius = parseInt(document.getElementById("mRadius").value);
+        const radius = parseFloat(document.getElementById("mRadius").value);
         const lat = parseFloat(document.getElementById("mLat").value);
         const lng = parseFloat(document.getElementById("mLng").value);
 
-        const newPoi = {
-          id,
-          name,
-          desc,
-          image,
-          radius,
-          coords: [lat, lng],
-          workerStatus: "processing",
+        // Khớp chuẩn schema POICreateSchema của Museum Service
+        const payload = {
+          id: id,
+          name: name,
+          description_vi: desc,
+          lat: lat,
+          lng: lng,
+          trigger_radius_meters: radius,
+          qr_code: "qr_" + id,
+          image:
+            image ||
+            "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80",
         };
-        const idx = museums.findIndex((x) => x.id === id);
-        if (idx >= 0) museums[idx] = newPoi;
-        else museums.push(newPoi);
 
-        closeMuseumModal();
-        renderMuseumsTable();
-        populateMuseumSelects();
+        try {
+          const res = await fetch(`${API_BASE}/pois/admin/add`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("jwt_token"),
+            },
+            body: JSON.stringify(payload),
+          });
 
-        // Giả lập bắn Redis Event đến audio_worker dịch và sinh Edge-TTS
-        showToast(
-          `🚀 [Redis Queue] Đã đẩy Event sinh audio đa ngữ (en, zh) cho "${name}"!`,
-          "indigo",
-        );
+          const data = await res.json();
+          if (!res.ok)
+            throw new Error(data.detail || "Lỗi lưu bảo tàng vào database");
+
+          closeMuseumModal();
+          showToast(
+            `🚀 [Redis Queue] Đã lưu vào MongoDB & bắn sự kiện tạo Audio cho "${name}"!`,
+            "indigo",
+          );
+
+          // Tải lại dữ liệu mới nhất từ backend
+          await fetchMuseumsData();
+        } catch (err) {
+          showToast(`❌ Thất bại: ${err.message}`, "rose");
+        }
       }
 
       // ==========================================
@@ -925,7 +1141,7 @@
         );
 
         if (filtered.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Chưa có hiện vật nào thuộc bảo tàng này.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Chưa có hiện vật nào thuộc bảo tàng này.</td></tr>`;
           return;
         }
 
@@ -934,11 +1150,14 @@
           const tr = document.createElement("tr");
           tr.className = "hover:bg-slate-50 transition";
           tr.innerHTML = `
+            <td class="p-4">
+              <img src="${art.image || "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80"}" class="w-12 h-10 object-cover rounded-lg border border-slate-200" />
+            </td>
             <td class="p-4 font-bold text-slate-800">${art.name}</td>
             <td class="p-4 text-slate-500">${art.room}</td>
             <td class="p-4 text-slate-500 max-w-sm line-clamp-1">${art.desc}</td>
             <td class="p-4">
-              <button onclick="generateAndShowQr('${art.id}', '${art.name}', '${m ? m.name : ""}', '${art.room}')" class="px-2.5 py-1 text-indigo-700 font-bold bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1 text-[11px]">
+              <button onclick="generateAndShowQr('${art.qr_code || art.id}', '${art.name}', '${m ? m.name : ""}', '${art.room}')" class="px-2.5 py-1 text-indigo-700 font-bold bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1 text-[11px]">
                 🖨️ Xem / In QR
               </button>
             </td>
@@ -967,9 +1186,13 @@
         const name = document.getElementById("artName").value.trim();
         const room = document.getElementById("artRoom").value.trim();
         const desc = document.getElementById("artDesc").value.trim();
+        const image =
+          document.getElementById("artImage").value.trim() ||
+          "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80";
         const id = "art_" + Date.now();
+        const qr_code = "QR_" + id;
 
-        artifacts.push({ id, museum_id, name, room, desc });
+        artifacts.push({ id, museum_id, name, room, desc, qr_code, image });
         closeArtifactModal();
         renderArtifactsTable();
         showToast(
@@ -985,7 +1208,7 @@
         showToast("Đã xóa hiện vật!", "rose");
       }
 
-      function generateAndShowQr(artifactId, name, museumName, room) {
+      function generateAndShowQr(codeOrId, name, museumName, room) {
         document.getElementById("qrMuseumName").innerText = museumName;
         document.getElementById("qrArtifactName").innerText = name;
         document.getElementById("qrArtifactRoom").innerText = "Vị trí: " + room;
@@ -993,8 +1216,10 @@
         const qrContainer = document.getElementById("qrcodeBox");
         qrContainer.innerHTML = "";
 
-        // Payload JSON truyền trong mã QR để camera điện thoại quét và kích hoạt TTS
-        const payload = JSON.stringify({ artifact_id: artifactId });
+        // Tạo payload mã QR
+        const payload = codeOrId.startsWith("{")
+          ? codeOrId
+          : JSON.stringify({ artifact_id: codeOrId });
 
         new QRCode(qrContainer, {
           text: payload,
@@ -1014,8 +1239,275 @@
         document.getElementById("qrPrintModal").classList.remove("flex");
       }
 
+      function viewMuseumDetail(id) {
+        const m = museums.find((x) => x.id === id);
+        if (!m) return;
+
+        currentViewingPoiId = m.id;
+        document.getElementById("viewMName").innerText = m.name;
+        document.getElementById("viewMId").innerText = m.id;
+        document.getElementById("viewMDesc").innerText =
+          m.desc || "Chưa có bài giới thiệu";
+        document.getElementById("viewMCoords").innerText =
+          `${m.coords[0]}, ${m.coords[1]}`;
+        document.getElementById("viewMRadius").innerText = `${m.radius} mét`;
+        document.getElementById("viewMQr").innerText =
+          m.qr_code || `qr_${m.id}`;
+
+        // 1. Tự động nhận diện ngôn ngữ của máy và gán vào dropdown
+        const langSelect = document.getElementById("audioLangSelect");
+        if (langSelect) {
+          langSelect.value = detectDeviceLanguage();
+        }
+
+        // 2. Kích hoạt phát audio đúng ngôn ngữ đó
+        playMuseumAudio();
+
+        // 3. Đổ danh sách hiện vật vào modal
+        const museumArtifacts = artifacts.filter((a) => a.museum_id === m.id);
+        const countLabel = document.getElementById("viewArtifactCount");
+        const listContainer = document.getElementById("viewArtifactsList");
+
+        if (countLabel) {
+          countLabel.innerText = `${museumArtifacts.length} hiện vật`;
+        }
+
+        if (listContainer) {
+          listContainer.innerHTML = "";
+          if (museumArtifacts.length === 0) {
+            listContainer.innerHTML = `
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-slate-400 italic">
+                Bảo tàng này hiện chưa có hiện vật nào.
+              </div>`;
+          } else {
+            museumArtifacts.forEach((art) => {
+              const itemDiv = document.createElement("div");
+              itemDiv.className =
+                "p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3 hover:bg-indigo-50/40 transition";
+              itemDiv.innerHTML = `
+                <div class="min-w-0 flex-1">
+                  <div class="font-bold text-slate-800 truncate">${art.name}</div>
+                  <div class="text-[10px] text-slate-400 truncate">${art.room} • Mã: ${art.qr_code || art.id}</div>
+                  <div class="text-[10px] text-slate-500 line-clamp-1 mt-0.5">${art.desc}</div>
+                </div>
+                <button 
+                  type="button"
+                  onclick="generateAndShowQr('${art.qr_code || art.id}', '${art.name}', '${m.name}', '${art.room}')" 
+                  class="shrink-0 px-2 py-1 bg-white hover:bg-indigo-600 hover:text-white text-indigo-600 font-bold border border-indigo-200 rounded-lg text-[10px] shadow-sm transition"
+                >
+                  🖨️ QR
+                </button>
+              `;
+              listContainer.appendChild(itemDiv);
+            });
+          }
+        }
+
+        document.getElementById("viewMuseumModal").classList.remove("hidden");
+        document.getElementById("viewMuseumModal").classList.add("flex");
+      }
+
+      function closeViewMuseumModal() {
+        if (audioCheckTimer) clearInterval(audioCheckTimer);
+        const player = document.getElementById("museumAudioPlayer");
+        if (player) {
+          player.pause();
+          player.src = "";
+        }
+        document.getElementById("viewMuseumModal").classList.add("hidden");
+        document.getElementById("viewMuseumModal").classList.remove("flex");
+      }
+      let currentViewingPoiId = null;
+      let audioCheckTimer = null;
+
+      async function playMuseumAudio() {
+        if (!currentViewingPoiId) return;
+
+        // Xóa timer kiểm tra trước đó nếu người dùng đổi ngôn ngữ liên tục
+        if (audioCheckTimer) clearInterval(audioCheckTimer);
+
+        const lang = document.getElementById("audioLangSelect").value;
+        const audioPlayer = document.getElementById("museumAudioPlayer");
+        const errorMsg = document.getElementById("audioErrorMsg");
+        const audioUrl = `${API_BASE}/audio/files/${currentViewingPoiId}_${lang}.mp3`;
+
+        let retryCount = 0;
+        const maxRetries = 10; // Thử lại tối đa 10 lần (khoảng 20 giây)
+
+        async function checkAudioReady() {
+          try {
+            // Kiểm tra nhanh sự tồn tại của file trên Gateway
+            const res = await fetch(audioUrl, {
+              method: "HEAD",
+              cache: "no-store",
+            });
+            if (res.ok) {
+              if (audioCheckTimer) clearInterval(audioCheckTimer);
+              errorMsg.classList.add("hidden");
+              audioPlayer.src = audioUrl;
+              return;
+            }
+          } catch (e) {}
+
+          // Nếu file chưa xong (Worker đang dịch và tạo file ngầm)
+          retryCount++;
+          errorMsg.classList.remove("hidden");
+          errorMsg.className = "text-[10px] text-amber-600 italic block";
+          errorMsg.innerHTML = `⏳ Đang tổng hợp thuyết minh (${lang.toUpperCase()})... Vui lòng đợi (${retryCount * 2}s)`;
+
+          if (retryCount >= maxRetries) {
+            if (audioCheckTimer) clearInterval(audioCheckTimer);
+            errorMsg.className = "text-[10px] text-rose-500 italic block";
+            errorMsg.innerText =
+              "❌ File âm thanh chưa sẵn sàng hoặc worker gặp sự cố.";
+          }
+        }
+
+        // Kiểm tra ngay lập tức
+        await checkAudioReady();
+
+        // Nếu chưa có, tự thăm dò lại mỗi 2 giây
+        audioCheckTimer = setInterval(checkAudioReady, 2000);
+      }
+
+      function detectDeviceLanguage() {
+        const browserLang = (
+          navigator.language ||
+          navigator.userLanguage ||
+          "vi"
+        ).toLowerCase();
+        if (browserLang.startsWith("en")) return "en";
+        if (browserLang.startsWith("zh")) return "zh";
+        return "vi";
+      }
+
       // Khởi tạo trạng thái ban đầu
       window.onload = checkAuthStatus;
     </script>
+    <div
+      id="viewMuseumModal"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4"
+    >
+      <div
+        class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar"
+      >
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 id="viewMName" class="font-extrabold text-base text-slate-800">
+            Chi tiết bảo tàng
+          </h3>
+          <button
+            onclick="closeViewMuseumModal()"
+            class="text-slate-400 hover:text-slate-700 font-bold text-lg"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <span class="font-bold text-slate-600 block mb-1"
+              >Mã bảo tàng (ID):</span
+            >
+            <span
+              id="viewMId"
+              class="font-mono bg-slate-100 px-2 py-1 rounded text-indigo-600"
+            ></span>
+          </div>
+          <div>
+            <span class="font-bold text-slate-600 block mb-1"
+              >Bài giới thiệu:</span
+            >
+            <p
+              id="viewMDesc"
+              class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-slate-700 leading-relaxed"
+            ></p>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="font-bold text-slate-600 block mb-1">Tọa độ:</span>
+              <span id="viewMCoords" class="font-mono text-slate-700"></span>
+            </div>
+            <div>
+              <span class="font-bold text-slate-600 block mb-1"
+                >Bán kính Geofence:</span
+              >
+              <span id="viewMRadius" class="font-bold text-blue-600"></span>
+            </div>
+          </div>
+          <div>
+            <span class="font-bold text-slate-600 block mb-1">Mã QR Code:</span>
+            <span
+              id="viewMQr"
+              class="font-mono bg-slate-100 px-2 py-1 rounded text-slate-700"
+            ></span>
+          </div>
+          <!-- KHỐI NGHE THỬ AUDIO THUYẾT MINH CÓ TRẠNG THÁI LOADING -->
+          <div
+            class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2"
+          >
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-700 block text-[11px]">
+                🎧 Nghe thử Audio thuyết minh:
+              </span>
+              <!-- Badge trạng thái động -->
+              <span
+                id="audioStatusBadge"
+                class="text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"
+                ></span>
+                Đang kiểm tra...
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <select
+                id="audioLangSelect"
+                onchange="playMuseumAudio()"
+                class="text-xs bg-white border border-slate-300 rounded-lg px-2 py-1 outline-none font-medium"
+              >
+                <option value="vi">🇻🇳 Tiếng Việt</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="zh">🇨🇳 中文</option>
+              </select>
+              <audio
+                id="museumAudioPlayer"
+                controls
+                class="h-8 flex-1 outline-none"
+              ></audio>
+            </div>
+
+            <!-- Dòng chữ hướng dẫn trạng thái -->
+            <p id="audioNoticeMsg" class="text-[10px] text-slate-500 italic">
+              Hệ thống đang chuẩn bị tệp âm thanh...
+            </p>
+          </div>
+
+          <div class="border-t pt-3">
+            <span
+              class="font-bold text-slate-700 block mb-2 flex items-center justify-between"
+            >
+              <span>🏺 Danh sách hiện vật trưng bày:</span>
+              <span
+                id="viewArtifactCount"
+                class="text-[11px] font-normal text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full"
+              ></span>
+            </span>
+            <div
+              id="viewArtifactsList"
+              class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1"
+            ></div>
+          </div>
+        </div>
+        <div class="pt-3 border-t flex justify-end">
+          <button
+            onclick="closeViewMuseumModal()"
+            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

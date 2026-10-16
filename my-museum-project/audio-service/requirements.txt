@@ -2,4 +2,5 @@ fastapi==0.110.0
 uvicorn==0.28.0
 redis==5.0.3
 deep-translator==1.11.4
-edge-tts==6.1.10
+edge-tts>=6.1.12
+gTTS>=2.5.0

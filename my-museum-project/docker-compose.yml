@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
 
   auth_service:
-    build: ./auth_service
+    build: ./auth-service
     container_name: auth_container
     ports:
       - "8001:8001"
@@ -42,13 +42,14 @@ services:
     restart: unless-stopped
 
   audio_service:
-    build: ./audio_service
+    build: ./audio-service
     container_name: audio_container
     ports:
-      - "8003:8003"
+      - "8003:8001"
     environment:
       - MONGO_URL=mongodb://mongodb:27017
       - REDIS_HOST=redis
+      - PYTHONUNBUFFERED=1
     volumes:
       - audio_media:/app/media
     depends_on:
@@ -57,12 +58,13 @@ services:
     restart: unless-stopped
 
   audio_worker:
-    build: ./audio_service
-    command: python worker.py
+    build: ./audio-service
+    command: python -u worker.py
     container_name: worker_container
     environment:
       - MONGO_URL=mongodb://mongodb:27017
       - REDIS_HOST=redis
+      - PYTHONUNBUFFERED=1
     volumes:
       - audio_media:/app/media
     depends_on:
