@@ -840,8 +840,30 @@
         return "vi";
       }
 
+      // Hàm tự động tải danh sách ngôn ngữ từ Backend nạp vào thẻ <select>
+      async function loadDynamicLanguages(selectElementId) {
+        const selectElem = document.getElementById(selectElementId);
+        if (!selectElem) return;
+
+        try {
+          const res = await fetch(`${API_BASE}/audio/languages`);
+          if (res.ok) {
+            const languages = await res.json();
+            selectElem.innerHTML = "";
+            languages.forEach((lang) => {
+              const opt = document.createElement("option");
+              opt.value = lang.code;
+              opt.innerText = lang.name;
+              selectElem.appendChild(opt);
+            });
+          }
+        } catch (err) {
+          console.log("Dùng ngôn ngữ mặc định (vi, en, zh) nếu API bận.");
+        }
+      }
       // Khởi tạo chạy ban đầu
       window.onload = async () => {
+        await loadDynamicLanguages("langSelect");
         // Tự động set ngôn ngữ theo region máy của người dùng
         const detectedLang = detectDeviceLanguage();
         const langSelect = document.getElementById("langSelect");

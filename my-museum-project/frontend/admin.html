@@ -1381,8 +1381,32 @@
         return "vi";
       }
 
+      async function loadDynamicLanguages(selectElementId) {
+        const selectElem = document.getElementById(selectElementId);
+        if (!selectElem) return;
+
+        try {
+          const res = await fetch(`${API_BASE}/audio/languages`);
+          if (res.ok) {
+            const languages = await res.json();
+            selectElem.innerHTML = "";
+            languages.forEach((lang) => {
+              const opt = document.createElement("option");
+              opt.value = lang.code;
+              opt.innerText = lang.name;
+              selectElem.appendChild(opt);
+            });
+          }
+        } catch (err) {
+          console.log("Dùng ngôn ngữ mặc định (vi, en, zh) nếu API bận.");
+        }
+      }
+
       // Khởi tạo trạng thái ban đầu
-      window.onload = checkAuthStatus;
+      window.onload = async () => {
+        checkAuthStatus();
+        await loadDynamicLanguages("audioLangSelect");
+      };
     </script>
     <div
       id="viewMuseumModal"
