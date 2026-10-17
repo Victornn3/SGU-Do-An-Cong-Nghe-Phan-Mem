@@ -87,7 +87,7 @@ MUSEUMS_DATA = [   {   'artifacts': [   {   'artifact_id': 'art_01_01',
                                     '- Địa chỉ: Số 2 Nguyễn Bỉnh Khiêm, Phường Bến Nghé, Quận 1, TP.HCM (trong khuôn '
                                     'viên Thảo Cầm Viên).',
         'id': 'museum_01',
-        'image_url': 'assets/images/museums/museum_01_bao_tang_lich_su.jpg',
+        'image_url': 'assets/images/museums/museum_01_bao_tang_my_thuat.jpg',
         'location': {'lat': 10.7878, 'lng': 106.7051},
         'name': 'Bảo tàng Lịch sử TP.HCM',
         'qr_code': 'QR_MUSEUM_01',

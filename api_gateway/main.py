@@ -31,6 +31,13 @@ os.makedirs(str(MEDIA_DIR), exist_ok=True)
 
 app.mount("/audio/files", StaticFiles(directory=str(MEDIA_DIR)), name="audio_files")
 
+ASSETS_DIR = Path("/app/assets")
+if not ASSETS_DIR.exists():
+    ASSETS_DIR = Path("assets")
+
+os.makedirs(str(ASSETS_DIR), exist_ok=True)
+app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
+
 # ==================== ĐIỀU HƯỚNG REVERSE PROXY ====================
 # Điều hướng luồng /auth/* sang Port 8001
 @app.api_route("/auth/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
@@ -41,13 +48,15 @@ async def proxy_auth(request: Request, path: str):
     return Response(content=resp.content, status_code=resp.status_code, headers=dict(resp.headers))
 
 # Điều hướng luồng /pois/* sang Port 8002
+# Đoạn code MỚI đã sửa:
+@app.api_route("/pois", methods=["GET", "POST", "PUT", "DELETE"])
 @app.api_route("/pois/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_museum(request: Request, path: str = ""):
     url = f"{MUSEUM_SERVICE_URL}/pois/{path}" if path else f"{MUSEUM_SERVICE_URL}/pois"
     body = await request.body()
-    resp = await client.request(request.method, url, headers=dict(request.headers), content=body)
+    req_headers = {k: v for k, v in request.headers.items() if k.lower() != "host"}
+    resp = await client.request(request.method, url, headers=req_headers, content=body)
     return Response(content=resp.content, status_code=resp.status_code, headers=dict(resp.headers))
-
 # Điều hướng luồng /audio/* sang Port 8003
 @app.api_route("/audio/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_audio(request: Request, path: str):

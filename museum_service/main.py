@@ -99,19 +99,27 @@ async def check_geofence(req: GeofenceRequest):
 
 @app.post("/pois/admin/add")
 async def add_poi(poi_data: POICreateSchema):
-    new_poi = {
-        "id": poi_data.id,
+    # Chỉ cập nhật các trường thông tin của bảo tàng, tuyệt đối không đè lên artifacts
+    update_data = {
         "name": poi_data.name,
         "description_vi": poi_data.description_vi,
         "location": {"lat": poi_data.lat, "lng": poi_data.lng},
         "trigger_radius_meters": poi_data.trigger_radius_meters,
         "qr_code": poi_data.qr_code,
-        "image": poi_data.image,
-        "artifacts": []
+        "image": poi_data.image
     }
-    
-    await poi_collection.update_one({"id": poi_data.id}, {"$set": new_poi}, upsert=True)
-    
+
+    # $set: Cập nhật thông tin bảo tàng
+    # $setOnInsert: Chỉ tạo mảng artifacts: [] nếu đây là bảo tàng mới thêm lần đầu
+    await poi_collection.update_one(
+        {"id": poi_data.id},
+        {
+            "$set": update_data,
+            "$setOnInsert": {"id": poi_data.id, "artifacts": []}
+        },
+        upsert=True
+    )
+
     event_payload = {
         "event": "POI_CREATED",
         "poi_id": poi_data.id,
@@ -121,11 +129,11 @@ async def add_poi(poi_data: POICreateSchema):
     try:
         redis_client.publish("poi_events", json.dumps(event_payload))
     except Exception as e:
-        print(f"Lỗi Redis: {e}")
-        
-    return {"success": True, "message": "Thêm bảo tàng thành công", "poi_id": poi_data.id}
+        print(f"Lỗi Redis: {e}", flush=True)
 
+    return {"success": True, "message": "Lưu bảo tàng thành công", "poi_id": poi_data.id}
 
+    
 @app.delete("/pois/admin/delete/{poi_id}")
 async def delete_poi(poi_id: str):
     # 1. Thử xóa theo trường id thông thường ("hist_vn", "war_remnants",...)
@@ -145,3 +153,64 @@ async def delete_poi(poi_id: str):
         raise HTTPException(status_code=404, detail=f"Không tìm thấy bảo tàng có id '{poi_id}' trong MongoDB")
         
     return {"success": True, "message": "Đã xóa bảo tàng thành công", "poi_id": poi_id}
+
+
+class ArtifactSchema(BaseModel):
+    artifact_id: str
+    name_vi: str
+    description_vi: str
+    room: str = "Khu vực trưng bày"
+    image_url: str = ""
+
+@app.post("/pois/{poi_id}/artifacts/admin/save")
+async def save_artifact(poi_id: str, art_data: ArtifactSchema):
+    poi = await poi_collection.find_one({"id": poi_id})
+    if not poi:
+        raise HTTPException(status_code=404, detail="Không tìm thấy bảo tàng")
+
+    new_artifact = {
+        "artifact_id": art_data.artifact_id,
+        "name_vi": art_data.name_vi,
+        "description_vi": art_data.description_vi,
+        "room": art_data.room,
+        "image_url": art_data.image_url,
+        "qr_code": f"QR_{art_data.artifact_id.upper()}"
+    }
+
+    # Xóa bản ghi cũ nếu trùng artifact_id rồi đẩy bản mới vào
+    await poi_collection.update_one(
+        {"id": poi_id},
+        {"$pull": {"artifacts": {"artifact_id": art_data.artifact_id}}}
+    )
+    await poi_collection.update_one(
+        {"id": poi_id},
+        {"$push": {"artifacts": new_artifact}}
+    )
+
+    # Bắn sự kiện sang Redis
+    event_payload = {
+        "event": "ARTIFACT_SAVED",
+        "poi_id": poi_id,
+        "artifact_id": art_data.artifact_id,
+        "text_vi": art_data.description_vi
+    }
+    try:
+        redis_client.publish("poi_events", json.dumps(event_payload))
+        print(f"📡 Đã publish sự kiện ARTIFACT_SAVED cho {art_data.artifact_id}")
+    except Exception as e:
+        print(f"❌ Lỗi Redis publish: {e}")
+
+    return {
+        "success": True,
+        "message": f"Đã lưu hiện vật '{art_data.name_vi}' và kích hoạt tạo audio",
+        "artifact_id": art_data.artifact_id
+    }
+@app.delete("/pois/{poi_id}/artifacts/admin/delete/{artifact_id}")
+async def delete_artifact(poi_id: str, artifact_id: str):
+    result = await poi_collection.update_one(
+        {"id": poi_id},
+        {"$pull": {"artifacts": {"artifact_id": artifact_id}}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Không tìm thấy hiện vật để xóa")
+    return {"success": True, "message": "Đã xóa hiện vật thành công"}    

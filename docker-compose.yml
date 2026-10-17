@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:latest
@@ -80,6 +78,7 @@ services:
     volumes:
       - audio_media:/app/media
       - ./frontend:/app/frontend
+      - ./assets:/app/assets
     depends_on:
       - auth_service
       - museum_service

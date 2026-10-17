@@ -390,17 +390,24 @@
             desc: item.description_vi || "",
             coords: [item.location?.lat || 0, item.location?.lng || 0],
             address: item.address || "TP. Hồ Chí Minh",
+            // SỬA DÒNG NÀY ĐỂ ĐỌC ĐÚNG ẢNH:
             image:
               item.image ||
+              item.image_url ||
               "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80",
             radius: item.trigger_radius_meters || 30,
             qr_code: item.qr_code || `qr_${item.id}`,
             artifacts: (item.artifacts || []).map((a) => ({
               id: a.artifact_id || a.id,
-              name: a.name || a.artifact_id,
+              museum_id: item.id,
+              name: a.name_vi || a.name || a.artifact_id,
               desc: a.description_vi || "Hiện vật trưng bày quý giá.",
               room: a.room || "Khu vực trưng bày",
-              image: a.image || "",
+              // SỬA CẢ ẢNH CỦA HIỆN VẬT:
+              image:
+                a.image ||
+                a.image_url ||
+                "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80",
             })),
           }));
 
@@ -463,8 +470,8 @@
           );
 
           const popupContent = `
-            <div style="width: 200px; font-family: sans-serif; pointer-events: none;">
-              <img src="${m.image}" alt="${m.name}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;" />
+            <div style="width: 200px; font-family: sans-serif;">
+              <img src="${m.image}" onerror="this.src='https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80'" alt="${m.name}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;" />
               <h4 style="font-weight: 700; color: #1e3a8a; font-size: 13px; line-height: 1.2;">${m.name}</h4>
               <p style="font-size: 11px; color: #64748b; margin: 3px 0;">${m.address}</p>
               <p style="font-size: 10px; color: #2563eb; font-weight: 600; margin-top: 4px;">👉 Nhấp chuột để xem danh sách hiện vật</p>
@@ -551,7 +558,15 @@
       }
 
       function onLanguageSelectChange() {
-        if (currentPlayingTarget) {
+        if (!currentPlayingTarget) return;
+
+        if (currentPlayingTarget.isArtifact) {
+          playArtifactAudio(
+            currentPlayingTarget.museumId,
+            currentPlayingTarget.artifactId,
+            currentPlayingTarget.name,
+          );
+        } else {
           playAudioTarget(currentPlayingTarget.id, currentPlayingTarget.name);
         }
       }
@@ -676,20 +691,21 @@
           div.className =
             "p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-200 transition flex gap-3 items-center justify-between";
 
-          // Ảnh mặc định nếu hiện vật chưa có ảnh
+          // Khử lỗi nháy đơn trong tên khi truyền vào hàm onclick
+          const safeName = (item.name || "").replace(/'/g, "\\'");
           const imgSrc =
             item.image ||
             "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80";
 
           div.innerHTML = `
-            <img src="${imgSrc}" class="w-12 h-12 object-cover rounded-lg border border-slate-200 shrink-0" alt="${item.name}" />
+            <img src="${imgSrc}" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80'" class="w-12 h-12 object-cover rounded-lg border border-slate-200 shrink-0" alt="${item.name}" />
             <div class="flex-1 min-w-0">
               <h4 class="font-bold text-xs text-slate-800 truncate">${item.name}</h4>
               <p class="text-[10px] text-blue-600 font-medium">${item.room || "Khu trưng bày"}</p>
               <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-1">${item.desc}</p>
             </div>
             <div class="shrink-0">
-              <button onclick="requestTtsOnDemand('${item.id}', '${item.name}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition flex items-center gap-1 active:scale-95">
+              <button onclick="playArtifactAudio('${museum.id}', '${item.id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition flex items-center gap-1 active:scale-95">
                 🔊 Nghe
               </button>
             </div>
@@ -698,32 +714,53 @@
         });
       }
 
-      async function requestTtsOnDemand(artifactId, artifactName) {
+      async function playArtifactAudio(museumId, artifactId, artifactName) {
         const lang = document.getElementById("langSelect").value;
+        const player = document.getElementById("audioPlayer");
         const statusBox = document.getElementById("statusBox");
-        statusBox.innerHTML = `🎙️ Đang kết nối Audio Service cho: <b>${artifactName}</b> (${lang})...`;
 
-        try {
-          const res = await fetch(`${API_BASE}/audio/tts-on-demand`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              artifact_id: artifactId,
-              lang: lang,
-            }),
-          });
+        currentPlayingTarget = {
+          id: `${museumId}_${artifactId}`,
+          name: artifactName,
+          isArtifact: true,
+          museumId,
+          artifactId,
+        };
 
-          if (!res.ok) throw new Error("Máy chủ TTS trả về mã: " + res.status);
-          const data = await res.json();
-          const audioPlayer = document.getElementById("audioPlayer");
-          audioPlayer.src =
-            data.audio_url ||
-            `${API_BASE}/audio/files/${artifactId}_${lang}.mp3`;
-          await audioPlayer.play();
-          statusBox.innerHTML = `🔊 Đang phát bài thuyết minh hiện vật: <b>${artifactName}</b>`;
-        } catch (e) {
-          // Thử phát thẳng file từ audio service
-          playAudioTarget(artifactId, artifactName, lang);
+        // Thứ tự ưu tiên Fallback: zh -> en -> vi
+        let priorityOrder = ["vi"];
+        if (lang === "zh") priorityOrder = ["zh", "en", "vi"];
+        else if (lang === "en") priorityOrder = ["en", "vi"];
+
+        statusBox.innerHTML = `⏳ Đang nạp thuyết minh: <b>${artifactName}</b>...`;
+
+        let played = false;
+        for (const l of priorityOrder) {
+          const audioUrl = `${API_BASE}/audio/files/${museumId}_${artifactId}_${l}.mp3`;
+          try {
+            const check = await fetch(audioUrl, {
+              method: "HEAD",
+              cache: "no-store",
+            });
+            if (check.ok) {
+              player.src = audioUrl;
+              await player.play();
+              played = true;
+
+              const langLabel = { vi: "Tiếng Việt", en: "English", zh: "中文" };
+              if (lang !== l) {
+                statusBox.innerHTML = `✅ <b>Đang phát:</b> ${artifactName}<br/><span class="text-amber-600 font-medium">⚠️ Tạm thời phát bản: ${langLabel[l]} (bản ${langLabel[lang]} chưa tạo)</span>`;
+              } else {
+                statusBox.innerHTML = `🔊 <b>Đang phát thuyết minh:</b> ${artifactName} (${langLabel[l]})`;
+              }
+              break;
+            }
+          } catch (e) {}
+        }
+
+        if (!played) {
+          player.pause();
+          statusBox.innerHTML = `❌ File âm thanh cho <b>${artifactName}</b> chưa sẵn sàng hoặc đang được Worker xử lý.`;
         }
       }
 
@@ -788,8 +825,11 @@
             ) {
               const art = result.data.artifacts[0];
               displayArtifacts(result.data.id);
-              requestTtsOnDemand(art.artifact_id || code, art.name || code);
-              return;
+              playArtifactAudio(
+                result.data.id,
+                art.artifact_id || code,
+                art.name_vi || art.name || code,
+              );
             } else if (result.type === "museum" && result.data) {
               displayArtifacts(result.data.id);
               playAudioTarget(result.data.id, result.data.name);
@@ -818,7 +858,7 @@
 
         if (foundArt) {
           displayArtifacts(foundMuseum.id);
-          requestTtsOnDemand(foundArt.id, foundArt.name);
+          playArtifactAudio(foundMuseum.id, foundArt.id, foundArt.name);
         } else if (foundMuseum) {
           displayArtifacts(foundMuseum.id);
           playAudioTarget(foundMuseum.id, foundMuseum.name);

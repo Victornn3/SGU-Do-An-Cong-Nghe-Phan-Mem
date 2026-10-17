@@ -25,6 +25,16 @@ GTTS_LANG_MAP = {
 # Đường dẫn thư mục media được mount volume chung trong Docker
 MEDIA_DIR = "/app/media"
 
+def get_smart_audio_text(text: str, max_chars: int = 450) -> str:
+    text = text.strip()
+    if len(text) <= max_chars:
+        return text  # Nếu ngắn thì đọc hết 100%
+    truncated = text[:max_chars]
+    last_dot = truncated.rfind(".")
+    if last_dot != -1:
+        return truncated[:last_dot + 1]  # Nếu dài thì dừng đúng dấu chấm câu
+    return truncated + "..."
+
 def translate_safe(text: str, target_lang: str) -> str:
     if target_lang == "vi":
         return text
@@ -66,12 +76,49 @@ async def process_poi_event(poi_data: dict):
 
     os.makedirs(MEDIA_DIR, exist_ok=True)
     print(f"\n🎧 [Worker] Bắt đầu xử lý âm thanh cho POI: {poi_id}", flush=True)
+    
+    # Lọc thông minh: ngắn đọc hết, dài lấy đoạn đầu trọn câu
+    audio_script = get_smart_audio_text(text_vi, max_chars=450)
 
-    for lang in ["vi", "en", "zh"]:
-        translated = translate_safe(text_vi, lang)
+    # 1. Tạo ngay Tiếng Việt trước (không cần dịch nên có ngay sau 1-2 giây)
+    file_vi = os.path.join(MEDIA_DIR, f"{poi_id}_vi.mp3")
+    await generate_speech(audio_script, "vi", file_vi)
+    print(f"⚡ [Worker] Đã tạo xong Tiếng Việt cho POI: {poi_id}", flush=True)
+
+    # 2. Dịch đoạn text đó và tạo file tiếng Anh, tiếng Trung
+    for lang in ["en", "zh"]:
+        translated = translate_safe(audio_script, lang)
         file_path = os.path.join(MEDIA_DIR, f"{poi_id}_{lang}.mp3")
         await generate_speech(translated, lang, file_path)
 
+    
+
+async def process_artifact_event(art_data: dict):
+    poi_id = art_data.get("poi_id")
+    artifact_id = art_data.get("artifact_id")
+    text_vi = art_data.get("text_vi", "")
+
+    if not poi_id or not artifact_id or not text_vi:
+        print(f"⚠️ Bỏ qua event do thiếu thông tin: {art_data}", flush=True)
+        return
+
+    os.makedirs(MEDIA_DIR, exist_ok=True)
+    print(f"\n🏺 [Worker] Bắt đầu xử lý âm thanh cho Hiện vật: {artifact_id} (Bảo tàng: {poi_id})", flush=True)
+
+    # Lọc thông minh: hiện vật để mốc 350 ký tự (hầu hết hiện vật sẽ đọc trọn vẹn)
+    audio_script = get_smart_audio_text(text_vi, max_chars=350)
+
+    # 1. Tạo ngay Tiếng Việt trước
+    file_vi = os.path.join(MEDIA_DIR, f"{poi_id}_{artifact_id}_vi.mp3")
+    await generate_speech(audio_script, "vi", file_vi)
+    print(f"⚡ [Worker] Đã tạo xong Tiếng Việt cho hiện vật: {artifact_id}", flush=True)
+
+    # 2. Dịch và tạo tiếng Anh & tiếng Trung
+    for lang in ["en", "zh"]:
+        translated = translate_safe(audio_script, lang)
+        file_path = os.path.join(MEDIA_DIR, f"{poi_id}_{artifact_id}_{lang}.mp3")
+        await generate_speech(translated, lang, file_path)
+        
 def main():
     print("--- AUDIO WORKER ĐANG LẮNG NGHE SỰ KIỆN TỪ REDIS ---", flush=True)
     pubsub = r.pubsub()
@@ -83,10 +130,25 @@ def main():
                 raw_data = message["data"]
                 if isinstance(raw_data, bytes):
                     raw_data = raw_data.decode("utf-8")
+                
                 data = json.loads(raw_data)
-                asyncio.run(process_poi_event(data))
+                event_type = data.get("event")
+
+                print(f"📥 [Worker] Nhận sự kiện: {event_type}", flush=True)
+
+                if event_type == "ARTIFACT_SAVED":
+                    asyncio.run(process_artifact_event(data))
+                elif event_type == "POI_CREATED":
+                    asyncio.run(process_poi_event(data))
+                else:
+                    # Dự phòng nếu event gửi lên không có trường "event"
+                    if "artifact_id" in data:
+                        asyncio.run(process_artifact_event(data))
+                    else:
+                        asyncio.run(process_poi_event(data))
+
             except Exception as e:
-                print(f"❌ Lỗi xử lý message: {e}", flush=True)
+                print(f"❌ Lỗi xử lý message từ Redis: {e}", flush=True)
 
 if __name__ == "__main__":
     main()
