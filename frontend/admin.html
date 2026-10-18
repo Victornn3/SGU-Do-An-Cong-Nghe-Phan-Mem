@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Portal - Quản Trị Hệ Thống Thuyết Minh Bảo Tàng</title>
+    <title>
+      Admin Portal - Quản Trị Hệ Thống Thuyết Minh Bảo Tàng Trung Tâm TP.HCM
+    </title>
 
     <!-- Thư viện CDN: TailwindCSS, Leaflet CSS/JS, QRCode.js -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -65,7 +67,7 @@
           <div>
             <h2 class="text-xl font-extrabold text-slate-800">Admin Portal</h2>
             <p class="text-xs text-slate-400">
-              Hệ thống Quản lý Thuyết minh Tự động
+              Hệ thống Quản lý Thuyết minh Tự động Bảo Tàng Trung Tâm TP.HCM
             </p>
           </div>
         </div>
@@ -689,6 +691,19 @@
       let museums = [];
       let artifacts = [];
 
+      (function blockMobileAccess() {
+        const isMobile =
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent,
+          );
+        if (isMobile) {
+          alert(
+            "Cổng Quản trị (Admin Portal) chỉ khả dụng trên máy tính để bàn hoặc laptop!",
+          );
+          window.location.href = "index.html"; // Chuyển thẳng du khách về trang tham quan
+        }
+      })();
+
       function handleFileUpload(inputElement, targetInputId, previewImgId) {
         const file = inputElement.files[0];
         if (!file) return;
@@ -819,9 +834,22 @@
       function initPickerMap(initialCoords = [10.7769, 106.7009]) {
         if (!pickerMap) {
           pickerMap = L.map("pickerMap").setView(initialCoords, 14);
-          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 19,
-          }).addTo(pickerMap);
+
+          // 1. Dùng nguồn Tile Esri World Street Map sắc nét, không bị chặn
+          const mainTileLayer = L.tileLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+            {
+              maxZoom: 19,
+              attribution: "Tiles &copy; Esri",
+            },
+          ).addTo(pickerMap);
+
+          // 2. Tự động chuyển về OpenStreetMap nếu mạng chặn Esri
+          mainTileLayer.on("tileerror", function () {
+            L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+              maxZoom: 19,
+            }).addTo(pickerMap);
+          });
 
           pickerMarker = L.marker(initialCoords, { draggable: true }).addTo(
             pickerMap,
@@ -843,7 +871,9 @@
           pickerMarker.setLatLng(initialCoords);
         }
 
-        setTimeout(() => pickerMap.invalidateSize(), 250);
+        // Ép vẽ lại kích thước để khử hoàn toàn vùng xám khi mở modal
+        setTimeout(() => pickerMap.invalidateSize(), 300);
+        setTimeout(() => pickerMap.invalidateSize(), 800);
         setCoordsInputs(initialCoords[0], initialCoords[1]);
       }
 
@@ -1152,13 +1182,15 @@
 
       // ==========================================
       // V. QUẢN LÝ HIỆN VẬT & TẠO MÃ QR CODE
-      // ==========================================
       function populateMuseumSelects() {
-        const selects = [
-          document.getElementById("artifactFilterMuseum"),
-          document.getElementById("artMuseumSelect"),
-        ];
-        selects.forEach((sel) => {
+        const filterSelect = document.getElementById("artifactFilterMuseum");
+        const formSelect = document.getElementById("artMuseumSelect");
+
+        // 1. Lưu lại giá trị bộ lọc bảo tàng mà người dùng đang chọn trước đó
+        const previousFilterVal = filterSelect ? filterSelect.value : "";
+        const previousFormVal = formSelect ? formSelect.value : "";
+
+        [filterSelect, formSelect].forEach((sel) => {
           if (!sel) return;
           sel.innerHTML = "";
           museums.forEach((m) => {
@@ -1168,6 +1200,22 @@
             sel.appendChild(opt);
           });
         });
+
+        // 2. Phục hồi lại đúng bảo tàng đang đứng (tránh nhảy về bảo tàng đầu tiên)
+        if (
+          filterSelect &&
+          previousFilterVal &&
+          museums.some((m) => m.id === previousFilterVal)
+        ) {
+          filterSelect.value = previousFilterVal;
+        }
+        if (
+          formSelect &&
+          previousFormVal &&
+          museums.some((m) => m.id === previousFormVal)
+        ) {
+          formSelect.value = previousFormVal;
+        }
       }
 
       function renderArtifactsTable() {
@@ -1341,8 +1389,20 @@
             "emerald",
           );
 
+          // Ghi nhớ bảo tàng đang lọc hiện tại (hoặc bảo tàng của hiện vật vừa lưu)
+          const filterElem = document.getElementById("artifactFilterMuseum");
+          const currentSelectedFilter = filterElem
+            ? filterElem.value || museum_id
+            : museum_id;
+
           // Nạp lại dữ liệu mới nhất từ CSDL
           await fetchMuseumsData();
+
+          // Khôi phục lại đúng bảo tàng đã chọn và render lại bảng hiện vật
+          if (filterElem) {
+            filterElem.value = currentSelectedFilter;
+            renderArtifactsTable();
+          }
         } catch (err) {
           showToast(`❌ Lỗi: ${err.message}`, "rose");
         }

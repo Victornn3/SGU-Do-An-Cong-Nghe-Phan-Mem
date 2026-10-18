@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hệ thống Thuyết minh Tự động Bảo tàng TP.HCM</title>
+    <title>Hệ thống Thuyết minh Tự động Bảo tàng Trung Tâm TP.HCM</title>
 
     <!-- Thư viện CDN: Leaflet, Tailwind CSS, html5-qrcode -->
     <link
@@ -48,131 +48,77 @@
       <header
         class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden"
       >
-        <!-- Hàng 1: Nhận diện thương hiệu & Tên ứng dụng -->
+        <!-- Hàng 1: Rút gọn tiêu đề trên mobile -->
         <div
-          class="px-5 py-4 flex items-center justify-between gap-4 border-b border-slate-100"
+          class="px-4 py-2.5 sm:px-5 sm:py-3.5 flex items-center justify-between gap-3 border-b border-slate-100"
         >
-          <div class="flex items-center gap-3.5">
-            <!-- Icon Logo Bảo tàng -->
+          <div class="flex items-center gap-2.5">
             <div
-              class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shadow-sm shrink-0"
+              class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shadow-sm shrink-0 text-base sm:text-xl"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3L2 8h20L12 3z"
-                />
-              </svg>
+              🏛️
             </div>
 
             <div>
               <h1
-                class="text-base sm:text-lg md:text-xl font-extrabold text-slate-800 tracking-tight leading-snug"
+                class="text-sm sm:text-base md:text-lg font-extrabold text-slate-800 tracking-tight leading-snug"
               >
-                Hệ thống Thuyết minh Tự động Bảo tàng TP.HCM
+                Thuyết Minh Bảo Tàng Trung Tâm TP.HCM
               </h1>
-              <p class="text-xs text-slate-400 font-normal mt-0.5">
-                Trải nghiệm tham quan thông minh qua định vị GPS & tương tác QR
-                Code
+              <p class="hidden sm:block text-[11px] text-slate-400 font-normal">
+                Định vị GPS & Tương tác quét mã QR
               </p>
             </div>
           </div>
 
-          <!-- Badge trạng thái trực tuyến -->
+          <!-- Nút Quét mã QR đưa lên ngang hàng để tiết kiệm chỗ trên mobile -->
+          <button
+            onclick="openQrScanner()"
+            class="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-sm transition active:scale-95 shrink-0"
+          >
+            <span>📷 Quét QR</span>
+          </button>
+        </div>
+
+        <!-- Hàng 2: Chọn ngôn ngữ thanh mảnh -->
+        <div
+          class="bg-slate-50/80 px-4 py-2 sm:px-5 sm:py-2 flex items-center justify-between gap-2"
+        >
           <div
-            class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium"
+            class="flex items-center gap-2 text-slate-500 text-xs font-semibold"
+          >
+            <span>🌐 Ngôn ngữ:</span>
+            <select
+              id="langSelect"
+              onchange="onLanguageSelectChange()"
+              class="bg-white border border-slate-300 text-slate-700 text-xs font-bold px-2 py-1 rounded-lg shadow-sm focus:outline-none cursor-pointer"
+            >
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+              <option value="en">🇬🇧 English</option>
+              <option value="zh">🇨🇳 中文</option>
+            </select>
+          </div>
+
+          <div
+            class="flex items-center gap-1.5 text-emerald-700 text-[11px] font-semibold"
           >
             <span
               class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
             ></span>
-            Sẵn sàng kết nối
+            <span>Trực tuyến</span>
           </div>
-        </div>
-
-        <!-- Hàng 2: Thanh Điều Khiển Tác Vụ (Action Bar) -->
-        <div
-          class="bg-slate-50/80 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3"
-        >
-          <!-- Cụm chọn ngôn ngữ -->
-          <div class="flex items-center gap-2">
-            <div
-              class="flex items-center gap-1.5 text-slate-500 text-xs font-semibold uppercase tracking-wider"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-4 h-4 text-slate-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
-                />
-              </svg>
-              <span>Ngôn ngữ</span>
-            </div>
-
-            <div class="relative">
-              <select
-                id="langSelect"
-                onchange="onLanguageSelectChange()"
-                class="appearance-none bg-white border border-slate-300 text-slate-700 text-xs font-semibold pl-3 pr-8 py-2 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none cursor-pointer transition"
-              >
-                <option value="vi">🇻🇳 Tiếng Việt</option>
-                <option value="en">🇬🇧 English</option>
-                <option value="zh">🇨🇳 中文</option>
-              </select>
-              <span
-                class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
-                >▼</span
-              >
-            </div>
-          </div>
-
-          <!-- Nút Mở Quét Camera QR -->
-          <button
-            onclick="openQrScanner()"
-            class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm hover:shadow transition-all duration-200 active:scale-95"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-              />
-            </svg>
-            <span>Quét mã QR hiện vật</span>
-          </button>
         </div>
       </header>
 
-      <!-- 2. Bố cục Trung tâm: Bản đồ & Bảng chi tiết Hiện vật -->
+      <!-- 2. Bố cục Trung tâm: Khung bản đồ mở rộng to rõ cho điện thoại -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- Khung Bản đồ (2 Cột trên màn hình lớn) -->
+        <!-- Đổi chiều cao bản đồ từ h-72 thành h-[480px] trên mobile -->
         <div
           class="lg:col-span-2 relative bg-white p-2 rounded-2xl shadow-sm border border-slate-200"
         >
           <div
             id="map"
-            class="h-72 sm:h-96 lg:h-[460px] w-full rounded-xl z-0"
+            class="h-[480px] sm:h-[520px] lg:h-[560px] w-full rounded-xl z-0"
           ></div>
 
           <!-- Nút Recenter Định vị 🎯 -->
@@ -336,16 +282,40 @@
       // II. KHỞI TẠO BẢN ĐỒ OPENSTREETMAP CHUẨN
       // ==========================================
       function initMap() {
-        map = L.map("map").setView(INITIAL_CENTER, 14);
+        // 1. Khởi tạo bản đồ
+        map = L.map("map", {
+          center: INITIAL_CENTER,
+          zoom: 14,
+          zoomControl: true,
+        });
 
-        // Tile layer chuẩn OpenStreetMap sắc nét theo yêu cầu
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-        }).addTo(map);
+        // 2. Sử dụng lớp Tile tiêu chuẩn toàn cầu của Esri (hiển thị cực nét và không bao giờ bị chặn trên PC/Mobile)
+        const mainTileLayer = L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+          {
+            maxZoom: 19,
+            attribution: "Tiles &copy; Esri",
+          },
+        ).addTo(map);
 
-        setTimeout(() => map.invalidateSize(), 300);
+        // 3. Fallback tự động: nếu mạng chặn Esri thì tự chuyển về OpenStreetMap chuẩn
+        mainTileLayer.on("tileerror", function () {
+          console.warn("Đang chuyển sang nguồn tile dự phòng...");
+          L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+          }).addTo(map);
+        });
 
-        // Marker vị trí người dùng
+        // 4. Ép vẽ lại kích thước để khử triệt để khoảng xám trên màn hình di động
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 300);
+
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 1000);
+
+        // 5. Marker vị trí người dùng
         userMarker = L.marker(INITIAL_CENTER, {
           title: "Vị trí của bạn",
           zIndexOffset: 1000,
@@ -390,7 +360,6 @@
             desc: item.description_vi || "",
             coords: [item.location?.lat || 0, item.location?.lng || 0],
             address: item.address || "TP. Hồ Chí Minh",
-            // SỬA DÒNG NÀY ĐỂ ĐỌC ĐÚNG ẢNH:
             image:
               item.image ||
               item.image_url ||
@@ -532,7 +501,6 @@
             const check = await fetch(testAudioUrl, { method: "HEAD" });
             if (check.ok) {
               player.src = testAudioUrl;
-              await player.play();
               successfullyPlayed = true;
 
               const langLabel = { vi: "Tiếng Việt", en: "English", zh: "中文" };
@@ -540,6 +508,12 @@
                 statusBox.innerHTML = `✅ <b>Đang phát:</b> ${targetName}<br/><span class="text-amber-600 font-medium">⚠️ Đã fallback sang phát: ${langLabel[lang]}</span>`;
               } else {
                 statusBox.innerHTML = `✅ <b>Đang phát thuyết minh:</b> ${targetName} (${langLabel[lang]})`;
+              }
+
+              try {
+                await player.play();
+              } catch (playErr) {
+                statusBox.innerHTML += `<br/><span class="text-indigo-600 font-semibold">👉 Chạm nút ▶️ trên thanh phát để nghe (do chính sách âm thanh điện thoại).</span>`;
               }
               break;
             }
@@ -744,7 +718,6 @@
             });
             if (check.ok) {
               player.src = audioUrl;
-              await player.play();
               played = true;
 
               const langLabel = { vi: "Tiếng Việt", en: "English", zh: "中文" };
@@ -752,6 +725,12 @@
                 statusBox.innerHTML = `✅ <b>Đang phát:</b> ${artifactName}<br/><span class="text-amber-600 font-medium">⚠️ Tạm thời phát bản: ${langLabel[l]} (bản ${langLabel[lang]} chưa tạo)</span>`;
               } else {
                 statusBox.innerHTML = `🔊 <b>Đang phát thuyết minh:</b> ${artifactName} (${langLabel[l]})`;
+              }
+
+              try {
+                await player.play();
+              } catch (playErr) {
+                statusBox.innerHTML += `<br/><span class="text-indigo-600 font-semibold">👉 Chạm nút ▶️ trên thanh phát để nghe (do chính sách âm thanh điện thoại).</span>`;
               }
               break;
             }
@@ -863,7 +842,7 @@
           displayArtifacts(foundMuseum.id);
           playAudioTarget(foundMuseum.id, foundMuseum.name);
         } else {
-          requestTtsOnDemand(code, "Hiện vật QR #" + code);
+          statusBox.innerHTML = `⚠️ Không tìm thấy hiện vật có mã QR: <b>${code}</b> trong hệ thống.`;
         }
       }
 
