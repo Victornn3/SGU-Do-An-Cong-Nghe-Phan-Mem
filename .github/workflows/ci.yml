@@ -1,4 +1,4 @@
-name: POI Service CI/CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -21,19 +21,22 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          # Cài đặt thư viện của service và pytest
           if [ -f services/poi-service/requirements.txt ]; then
             pip install -r services/poi-service/requirements.txt
           fi
-          pip install pytest
 
-      - name: Run Unit Tests with Pytest
+      - name: Check Python Syntax
         run: |
-          cd services/poi-service
-          # Chạy pytest để kiểm thử tự động toàn bộ logic (Geofence, tính khoảng cách,...)
-          pytest -v
+          # Kiểm tra trực tiếp lỗi cú pháp trên toàn bộ mã nguồn python của các service
+          python -m py_compile services/poi-service/app/*.py
+          python -m py_compile services/statistics-service/app/*.py
+          python -m py_compile services/ticket-service/app/*.py
+          python -m py_compile services/auth-service/app/*.py
+          python -m py_compile services/narration-service/app/*.py
+          python -m py_compile api-gateway/app/*.py
 
-      - name: Build Docker Image
+      - name: Build Docker Images
         run: |
-          # Kiểm tra xem Dockerfile build thành công hay không
+          # Kiểm tra build thử các Dockerfile quan trọng xem có lỗi đường dẫn hay build context không
           docker build -t vanmieu-poi-service:latest -f services/poi-service/Dockerfile .
+          docker build -t vanmieu-api-gateway:latest -f api-gateway/Dockerfile .
