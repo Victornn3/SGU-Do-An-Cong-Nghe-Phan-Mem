@@ -1,902 +1,472 @@
 <!doctype html>
+
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hệ thống Thuyết minh Tự động Bảo tàng Trung Tâm TP.HCM</title>
 
-    <!-- Thư viện CDN: Leaflet, Tailwind CSS, html5-qrcode -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Văn Miếu – Quốc Tử Giám | Thuyết minh tự động GPS</title>
+
+    <!-- Tailwind CSS CDN -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- FontAwesome cho icon -->
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- File CSS riêng -->
+
+    <link rel="stylesheet" href="css/styles.css?v=2" />
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-
-    <style>
-      /* Ẩn attribution của leaflet để giao diện sạch sẽ */
-      .leaflet-control-attribution {
-        display: none !important;
-      }
-      /* Tùy biến thanh cuộn danh sách hiện vật */
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #cbd5e1;
-        border-radius: 4px;
-      }
-      /* Nhãn tên bảo tàng kèm hiệu ứng nổi bật */
-      .museum-label {
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-        padding: 2px 6px;
-        white-space: nowrap;
-        font-weight: 700;
-        font-size: 11px;
-        color: #1e3a8a;
-        pointer-events: auto;
-      }
-    </style>
   </head>
-  <body class="bg-slate-100 text-slate-800 antialiased font-sans">
-    <div class="max-w-6xl mx-auto p-3 md:p-5 space-y-4">
-      <!-- 1. Thanh Header & Ngôn ngữ -->
-      <header
-        class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden"
-      >
-        <!-- Hàng 1: Rút gọn tiêu đề trên mobile -->
+
+  <body
+    class="bg-slate-50 text-slate-800 flex flex-col h-[100dvh] md:h-screen w-screen overflow-hidden select-none"
+  >
+    <!-- HEADER -->
+
+    <header
+      class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm z-20"
+    >
+      <div class="flex items-center space-x-3">
         <div
-          class="px-4 py-2.5 sm:px-5 sm:py-3.5 flex items-center justify-between gap-3 border-b border-slate-100"
+          class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-white shadow-md"
         >
-          <div class="flex items-center gap-2.5">
-            <div
-              class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shadow-sm shrink-0 text-base sm:text-xl"
-            >
-              🏛️
-            </div>
-
-            <div>
-              <h1
-                class="text-sm sm:text-base md:text-lg font-extrabold text-slate-800 tracking-tight leading-snug"
-              >
-                Thuyết Minh Bảo Tàng Trung Tâm TP.HCM
-              </h1>
-              <p class="hidden sm:block text-[11px] text-slate-400 font-normal">
-                Định vị GPS & Tương tác quét mã QR
-              </p>
-            </div>
-          </div>
-
-          <!-- Nút Quét mã QR đưa lên ngang hàng để tiết kiệm chỗ trên mobile -->
-          <button
-            onclick="openQrScanner()"
-            class="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-sm transition active:scale-95 shrink-0"
-          >
-            <span>📷 Quét QR</span>
-          </button>
+          <i class="fa-solid fa-landmark text-lg"></i>
         </div>
 
-        <!-- Hàng 2: Chọn ngôn ngữ thanh mảnh -->
-        <div
-          class="bg-slate-50/80 px-4 py-2 sm:px-5 sm:py-2 flex items-center justify-between gap-2"
-        >
-          <div
-            class="flex items-center gap-2 text-slate-500 text-xs font-semibold"
+        <div>
+          <h1
+            class="font-bold text-base text-slate-900 leading-tight"
+            data-i18n="header.title"
           >
-            <span>🌐 Ngôn ngữ:</span>
-            <select
-              id="langSelect"
-              onchange="onLanguageSelectChange()"
-              class="bg-white border border-slate-300 text-slate-700 text-xs font-bold px-2 py-1 rounded-lg shadow-sm focus:outline-none cursor-pointer"
-            >
-              <option value="vi">🇻🇳 Tiếng Việt</option>
-              <option value="en">🇬🇧 English</option>
-              <option value="zh">🇨🇳 中文</option>
-            </select>
-          </div>
+            Văn Miếu – Quốc Tử Giám
+          </h1>
 
+          <p
+            class="text-xs text-sky-600 font-medium"
+            data-i18n="header.subtitle"
+          >
+            Hệ thống Thuyết minh tự động GPS & Geofence
+          </p>
+        </div>
+      </div>
+
+      <!-- Chọn ngôn ngữ -->
+
+      <div class="flex items-center space-x-2">
+        <select
+          id="langSelect"
+          onchange="changeLanguage(this.value)"
+          class="bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+        >
+          <option value="vi">🇻🇳 Tiếng Việt</option>
+
+          <option value="en">🇬🇧 English</option>
+
+          <option value="zh">🇨🇳 中文</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+
+    <main class="flex-1 relative overflow-hidden flex flex-col">
+      <!-- TAB 1: BẢN ĐỒ (MAP VIEW) -->
+
+      <div
+        id="tabMap"
+        class="absolute inset-0 flex flex-col map-bg p-2.5 md:p-4 overflow-y-auto pb-20 md:pb-28"
+      >
+        <!-- Thanh trạng thái GPS & Nút Giả lập -->
+
+        <div class="flex items-center justify-between mb-3 z-10">
           <div
-            class="flex items-center gap-1.5 text-emerald-700 text-[11px] font-semibold"
+            id="gpsBadge"
+            class="bg-white/90 backdrop-blur border border-sky-200 text-sky-700 text-xs font-medium px-3 py-1.5 rounded-full shadow-sm flex items-center space-x-2"
           >
             <span
-              class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+              class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"
             ></span>
-            <span>Trực tuyến</span>
-          </div>
-        </div>
-      </header>
 
-      <!-- 2. Bố cục Trung tâm: Khung bản đồ mở rộng to rõ cho điện thoại -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- Đổi chiều cao bản đồ từ h-72 thành h-[480px] trên mobile -->
+            <span id="gpsStatusText" data-i18n="map.gpsStatus"
+              >Đang định vị Nội tự (Geofence 10m)</span
+            >
+          </div>
+
+          <button
+            onclick="toggleSimulator()"
+            class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
+          >
+            <i class="fa-solid fa-location-crosshairs"></i>
+
+            <span data-i18n="map.simulate">Giả lập GPS</span>
+          </button>
+        </div>
+
+        <!-- Bảng chọn giả lập GPS (Ẩn/Hiện) -->
+
         <div
-          class="lg:col-span-2 relative bg-white p-2 rounded-2xl shadow-sm border border-slate-200"
+          id="simulatorPanel"
+          class="hidden bg-white/95 border border-slate-200 rounded-xl p-3 mb-3 shadow-lg z-10"
         >
+          <p
+            class="text-xs font-bold text-slate-700 mb-2"
+            data-i18n="map.chooseLocation"
+          >
+            <i class="fa-solid fa-compass text-sky-600 mr-1"></i> Chọn nhanh vị
+            trí tham quan (Mô phỏng):
+          </p>
+
+          <div id="simulatorButtons" class="grid grid-cols-5 gap-1.5"></div>
+        </div>
+
+        <!-- KHUNG BẢN ĐỒ VĂN MIẾU - LEAFLET -->
+        <div
+          id="mapContainerWrapper"
+          class="relative flex-1 w-full h-full rounded-2xl border border-slate-200 shadow-inner overflow-hidden min-h-0 md:min-h-[350px] mb-2 md:mb-24"
+        >
+          <!-- Bản đồ thực tế -->
+          <div id="leafletMap" class="absolute inset-0"></div>
+
+          <!-- Thông báo lỗi bản đồ / dữ liệu POI (ẩn khi không có lỗi) -->
           <div
-            id="map"
-            class="h-[480px] sm:h-[520px] lg:h-[560px] w-full rounded-xl z-0"
+            id="mapNotice"
+            role="alert"
+            class="hidden absolute top-3 left-3 right-14 z-[1000] bg-amber-50/95 border border-amber-300 text-amber-800 text-xs rounded-lg px-3 py-2 shadow space-y-1"
           ></div>
 
-          <!-- Nút Recenter Định vị 🎯 -->
-          <button
-            onclick="recenterMap()"
-            class="absolute bottom-6 right-6 z-[1000] bg-white text-slate-800 hover:bg-blue-50 hover:text-blue-600 p-3 rounded-full shadow-lg border border-slate-200 flex items-center justify-center transition-all duration-200 group active:scale-95"
-            title="Định tâm lại bản đồ"
-          >
-            <span class="text-xl group-hover:scale-110 transition-transform"
-              >🎯</span
-            >
-          </button>
-        </div>
-
-        <!-- Khung Hiện vật & Audio (1 Cột) -->
-        <div class="flex flex-col space-y-4">
-          <!-- Bảng Trình phát Âm thanh -->
+          <!-- Công cụ điều khiển bản đồ -->
           <div
-            class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200"
+            class="absolute top-3 right-3 z-[1000] flex flex-col bg-white/95 backdrop-blur border border-slate-200 rounded-lg shadow-md overflow-hidden"
           >
-            <div class="flex items-center justify-between mb-2">
-              <h2
-                class="font-bold text-slate-700 flex items-center gap-2 text-sm md:text-base"
-              >
-                🎧 Thuyết minh Âm thanh
-              </h2>
-              <span
-                id="cooldownBadge"
-                class="hidden text-[10px] bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full"
-              >
-                Đang Cooldown
-              </span>
-            </div>
-
-            <div
-              id="statusBox"
-              class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 mb-2 leading-relaxed"
+            <button
+              type="button"
+              onclick="zoomMap(1)"
+              class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 text-slate-700 font-bold border-b border-slate-100 text-sm cursor-pointer"
+              map.zoomIn
+              title="Phóng to"
+              aria-label="Phóng to bản đồ"
             >
-              📍 Vị trí: Đang chờ dữ liệu GPS...
-            </div>
+              +
+            </button>
 
-            <audio id="audioPlayer" controls class="w-full h-9 rounded"></audio>
-          </div>
-
-          <!-- Bảng Danh sách Hiện vật -->
-          <div
-            class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-[220px]"
-          >
-            <div class="border-b pb-2 mb-2 flex justify-between items-center">
-              <h3
-                id="currentMuseumTitle"
-                class="font-bold text-sm text-blue-900 truncate"
-              >
-                🏛️ Chọn bảo tàng để xem hiện vật
-              </h3>
-            </div>
-
-            <div
-              id="artifactList"
-              class="space-y-2 overflow-y-auto max-h-[190px] custom-scrollbar flex-1 pr-1"
+            <button
+              type="button"
+              onclick="zoomMap(-1)"
+              class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 text-slate-700 font-bold border-b border-slate-100 text-sm cursor-pointer"
+              map.zoomOut
+              title="Thu nhỏ"
+              aria-label="Thu nhỏ bản đồ"
             >
-              <p class="text-xs text-slate-400 italic text-center py-8">
-                Nhấp vào một điểm bảo tàng trên bản đồ để xem danh mục bảo vật
-                và nghe thuyết minh chi tiết.
-              </p>
-            </div>
+              −
+            </button>
+
+            <button
+              type="button"
+              onclick="resetZoomMap()"
+              class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 text-sky-600 text-xs cursor-pointer"
+              map.reset
+              title="Đặt lại bản đồ"
+              aria-label="Đặt lại bản đồ"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
           </div>
         </div>
-      </div>
+        <!-- KẾT THÚC KHUNG BẢN ĐỒ -->
 
-      <!-- 3. Bảng Giả lập GPS -->
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-        <h2
-          class="font-bold text-slate-700 text-xs uppercase tracking-wider mb-2.5"
-        >
-          📍 Giả lập GPS Di chuyển (Bán kính Geofence 30m):
-        </h2>
-        <div class="flex flex-wrap gap-2.5">
-          <button
-            onclick="triggerSimulateGPS(10.7876, 106.705)"
-            class="bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 px-3 py-2 rounded-xl text-xs font-semibold transition active:scale-95"
-          >
-            Bảo tàng Lịch sử (Q1)
-          </button>
-          <button
-            onclick="triggerSimulateGPS(10.7788, 106.6923)"
-            class="bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 px-3 py-2 rounded-xl text-xs font-semibold transition active:scale-95"
-          >
-            Chứng tích Chiến tranh (Q3)
-          </button>
-          <button
-            onclick="triggerSimulateGPS(10.7682, 106.7067)"
-            class="bg-purple-50 hover:bg-purple-600 text-purple-700 hover:text-white border border-purple-200 px-3 py-2 rounded-xl text-xs font-semibold transition active:scale-95"
-          >
-            Bến Nhà Rồng (Q4)
-          </button>
-          <button
-            onclick="triggerSimulateGPS(10.77, 106.68)"
-            class="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 px-3 py-2 rounded-xl text-xs font-semibold transition active:scale-95"
-          >
-            Đi ra ngoài vùng bảo tàng
-          </button>
-        </div>
-      </div>
-    </div>
+        <!-- TRÌNH PHÁT ÂM THANH NỔI (CHỈ HIỆN KHI VƯỚT VÀO PHẠM VI GEOFENCE) -->
 
-    <!-- 4. Modal Camera Quét QR Code -->
-    <div
-      id="qrModal"
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[2000] p-4"
-    >
-      <div
-        class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4"
-      >
-        <div class="flex justify-between items-center border-b pb-2">
-          <h3 class="font-bold text-slate-800 text-base">
-            Quét mã QR Hiện vật
-          </h3>
-          <button
-            onclick="closeQrScanner()"
-            class="text-slate-400 hover:text-slate-700 text-lg font-bold"
-          >
-            ✕
-          </button>
-        </div>
         <div
-          id="reader"
-          class="w-full rounded-xl overflow-hidden bg-black min-h-[240px]"
-        ></div>
-        <p class="text-[11px] text-slate-500 text-center">
-          Hướng camera vào mã QR dán bên cạnh bảng hiện vật để nghe thuyết minh
-          tự động.
-        </p>
-      </div>
-    </div>
-
-    <script>
-      // ==========================================
-      // I. CẤU HÌNH HỆ THỐNG & ĐỊNH VỊ LINH HOẠT CHO LAN/MOBILE
-      // ==========================================
-      const INITIAL_CENTER = [10.7769, 106.7009];
-
-      // Tự động nhận diện host (nếu chạy trực tiếp file:/// sẽ trỏ về localhost:8000)
-      const API_BASE =
-        window.location.origin && window.location.origin.startsWith("http")
-          ? window.location.origin
-          : "http://localhost:8000";
-
-      let MUSEUMS = [];
-      let debounceTimer = null;
-      let lastTriggerTimes = {};
-      const COOLDOWN_MS = 5 * 60 * 1000;
-      let currentInsidePoiId = null; // LƯU BẢO TÀNG HIỆN TẠI ĐỂ KHÔNG BAO GIỜ PHÁT LẶP LẠI KHI Ở LÂU
-      let qrCodeScannerInstance = null;
-      let map = null;
-      let userMarker = null;
-      let museumLayerGroup = null;
-      let currentPlayingTarget = null; // Lưu POI/Artifact đang phát để chuyển ngôn ngữ
-
-      // ==========================================
-      // II. KHỞI TẠO BẢN ĐỒ OPENSTREETMAP CHUẨN
-      // ==========================================
-      function initMap() {
-        // 1. Khởi tạo bản đồ
-        map = L.map("map", {
-          center: INITIAL_CENTER,
-          zoom: 14,
-          zoomControl: true,
-        });
-
-        // 2. Sử dụng lớp Tile tiêu chuẩn toàn cầu của Esri (hiển thị cực nét và không bao giờ bị chặn trên PC/Mobile)
-        const mainTileLayer = L.tileLayer(
-          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-          {
-            maxZoom: 19,
-            attribution: "Tiles &copy; Esri",
-          },
-        ).addTo(map);
-
-        // 3. Fallback tự động: nếu mạng chặn Esri thì tự chuyển về OpenStreetMap chuẩn
-        mainTileLayer.on("tileerror", function () {
-          console.warn("Đang chuyển sang nguồn tile dự phòng...");
-          L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 19,
-          }).addTo(map);
-        });
-
-        // 4. Ép vẽ lại kích thước để khử triệt để khoảng xám trên màn hình di động
-        setTimeout(() => {
-          map.invalidateSize();
-        }, 300);
-
-        setTimeout(() => {
-          map.invalidateSize();
-        }, 1000);
-
-        // 5. Marker vị trí người dùng
-        userMarker = L.marker(INITIAL_CENTER, {
-          title: "Vị trí của bạn",
-          zIndexOffset: 1000,
-        })
-          .addTo(map)
-          .bindTooltip("📍 Vị trí của bạn", {
-            permanent: true,
-            direction: "top",
-            offset: [0, -10],
-          });
-
-        museumLayerGroup = L.layerGroup().addTo(map);
-      }
-
-      function recenterMap() {
-        if (userMarker) {
-          map.flyTo(userMarker.getLatLng(), 15, {
-            animate: true,
-            duration: 1.0,
-          });
-        } else {
-          map.flyTo(INITIAL_CENTER, 15, { animate: true, duration: 1.0 });
-        }
-      }
-
-      // ==========================================
-      // III. KẾT NỐI API BACKEND: TẢI BẢO TÀNG & HIỆN VẬT THẬT
-      // ==========================================
-      async function fetchMuseumsFromBackend() {
-        const statusBox = document.getElementById("statusBox");
-        try {
-          const res = await fetch(`${API_BASE}/pois`);
-          if (!res.ok)
-            throw new Error(
-              "Mã phản hồi từ Gateway không hợp lệ: " + res.status,
-            );
-          const data = await res.json();
-
-          MUSEUMS = data.map((item) => ({
-            id: item.id,
-            name: item.name,
-            desc: item.description_vi || "",
-            coords: [item.location?.lat || 0, item.location?.lng || 0],
-            address: item.address || "TP. Hồ Chí Minh",
-            image:
-              item.image ||
-              item.image_url ||
-              "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80",
-            radius: item.trigger_radius_meters || 30,
-            qr_code: item.qr_code || `qr_${item.id}`,
-            artifacts: (item.artifacts || []).map((a) => ({
-              id: a.artifact_id || a.id,
-              museum_id: item.id,
-              name: a.name_vi || a.name || a.artifact_id,
-              desc: a.description_vi || "Hiện vật trưng bày quý giá.",
-              room: a.room || "Khu vực trưng bày",
-              // SỬA CẢ ẢNH CỦA HIỆN VẬT:
-              image:
-                a.image ||
-                a.image_url ||
-                "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80",
-            })),
-          }));
-
-          // Xóa các marker cũ và vẽ lại toàn bộ danh sách mới nhất
-          renderMuseumsOnMap();
-          statusBox.innerHTML = `✅ Đã kết nối Microservices (${MUSEUMS.length} bảo tàng). Sẵn sàng nhận tín hiệu GPS.`;
-        } catch (err) {
-          console.warn("Lỗi tải POIs từ server:", err);
-          statusBox.innerHTML = `⚠️ <i>Đang chạy chế độ kiểm thử (Không kết nối được Gateway: ${err.message}).</i>`;
-        }
-      }
-      function selectMuseum(museumId) {
-        const m = MUSEUMS.find((x) => x.id === museumId);
-        if (!m) return;
-
-        // 1. Bay tâm bản đồ tới bảo tàng được chọn
-        if (m.coords[0] && m.coords[1]) {
-          map.panTo(m.coords, { animate: true, duration: 0.8 });
-        }
-
-        // 2. Đổ danh sách hiện vật sang bảng bên cạnh
-        displayArtifacts(m.id);
-
-        // 3. Chuẩn bị sẵn file audio vào trình phát (KHÔNG TỰ ĐỘNG PHÁT)
-        const chosenLang = document.getElementById("langSelect").value;
-        const player = document.getElementById("audioPlayer");
-        const statusBox = document.getElementById("statusBox");
-
-        player.pause(); // Dừng bài cũ nếu đang phát
-        player.src = `${API_BASE}/audio/files/${m.id}_${chosenLang}.mp3`;
-
-        statusBox.innerHTML = `🏛️ Đã chọn: <b>${m.name}</b> (Bấm ▶️ trên trình phát để nghe thuyết minh).`;
-        currentPlayingTarget = { id: m.id, name: m.name };
-      }
-
-      function renderMuseumsOnMap() {
-        museumLayerGroup.clearLayers();
-
-        MUSEUMS.forEach((m) => {
-          if (!m.coords[0] || !m.coords[1]) return;
-
-          const customMuseumIcon = L.divIcon({
-            className: "custom-museum-pin",
-            html: `
-              <div style="display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); pointer-events: auto;">
-                <div style="background-color: #ffffff; border: 2px solid #2563eb; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: 0 4px 8px rgba(0,0,0,0.25); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
-                  🏛️
-                </div>
-                <div class="museum-label" style="margin-top: 3px; max-width: 140px; text-overflow: ellipsis; overflow: hidden;">
-                  ${m.name}
-                </div>
+          id="floatingAudioContainer"
+          class="hidden absolute bottom-20 md:bottom-3 left-4 right-4 z-20 bg-white border border-sky-200 rounded-2xl p-3 shadow-xl transition-all duration-300"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-7 h-7 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs"
+              >
+                <i class="fa-solid fa-headphones"></i>
               </div>
-            `,
-            iconSize: [0, 0],
-            popupAnchor: [0, -20],
-          });
 
-          const marker = L.marker(m.coords, { icon: customMuseumIcon }).addTo(
-            museumLayerGroup,
-          );
+              <div>
+                <span
+                  class="text-[10px] uppercase tracking-wider text-slate-400 font-bold block"
+                  data-i18n="audio.title"
+                  >Thuyết minh Âm thanh</span
+                >
 
-          const popupContent = `
-            <div style="width: 200px; font-family: sans-serif;">
-              <img src="${m.image}" onerror="this.src='https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=400&q=80'" alt="${m.name}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;" />
-              <h4 style="font-weight: 700; color: #1e3a8a; font-size: 13px; line-height: 1.2;">${m.name}</h4>
-              <p style="font-size: 11px; color: #64748b; margin: 3px 0;">${m.address}</p>
-              <p style="font-size: 10px; color: #2563eb; font-weight: 600; margin-top: 4px;">👉 Nhấp chuột để xem danh sách hiện vật</p>
+                <h4
+                  id="currentAudioTitle"
+                  class="text-xs font-bold text-slate-800"
+                >
+                  --
+                </h4>
+              </div>
             </div>
-          `;
-          marker.bindPopup(popupContent, {
-            closeButton: false,
-            offset: [0, -10],
-          });
 
-          // 1. Rà chuột (Hover) vào thì hiện bảng thông tin
-          marker.on("mouseover", function () {
-            this.openPopup();
-          });
+            <div class="flex items-center space-x-2">
+              <span
+                id="audioModeBadge"
+                class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                data-i18n="audio.geofence"
+                >Geofence (10m)</span
+              >
 
-          // Rà chuột ra ngoài thì tự ẩn nếu chưa bấm
-          marker.on("mouseout", function () {
-            this.closePopup();
-          });
-
-          // 2. Click vào icon: Đóng bảng popup ngay lập tức và nạp hiện vật (không tự phát tiếng)
-          marker.on("click", function () {
-            this.closePopup();
-            selectMuseum(m.id);
-          });
-
-          // Vòng tròn bán kính Geofence
-          L.circle(m.coords, {
-            color: "#2563eb",
-            fillColor: "#60a5fa",
-            fillOpacity: 0.2,
-            radius: m.radius || 30,
-          }).addTo(museumLayerGroup);
-        });
-      }
-
-      // ==========================================
-      // IV. PHÁT AUDIO VÀ CƠ CHẾ FALLBACK 3 TẦNG (zh -> en -> vi)
-      // ==========================================
-      async function playAudioTarget(targetId, targetName, preferredLang) {
-        const player = document.getElementById("audioPlayer");
-        const statusBox = document.getElementById("statusBox");
-        const chosenLang =
-          preferredLang || document.getElementById("langSelect").value;
-
-        currentPlayingTarget = { id: targetId, name: targetName };
-
-        // Thứ tự ưu tiên Fallback
-        let priorityOrder = ["vi"];
-        if (chosenLang === "zh") priorityOrder = ["zh", "en", "vi"];
-        else if (chosenLang === "en") priorityOrder = ["en", "vi"];
-
-        let successfullyPlayed = false;
-
-        for (const lang of priorityOrder) {
-          const testAudioUrl = `${API_BASE}/audio/files/${targetId}_${lang}.mp3`;
-          try {
-            const check = await fetch(testAudioUrl, { method: "HEAD" });
-            if (check.ok) {
-              player.src = testAudioUrl;
-              successfullyPlayed = true;
-
-              const langLabel = { vi: "Tiếng Việt", en: "English", zh: "中文" };
-              if (chosenLang !== lang) {
-                statusBox.innerHTML = `✅ <b>Đang phát:</b> ${targetName}<br/><span class="text-amber-600 font-medium">⚠️ Đã fallback sang phát: ${langLabel[lang]}</span>`;
-              } else {
-                statusBox.innerHTML = `✅ <b>Đang phát thuyết minh:</b> ${targetName} (${langLabel[lang]})`;
-              }
-
-              try {
-                await player.play();
-              } catch (playErr) {
-                statusBox.innerHTML += `<br/><span class="text-indigo-600 font-semibold">👉 Chạm nút ▶️ trên thanh phát để nghe (do chính sách âm thanh điện thoại).</span>`;
-              }
-              break;
-            }
-          } catch (e) {
-            // Thử ngôn ngữ tiếp theo trong fallback
-          }
-        }
-
-        if (!successfullyPlayed) {
-          // Thử phát URL trực tiếp nếu có cấu hình tĩnh hoặc phát báo lỗi
-          player.src = `${API_BASE}/audio/files/${targetId}_vi.mp3`;
-          player.play().catch(() => {
-            statusBox.innerHTML = `❌ File âm thanh cho <b>${targetName}</b> đang được Worker tổng hợp hoặc chưa có trong thư mục media/.`;
-          });
-        }
-      }
-
-      function onLanguageSelectChange() {
-        if (!currentPlayingTarget) return;
-
-        if (currentPlayingTarget.isArtifact) {
-          playArtifactAudio(
-            currentPlayingTarget.museumId,
-            currentPlayingTarget.artifactId,
-            currentPlayingTarget.name,
-          );
-        } else {
-          playAudioTarget(currentPlayingTarget.id, currentPlayingTarget.name);
-        }
-      }
-
-      // ==========================================
-      // V. GEOFENCE GPS (Debounce 3s & Cooldown 5m)
-      // ==========================================
-      function triggerSimulateGPS(lat, lng) {
-        userMarker.setLatLng([lat, lng]);
-        map.panTo([lat, lng]);
-
-        const statusBox = document.getElementById("statusBox");
-        statusBox.innerHTML = `⏱️ Đang lấy tọa độ (${lat.toFixed(4)}, ${lng.toFixed(4)})... Đang chờ ổn định vị trí (Debounce 3s)...`;
-
-        if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-          executeGeofenceCheck(lat, lng);
-        }, 3000);
-      }
-
-      async function executeGeofenceCheck(lat, lng) {
-        const statusBox = document.getElementById("statusBox");
-        const chosenLang = document.getElementById("langSelect").value;
-        const badge = document.getElementById("cooldownBadge");
-        statusBox.innerHTML = `🔍 Đang gửi yêu cầu kiểm tra Geofence tới Server...`;
-
-        try {
-          const res = await fetch(`${API_BASE}/pois/geofence`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              user_lat: lat,
-              user_lng: lng,
-              preferred_lang: chosenLang,
-            }),
-          });
-
-          if (!res.ok) throw new Error("Lỗi HTTP: " + res.status);
-          const data = await res.json();
-
-          if (data.inside_geofence) {
-            displayArtifacts(data.poi_id);
-
-            // NẾU VẪN ĐANG Ở TRONG CÙNG 1 BẢO TÀNG -> TUYỆT ĐỐI KHÔNG PHÁT LẠI DÙ QUA 5 PHÚT HAY CẢ TIẾNG
-            if (currentInsidePoiId === data.poi_id) {
-              statusBox.innerHTML = `📍 Bạn đang tham quan bên trong: <b>${data.poi_name}</b>`;
-              return;
-            }
-
-            // NẾU BƯỚC SANG MỘT BẢO TÀNG MỚI -> CẬP NHẬT VÀ PHÁT BÀI MỚI
-            currentInsidePoiId = data.poi_id;
-            lastTriggerTimes[data.poi_id] = Date.now();
-            badge.classList.add("hidden");
-            playAudioTarget(data.poi_id, data.poi_name, chosenLang);
-          } else {
-            // Khi bước ra ngoài vùng bảo tàng -> reset trạng thái để lần sau vào lại bảo tàng thì được nghe lại
-            currentInsidePoiId = null;
-            badge.classList.add("hidden");
-            statusBox.innerHTML = `❌ Bạn đang ở ngoài vùng Geofence của các bảo tàng.`;
-          }
-        } catch (err) {
-          // Tính toán Geofence cục bộ nếu Gateway bị gián đoạn
-          fallbackLocalGeofence(lat, lng, chosenLang);
-        }
-      }
-
-      function fallbackLocalGeofence(lat, lng, lang) {
-        const found = MUSEUMS.find((m) => {
-          const d = map.distance([lat, lng], m.coords);
-          return d <= (m.radius || 30);
-        });
-
-        const statusBox = document.getElementById("statusBox");
-        if (found) {
-          displayArtifacts(found.id);
-          statusBox.innerHTML = `✅ [Offline Fallback] Đã vào vùng: <b>${found.name}</b>`;
-          playAudioTarget(found.id, found.name, lang);
-        } else {
-          statusBox.innerHTML = `❌ Ngoài vùng thuyết minh của các bảo tàng.`;
-        }
-      }
-
-      // Theo dõi vị trí GPS thực tế khi mở trên điện thoại
-      function initRealDeviceGPS() {
-        if ("geolocation" in navigator) {
-          navigator.geolocation.watchPosition(
-            (pos) => {
-              const lat = pos.coords.latitude;
-              const lng = pos.coords.longitude;
-              userMarker.setLatLng([lat, lng]);
-
-              if (debounceTimer) clearTimeout(debounceTimer);
-              debounceTimer = setTimeout(() => {
-                executeGeofenceCheck(lat, lng);
-              }, 3000);
-            },
-            (err) => console.log("GPS Device Notice:", err.message),
-            { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 },
-          );
-        }
-      }
-
-      // ==========================================
-      // VI. BẢNG HIỆN VẬT & PHÁT THUYẾT MINH HIỆN VẬT
-      // ==========================================
-      function displayArtifacts(museumId) {
-        const museum = MUSEUMS.find((m) => m.id === museumId);
-        if (!museum) return;
-
-        document.getElementById("currentMuseumTitle").innerText =
-          `🏛️ Hiện vật: ${museum.name}`;
-        const container = document.getElementById("artifactList");
-        container.innerHTML = "";
-
-        if (!museum.artifacts || museum.artifacts.length === 0) {
-          container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-8">Chưa có hiện vật nào thuộc bảo tàng này.</p>`;
-          return;
-        }
-
-        museum.artifacts.forEach((item) => {
-          const div = document.createElement("div");
-          div.className =
-            "p-2.5 bg-slate-50 hover:bg-blue-50/50 rounded-xl border border-slate-200 transition flex gap-3 items-center justify-between";
-
-          // Khử lỗi nháy đơn trong tên khi truyền vào hàm onclick
-          const safeName = (item.name || "").replace(/'/g, "\\'");
-          const imgSrc =
-            item.image ||
-            "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80";
-
-          div.innerHTML = `
-            <img src="${imgSrc}" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&q=80'" class="w-12 h-12 object-cover rounded-lg border border-slate-200 shrink-0" alt="${item.name}" />
-            <div class="flex-1 min-w-0">
-              <h4 class="font-bold text-xs text-slate-800 truncate">${item.name}</h4>
-              <p class="text-[10px] text-blue-600 font-medium">${item.room || "Khu trưng bày"}</p>
-              <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-1">${item.desc}</p>
-            </div>
-            <div class="shrink-0">
-              <button onclick="playArtifactAudio('${museum.id}', '${item.id}', '${safeName}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-lg shadow-sm transition flex items-center gap-1 active:scale-95">
-                🔊 Nghe
+              <button
+                onclick="expandToDetail()"
+                title="Phóng to xem chi tiết"
+                class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 flex items-center justify-center text-xs transition cursor-pointer"
+              >
+                <i class="fa-solid fa-expand"></i>
               </button>
             </div>
-          `;
-          container.appendChild(div);
-        });
-      }
+          </div>
 
-      async function playArtifactAudio(museumId, artifactId, artifactName) {
-        const lang = document.getElementById("langSelect").value;
-        const player = document.getElementById("audioPlayer");
-        const statusBox = document.getElementById("statusBox");
+          <audio
+            id="audioPlayer"
+            controls
+            class="w-full h-8 outline-none rounded-lg accent-sky-600"
+          ></audio>
+        </div>
+      </div>
 
-        currentPlayingTarget = {
-          id: `${museumId}_${artifactId}`,
-          name: artifactName,
-          isArtifact: true,
-          museumId,
-          artifactId,
-        };
+      <!-- TAB 2: DANH SÁCH ĐIỂM THAM QUAN (POI LIST) -->
 
-        // Thứ tự ưu tiên Fallback: zh -> en -> vi
-        let priorityOrder = ["vi"];
-        if (lang === "zh") priorityOrder = ["zh", "en", "vi"];
-        else if (lang === "en") priorityOrder = ["en", "vi"];
+      <div
+        id="tabList"
+        class="absolute inset-0 bg-slate-50 hidden flex-col p-4 overflow-y-auto pb-28"
+      >
+        <div class="mb-3">
+          <h2 class="text-sm font-bold text-slate-800" data-i18n="poi.title">
+            Danh sách điểm tham quan (11 POI)
+          </h2>
 
-        statusBox.innerHTML = `⏳ Đang nạp thuyết minh: <b>${artifactName}</b>...`;
+          <p class="text-xs text-slate-500" data-i18n="poi.description">
+            Khám phá chi tiết các khu vực và di tích trong khu Nội tự.
+          </p>
+        </div>
 
-        let played = false;
-        for (const l of priorityOrder) {
-          const audioUrl = `${API_BASE}/audio/files/${museumId}_${artifactId}_${l}.mp3`;
-          try {
-            const check = await fetch(audioUrl, {
-              method: "HEAD",
-              cache: "no-store",
-            });
-            if (check.ok) {
-              player.src = audioUrl;
-              played = true;
+        <div id="poiListContainer" class="space-y-3"></div>
+      </div>
 
-              const langLabel = { vi: "Tiếng Việt", en: "English", zh: "中文" };
-              if (lang !== l) {
-                statusBox.innerHTML = `✅ <b>Đang phát:</b> ${artifactName}<br/><span class="text-amber-600 font-medium">⚠️ Tạm thời phát bản: ${langLabel[l]} (bản ${langLabel[lang]} chưa tạo)</span>`;
-              } else {
-                statusBox.innerHTML = `🔊 <b>Đang phát thuyết minh:</b> ${artifactName} (${langLabel[l]})`;
-              }
+      <!-- TRANG XEM CHI TIẾT ĐIỂM THAM QUAN (DETAIL VIEW) -->
 
-              try {
-                await player.play();
-              } catch (playErr) {
-                statusBox.innerHTML += `<br/><span class="text-indigo-600 font-semibold">👉 Chạm nút ▶️ trên thanh phát để nghe (do chính sách âm thanh điện thoại).</span>`;
-              }
-              break;
-            }
-          } catch (e) {}
-        }
+      <div
+        id="detailView"
+        class="absolute inset-0 bg-white hidden flex-col z-40 h-[100dvh] md:h-full"
+      >
+        <div
+          class="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50"
+        >
+          <div class="flex items-center space-x-2">
+            <span
+              id="detailPoiCodeBadge"
+              class="bg-sky-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg"
+              >P00</span
+            >
 
-        if (!played) {
-          player.pause();
-          statusBox.innerHTML = `❌ File âm thanh cho <b>${artifactName}</b> chưa sẵn sàng hoặc đang được Worker xử lý.`;
-        }
-      }
+            <h3
+              id="detailHeaderTitle"
+              class="font-bold text-sm text-slate-900 truncate max-w-[240px]"
+            >
+              <span data-i18n="detail.title"> chi tiết điểm </span>
+            </h3>
+          </div>
 
-      // ==========================================
-      // VII. CAMERA QUÉT QR CODE TRÊN ĐIỆN THOẠI & LAPTOP
-      // ==========================================
-      function openQrScanner() {
-        document.getElementById("qrModal").classList.remove("hidden");
-        document.getElementById("qrModal").classList.add("flex");
+          <button
+            onclick="closeDetailView()"
+            class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition cursor-pointer"
+            data-i18n="detail.close"
+            title="Đóng"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
 
-        qrCodeScannerInstance = new Html5Qrcode("reader");
-        qrCodeScannerInstance
-          .start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 220, height: 220 } },
-            (decodedText) => {
-              handleQrCodeResult(decodedText);
-              closeQrScanner();
-            },
-            () => {},
-          )
-          .catch((err) => {
-            alert("Không thể khởi động camera: " + err);
-            closeQrScanner();
-          });
-      }
+        <div
+          class="flex-1 overflow-y-auto p-4 space-y-4 md:space-y-6 pb-32 md:pb-36 max-w-3xl mx-auto w-full"
+        >
+          <div
+            class="flex flex-col md:flex-row gap-4 items-center md:items-start bg-white p-4 rounded-2xl border border-slate-100 shadow-sm"
+          >
+            <div
+              class="w-full md:w-64 h-48 shrink-0 bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center shadow-inner"
+            >
+              <img
+                id="detailImage"
+                src=""
+                alt="POI Image"
+                class="w-full h-full object-contain"
+              />
+            </div>
 
-      function closeQrScanner() {
-        if (qrCodeScannerInstance) {
-          qrCodeScannerInstance
-            .stop()
-            .then(() => {
-              qrCodeScannerInstance.clear();
-              qrCodeScannerInstance = null;
-            })
-            .catch(console.error);
-        }
-        document.getElementById("qrModal").classList.add("hidden");
-        document.getElementById("qrModal").classList.remove("flex");
-      }
+            <div class="flex-1 w-full">
+              <h2
+                id="detailName"
+                class="text-lg md:text-xl font-bold text-slate-900 mb-2 text-center md:text-left"
+              ></h2>
 
-      async function handleQrCodeResult(qrData) {
-        let code = qrData;
-        try {
-          const parsed = JSON.parse(qrData);
-          if (parsed.artifact_id) code = parsed.artifact_id;
-        } catch (e) {}
+              <div class="bg-sky-50 border border-sky-100 rounded-xl p-3.5">
+                <h4
+                  class="text-xs font-bold uppercase tracking-wider text-sky-700 mb-1"
+                >
+                  <i class="fa-solid fa-book-open mr-1"></i>
+                  <span data-i18n="detail.introduction"
+                    >Giới thiệu thuyết minh</span
+                  >
+                </h4>
 
-        const statusBox = document.getElementById("statusBox");
-        statusBox.innerHTML = `📷 Đã quét mã: <b>${code}</b>. Đang tra cứu thông tin...`;
+                <p
+                  id="detailDescription"
+                  class="text-xs sm:text-sm text-slate-700 leading-relaxed"
+                ></p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        try {
-          // Gửi tới API tra cứu QR thật
-          const res = await fetch(
-            `${API_BASE}/pois/qr/${encodeURIComponent(code)}`,
-          );
-          if (res.ok) {
-            const result = await res.json();
-            if (
-              result.type === "artifact" &&
-              result.data?.artifacts?.length > 0
-            ) {
-              const art = result.data.artifacts[0];
-              displayArtifacts(result.data.id);
-              playArtifactAudio(
-                result.data.id,
-                art.artifact_id || code,
-                art.name_vi || art.name || code,
-              );
-            } else if (result.type === "museum" && result.data) {
-              displayArtifacts(result.data.id);
-              playAudioTarget(result.data.id, result.data.name);
-              return;
-            }
-          }
-        } catch (err) {}
+        <div
+          class="sticky md:absolute bottom-0 left-0 right-0 shrink-0 bg-white border-t border-slate-200 px-4 py-3 shadow-2xl z-50"
+        >
+          <div class="max-w-xl mx-auto">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <div
+                  class="w-7 h-7 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs"
+                >
+                  <i class="fa-solid fa-headphones"></i>
+                </div>
 
-        // Fallback tra cứu trong mảng MUSEUMS đã tải về
-        let foundArt = null;
-        let foundMuseum = null;
-        for (const m of MUSEUMS) {
-          const a = (m.artifacts || []).find(
-            (x) => x.id === code || x.qr_code === code,
-          );
-          if (a) {
-            foundArt = a;
-            foundMuseum = m;
-            break;
-          }
-          if (m.id === code || m.qr_code === code) {
-            foundMuseum = m;
-            break;
-          }
-        }
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-400 font-bold block"
+                    data-i18n="audio.title"
+                    >Thuyết minh Âm thanh</span
+                  >
 
-        if (foundArt) {
-          displayArtifacts(foundMuseum.id);
-          playArtifactAudio(foundMuseum.id, foundArt.id, foundArt.name);
-        } else if (foundMuseum) {
-          displayArtifacts(foundMuseum.id);
-          playAudioTarget(foundMuseum.id, foundMuseum.name);
-        } else {
-          statusBox.innerHTML = `⚠️ Không tìm thấy hiện vật có mã QR: <b>${code}</b> trong hệ thống.`;
-        }
-      }
+                  <h4
+                    id="detailAudioTitle"
+                    class="text-xs font-bold text-slate-800"
+                  >
+                    --
+                  </h4>
+                </div>
+              </div>
 
-      // Tự động nhận diện ngôn ngữ máy/trình duyệt
-      function detectDeviceLanguage() {
-        const browserLang = (
-          navigator.language ||
-          navigator.userLanguage ||
-          "vi"
-        ).toLowerCase();
+              <span
+                class="bg-sky-50 text-sky-600 border border-sky-200 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                data-i18n="audio.manual"
+                >Phát thủ công</span
+              >
+            </div>
 
-        if (browserLang.startsWith("en")) return "en";
-        if (browserLang.startsWith("zh")) return "zh";
-        return "vi";
-      }
+            <!-- Bổ sung nút nghe rõ ràng trong trang chi tiết -->
+            <button
+              id="btnPlayDetail"
+              type="button"
+              onclick="playDetailAudioManually()"
+              class="mt-2 w-full rounded-xl bg-sky-600 hover:bg-sky-700 px-4 py-2 text-xs font-bold text-white transition cursor-pointer flex items-center justify-center space-x-2 shadow-sm"
+            >
+              <i class="fa-solid fa-play mr-1"></i>
+              <span data-i18n="detail.playAudio"
+                >Nghe thuyết minh điểm này</span
+              >
+            </button>
 
-      // Hàm tự động tải danh sách ngôn ngữ từ Backend nạp vào thẻ <select>
-      async function loadDynamicLanguages(selectElementId) {
-        const selectElem = document.getElementById(selectElementId);
-        if (!selectElem) return;
+            <audio
+              id="audioPlayerDetail"
+              controls
+              class="w-full h-8 outline-none rounded-lg accent-sky-600 mt-2"
+            ></audio>
+          </div>
+        </div>
+      </div>
+    </main>
 
-        try {
-          const res = await fetch(`${API_BASE}/audio/languages`);
-          if (res.ok) {
-            const languages = await res.json();
-            selectElem.innerHTML = "";
-            languages.forEach((lang) => {
-              const opt = document.createElement("option");
-              opt.value = lang.code;
-              opt.innerText = lang.name;
-              selectElem.appendChild(opt);
-            });
-          }
-        } catch (err) {
-          console.log("Dùng ngôn ngữ mặc định (vi, en, zh) nếu API bận.");
-        }
-      }
-      // Khởi tạo chạy ban đầu
-      window.onload = async () => {
-        await loadDynamicLanguages("langSelect");
-        // Tự động set ngôn ngữ theo region máy của người dùng
-        const detectedLang = detectDeviceLanguage();
-        const langSelect = document.getElementById("langSelect");
-        if (langSelect) {
-          langSelect.value = detectedLang;
-        }
+    <!-- HỘP THOẠI CHÀO MỪNG & BẮT ĐẦU TRẢI NGHIỆM TẠI P00 -->
+    <div
+      id="welcomeModal"
+      class="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 text-center"
+      >
+        <div
+          class="w-14 h-14 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl mx-auto mb-4 shadow-inner"
+        >
+          <i class="fa-solid fa-headphones"></i>
+        </div>
 
-        initMap();
-        await fetchMuseumsFromBackend();
-        initRealDeviceGPS();
+        <h2 class="text-base font-bold text-slate-900">
+          Văn Miếu – Quốc Tử Giám
+        </h2>
 
-        // Tự động đồng bộ cập nhật dữ liệu định kỳ mỗi 15 giây (khi Admin thêm/xóa bảo tàng)
-        setInterval(fetchMuseumsFromBackend, 15000);
-      };
-    </script>
+        <p class="mt-2 text-xs leading-relaxed text-slate-600">
+          Chào mừng bạn đến với di tích. Bấm bắt đầu để khám phá và nghe thuyết
+          minh tự động tại điểm đầu tiên: <strong>Cổng Văn Miếu (P00)</strong>.
+        </p>
+
+        <!-- Nút bấm bắt đầu với POI P00 -->
+        <button
+          id="btnBatDauP00"
+          type="button"
+          onclick="batDauTraiNghiemP00()"
+          class="mt-5 w-full rounded-xl bg-sky-600 hover:bg-sky-700 px-4 py-3 text-xs font-bold text-white transition shadow-md shadow-sky-600/20 cursor-pointer flex items-center justify-center space-x-2"
+        >
+          <i class="fa-solid fa-play"></i>
+          <span>Bắt đầu với điểm P00</span>
+        </button>
+
+        <p class="mt-3 text-[11px] text-slate-400">Chạm để bắt đầu</p>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+
+    <nav
+      id="bottomNav"
+      class="bg-white border-t border-slate-200 px-6 py-2 flex items-center justify-around z-20 shadow-lg"
+    >
+      <button
+        onclick="switchTab('map')"
+        id="btnTabMap"
+        class="flex flex-col items-center text-sky-600 transition cursor-pointer"
+      >
+        <i class="fa-solid fa-map text-lg mb-0.5"></i>
+
+        <span class="text-[11px] font-bold" data-i18n="nav.map">Bản đồ</span>
+      </button>
+
+      <button
+        onclick="switchTab('list')"
+        id="btnTabList"
+        class="flex flex-col items-center text-slate-400 hover:text-slate-600 transition cursor-pointer"
+      >
+        <i class="fa-solid fa-list-ul text-lg mb-0.5"></i>
+
+        <span class="text-[11px] font-semibold" data-i18n="nav.list"
+          >Điểm tham quan</span
+        >
+      </button>
+    </nav>
+
+    <!-- File JS riêng -->
+
+    <script src="js/main.js?v=3"></script>
   </body>
 </html>

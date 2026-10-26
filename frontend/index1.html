@@ -1,0 +1,472 @@
+<!doctype html>
+
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Văn Miếu – Quốc Tử Giám | Thuyết minh tự động GPS</title>
+
+    <!-- Tailwind CSS CDN -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- FontAwesome cho icon -->
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- File CSS riêng -->
+
+    <link rel="stylesheet" href="css/styles.css?v=2" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+
+  <body
+    class="bg-slate-50 text-slate-800 flex flex-col h-[100dvh] md:h-screen w-screen overflow-hidden select-none"
+  >
+    <!-- HEADER -->
+
+    <header
+      class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm z-20"
+    >
+      <div class="flex items-center space-x-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-white shadow-md"
+        >
+          <i class="fa-solid fa-landmark text-lg"></i>
+        </div>
+
+        <div>
+          <h1
+            class="font-bold text-base text-slate-900 leading-tight"
+            data-i18n="header.title"
+          >
+            Văn Miếu – Quốc Tử Giám
+          </h1>
+
+          <p
+            class="text-xs text-sky-600 font-medium"
+            data-i18n="header.subtitle"
+          >
+            Hệ thống Thuyết minh tự động GPS & Geofence
+          </p>
+        </div>
+      </div>
+
+      <!-- Chọn ngôn ngữ -->
+
+      <div class="flex items-center space-x-2">
+        <select
+          id="langSelect"
+          onchange="changeLanguage(this.value)"
+          class="bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+        >
+          <option value="vi">🇻🇳 Tiếng Việt</option>
+
+          <option value="en">🇬🇧 English</option>
+
+          <option value="zh">🇨🇳 中文</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+
+    <main class="flex-1 relative overflow-hidden flex flex-col">
+      <!-- TAB 1: BẢN ĐỒ (MAP VIEW) -->
+
+      <div
+        id="tabMap"
+        class="absolute inset-0 flex flex-col map-bg p-2.5 md:p-4 overflow-y-auto pb-20 md:pb-28"
+      >
+        <!-- Thanh trạng thái GPS & Nút Giả lập -->
+
+        <div class="flex items-center justify-between mb-3 z-10">
+          <div
+            id="gpsBadge"
+            class="bg-white/90 backdrop-blur border border-sky-200 text-sky-700 text-xs font-medium px-3 py-1.5 rounded-full shadow-sm flex items-center space-x-2"
+          >
+            <span
+              class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"
+            ></span>
+
+            <span id="gpsStatusText" data-i18n="map.gpsStatus"
+              >Đang định vị Nội tự (Geofence 10m)</span
+            >
+          </div>
+
+          <button
+            onclick="toggleSimulator()"
+            class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
+          >
+            <i class="fa-solid fa-location-crosshairs"></i>
+
+            <span data-i18n="map.simulate">Giả lập GPS</span>
+          </button>
+        </div>
+
+        <!-- Bảng chọn giả lập GPS (Ẩn/Hiện) -->
+
+        <div
+          id="simulatorPanel"
+          class="hidden bg-white/95 border border-slate-200 rounded-xl p-3 mb-3 shadow-lg z-10"
+        >
+          <p
+            class="text-xs font-bold text-slate-700 mb-2"
+            data-i18n="map.chooseLocation"
+          >
+            <i class="fa-solid fa-compass text-sky-600 mr-1"></i> Chọn nhanh vị
+            trí tham quan (Mô phỏng):
+          </p>
+
+          <div id="simulatorButtons" class="grid grid-cols-5 gap-1.5"></div>
+        </div>
+
+        <!-- KHUNG BẢN ĐỒ VĂN MIẾU - LEAFLET -->
+        <div
+          id="mapContainerWrapper"
+          class="relative flex-1 w-full h-full rounded-2xl border border-slate-200 shadow-inner overflow-hidden min-h-0 md:min-h-[350px] mb-2 md:mb-24"
+        >
+          <!-- Bản đồ thực tế -->
+          <div id="leafletMap" class="absolute inset-0"></div>
+
+          <!-- Thông báo lỗi bản đồ / dữ liệu POI (ẩn khi không có lỗi) -->
+          <div
+            id="mapNotice"
+            role="alert"
+            class="hidden absolute top-3 left-3 right-14 z-[1000] bg-amber-50/95 border border-amber-300 text-amber-800 text-xs rounded-lg px-3 py-2 shadow space-y-1"
+          ></div>
+
+          <!-- Công cụ điều khiển bản đồ -->
+          <div
+            class="absolute top-3 right-3 z-[1000] flex flex-col bg-white/95 backdrop-blur border border-slate-200 rounded-lg shadow-md overflow-hidden"
+          >
+            <button
+              type="button"
+              onclick="zoomMap(1)"
+              class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 text-slate-700 font-bold border-b border-slate-100 text-sm cursor-pointer"
+              map.zoomIn
+              title="Phóng to"
+              aria-label="Phóng to bản đồ"
+            >
+              +
+            </button>
+
+            <button
+              type="button"
+              onclick="zoomMap(-1)"
+              class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 text-slate-700 font-bold border-b border-slate-100 text-sm cursor-pointer"
+              map.zoomOut
+              title="Thu nhỏ"
+              aria-label="Thu nhỏ bản đồ"
+            >
+              −
+            </button>
+
+            <button
+              type="button"
+              onclick="resetZoomMap()"
+              class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 text-sky-600 text-xs cursor-pointer"
+              map.reset
+              title="Đặt lại bản đồ"
+              aria-label="Đặt lại bản đồ"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+        </div>
+        <!-- KẾT THÚC KHUNG BẢN ĐỒ -->
+
+        <!-- TRÌNH PHÁT ÂM THANH NỔI (CHỈ HIỆN KHI VƯỚT VÀO PHẠM VI GEOFENCE) -->
+
+        <div
+          id="floatingAudioContainer"
+          class="hidden absolute bottom-20 md:bottom-3 left-4 right-4 z-20 bg-white border border-sky-200 rounded-2xl p-3 shadow-xl transition-all duration-300"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-7 h-7 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs"
+              >
+                <i class="fa-solid fa-headphones"></i>
+              </div>
+
+              <div>
+                <span
+                  class="text-[10px] uppercase tracking-wider text-slate-400 font-bold block"
+                  data-i18n="audio.title"
+                  >Thuyết minh Âm thanh</span
+                >
+
+                <h4
+                  id="currentAudioTitle"
+                  class="text-xs font-bold text-slate-800"
+                >
+                  --
+                </h4>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <span
+                id="audioModeBadge"
+                class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                data-i18n="audio.geofence"
+                >Geofence (10m)</span
+              >
+
+              <button
+                onclick="expandToDetail()"
+                title="Phóng to xem chi tiết"
+                class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 flex items-center justify-center text-xs transition cursor-pointer"
+              >
+                <i class="fa-solid fa-expand"></i>
+              </button>
+            </div>
+          </div>
+
+          <audio
+            id="audioPlayer"
+            controls
+            class="w-full h-8 outline-none rounded-lg accent-sky-600"
+          ></audio>
+        </div>
+      </div>
+
+      <!-- TAB 2: DANH SÁCH ĐIỂM THAM QUAN (POI LIST) -->
+
+      <div
+        id="tabList"
+        class="absolute inset-0 bg-slate-50 hidden flex-col p-4 overflow-y-auto pb-28"
+      >
+        <div class="mb-3">
+          <h2 class="text-sm font-bold text-slate-800" data-i18n="poi.title">
+            Danh sách điểm tham quan (11 POI)
+          </h2>
+
+          <p class="text-xs text-slate-500" data-i18n="poi.description">
+            Khám phá chi tiết các khu vực và di tích trong khu Nội tự.
+          </p>
+        </div>
+
+        <div id="poiListContainer" class="space-y-3"></div>
+      </div>
+
+      <!-- TRANG XEM CHI TIẾT ĐIỂM THAM QUAN (DETAIL VIEW) -->
+
+      <div
+        id="detailView"
+        class="absolute inset-0 bg-white hidden flex-col z-40 h-[100dvh] md:h-full"
+      >
+        <div
+          class="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50"
+        >
+          <div class="flex items-center space-x-2">
+            <span
+              id="detailPoiCodeBadge"
+              class="bg-sky-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg"
+              >P00</span
+            >
+
+            <h3
+              id="detailHeaderTitle"
+              class="font-bold text-sm text-slate-900 truncate max-w-[240px]"
+            >
+              <span data-i18n="detail.title"> chi tiết điểm </span>
+            </h3>
+          </div>
+
+          <button
+            onclick="closeDetailView()"
+            class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition cursor-pointer"
+            data-i18n="detail.close"
+            title="Đóng"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div
+          class="flex-1 overflow-y-auto p-4 space-y-4 md:space-y-6 pb-32 md:pb-36 max-w-3xl mx-auto w-full"
+        >
+          <div
+            class="flex flex-col md:flex-row gap-4 items-center md:items-start bg-white p-4 rounded-2xl border border-slate-100 shadow-sm"
+          >
+            <div
+              class="w-full md:w-64 h-48 shrink-0 bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center shadow-inner"
+            >
+              <img
+                id="detailImage"
+                src=""
+                alt="POI Image"
+                class="w-full h-full object-contain"
+              />
+            </div>
+
+            <div class="flex-1 w-full">
+              <h2
+                id="detailName"
+                class="text-lg md:text-xl font-bold text-slate-900 mb-2 text-center md:text-left"
+              ></h2>
+
+              <div class="bg-sky-50 border border-sky-100 rounded-xl p-3.5">
+                <h4
+                  class="text-xs font-bold uppercase tracking-wider text-sky-700 mb-1"
+                >
+                  <i class="fa-solid fa-book-open mr-1"></i>
+                  <span data-i18n="detail.introduction"
+                    >Giới thiệu thuyết minh</span
+                  >
+                </h4>
+
+                <p
+                  id="detailDescription"
+                  class="text-xs sm:text-sm text-slate-700 leading-relaxed"
+                ></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="sticky md:absolute bottom-0 left-0 right-0 shrink-0 bg-white border-t border-slate-200 px-4 py-3 shadow-2xl z-50"
+        >
+          <div class="max-w-xl mx-auto">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <div
+                  class="w-7 h-7 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs"
+                >
+                  <i class="fa-solid fa-headphones"></i>
+                </div>
+
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-400 font-bold block"
+                    data-i18n="audio.title"
+                    >Thuyết minh Âm thanh</span
+                  >
+
+                  <h4
+                    id="detailAudioTitle"
+                    class="text-xs font-bold text-slate-800"
+                  >
+                    --
+                  </h4>
+                </div>
+              </div>
+
+              <span
+                class="bg-sky-50 text-sky-600 border border-sky-200 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                data-i18n="audio.manual"
+                >Phát thủ công</span
+              >
+            </div>
+
+            <!-- Bổ sung nút nghe rõ ràng trong trang chi tiết -->
+            <button
+              id="btnPlayDetail"
+              type="button"
+              onclick="playDetailAudioManually()"
+              class="mt-2 w-full rounded-xl bg-sky-600 hover:bg-sky-700 px-4 py-2 text-xs font-bold text-white transition cursor-pointer flex items-center justify-center space-x-2 shadow-sm"
+            >
+              <i class="fa-solid fa-play mr-1"></i>
+              <span data-i18n="detail.playAudio"
+                >Nghe thuyết minh điểm này</span
+              >
+            </button>
+
+            <audio
+              id="audioPlayerDetail"
+              controls
+              class="w-full h-8 outline-none rounded-lg accent-sky-600 mt-2"
+            ></audio>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- HỘP THOẠI CHÀO MỪNG & BẮT ĐẦU TRẢI NGHIỆM TẠI P00 -->
+    <div
+      id="welcomeModal"
+      class="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 text-center"
+      >
+        <div
+          class="w-14 h-14 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl mx-auto mb-4 shadow-inner"
+        >
+          <i class="fa-solid fa-headphones"></i>
+        </div>
+
+        <h2 class="text-base font-bold text-slate-900">
+          Văn Miếu – Quốc Tử Giám
+        </h2>
+
+        <p class="mt-2 text-xs leading-relaxed text-slate-600">
+          Chào mừng bạn đến với di tích. Bấm bắt đầu để khám phá và nghe thuyết
+          minh tự động tại điểm đầu tiên: <strong>Cổng Văn Miếu (P00)</strong>.
+        </p>
+
+        <!-- Nút bấm bắt đầu với POI P00 -->
+        <button
+          id="btnBatDauP00"
+          type="button"
+          onclick="batDauTraiNghiemP00()"
+          class="mt-5 w-full rounded-xl bg-sky-600 hover:bg-sky-700 px-4 py-3 text-xs font-bold text-white transition shadow-md shadow-sky-600/20 cursor-pointer flex items-center justify-center space-x-2"
+        >
+          <i class="fa-solid fa-play"></i>
+          <span>Bắt đầu với điểm P00</span>
+        </button>
+
+        <p class="mt-3 text-[11px] text-slate-400">Chạm để bắt đầu</p>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+
+    <nav
+      id="bottomNav"
+      class="bg-white border-t border-slate-200 px-6 py-2 flex items-center justify-around z-20 shadow-lg"
+    >
+      <button
+        onclick="switchTab('map')"
+        id="btnTabMap"
+        class="flex flex-col items-center text-sky-600 transition cursor-pointer"
+      >
+        <i class="fa-solid fa-map text-lg mb-0.5"></i>
+
+        <span class="text-[11px] font-bold" data-i18n="nav.map">Bản đồ</span>
+      </button>
+
+      <button
+        onclick="switchTab('list')"
+        id="btnTabList"
+        class="flex flex-col items-center text-slate-400 hover:text-slate-600 transition cursor-pointer"
+      >
+        <i class="fa-solid fa-list-ul text-lg mb-0.5"></i>
+
+        <span class="text-[11px] font-semibold" data-i18n="nav.list"
+          >Điểm tham quan</span
+        >
+      </button>
+    </nav>
+
+    <!-- File JS riêng -->
+
+    <script src="js/main.js?v=3"></script>
+  </body>
+</html>

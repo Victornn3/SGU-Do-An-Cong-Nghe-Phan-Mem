@@ -1,0 +1,133 @@
+name: van-mieu
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "db.adminCommand('ping').ok"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: van_mieu
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  poi-service:
+    build:
+      context: .
+      dockerfile: services/poi-service/Dockerfile
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: van_mieu
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  narration-service:
+    build:
+      context: .
+      dockerfile: services/narration-service/Dockerfile
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: van_mieu
+      AUDIO_BASE_DIR: /data/audio
+    volumes:
+      - ./data/audio:/data/audio
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  ticket-service:
+    build:
+      context: .
+      dockerfile: services/ticket-service/Dockerfile
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: van_mieu
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  statistics-service:
+    build:
+      context: .
+      dockerfile: services/statistics-service/Dockerfile
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: van_mieu
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8001
+      POI_SERVICE_URL: http://poi-service:8002
+      NARRATION_SERVICE_URL: http://narration-service:8003
+      TICKET_SERVICE_URL: http://ticket-service:8004
+      STATISTICS_SERVICE_URL: http://statistics-service:8005
+    depends_on:
+      - auth-service
+      - poi-service
+      - narration-service
+      - ticket-service
+      - statistics-service
+
+  seed-data:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DB: van_mieu
+      SEED_DATA_DIR: /app/data/seed
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+    volumes:
+      - ./data/seed:/app/data/seed:ro
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: "no"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./data/audio:/app-data/audio:ro
+      - ./data/images:/app-data/images:ro
+    depends_on:
+      - api-gateway
+
+volumes:
+  mongo_data:

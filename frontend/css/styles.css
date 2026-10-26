@@ -1,0 +1,272 @@
+body {
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+
+
+.map-bg {
+
+    background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+
+}
+
+
+
+/* Khung hình chữ nhật gọn gàng, cân đối ở giữa, có nền tối sang trọng lót xung quanh ảnh chi tiết */
+
+.poi-image-container {
+
+    width: 100%;
+
+    max-width: 400px;
+
+    height: 240px;
+
+    margin: 0 auto;
+
+    background-color: #0f172a; 
+
+    border-radius: 1rem;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+}
+
+
+
+.poi-image-fit {
+
+    max-width: 100%;
+
+    max-height: 100%;
+
+    object-fit: contain; 
+
+}
+
+
+
+/* --- TÍNH NĂNG KÉO THẢ VÀ ZOOM SƠ ĐỒ VĂN MIẾU --- */
+
+#mapContainerWrapper {
+
+    cursor: grab;
+
+    overflow: hidden;
+
+    position: relative;
+
+    user-select: none;
+
+    background-color: #f8fafc;
+
+}
+
+#mapContainerWrapper:active {
+
+    cursor: grabbing;
+
+}
+
+#mapZoomPanContent {
+
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+    transition: transform 0.05s ease-out;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} 
+
+#mapContainerWrapper {
+  position: relative;
+  min-height: 350px;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+#leafletMap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#floatingAudioContainer {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 12px;
+  z-index: 500;
+  margin-top: 0;
+}
+
+/* --- MARKER HÌNH ẢNH KÈM TÊN ĐỊA ĐIỂM --- */
+.poi-custom-marker {
+  background: none;
+  border: none;
+}
+
+.poi-marker-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90px;
+  transform: translateX(-5px);
+}
+
+/* Khung tròn viền trắng nổi bật chứa hình ảnh của điểm */
+.poi-marker__frame {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2.5px solid #ffffff;
+  background: #0284c7;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.poi-marker__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Mũi tên nhọn chỉ vào vị trí */
+.poi-marker__tip {
+  display: block;
+  width: 0;
+  height: 0;
+  margin-top: -1px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #0284c7;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Nhãn hiển thị tên điểm tham quan ngay bên dưới ghim */
+.poi-marker__title {
+  margin-top: 3px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1.2;
+  text-align: center;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  max-width: 85px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}/* --- MARKER HÌNH ẢNH KÈM TÊN ĐỊA ĐIỂM --- */
+.poi-custom-marker {
+  background: none;
+  border: none;
+}
+
+.poi-marker-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90px;
+  transform: translateX(-5px);
+}
+
+/* Khung tròn viền trắng nổi bật chứa hình ảnh của điểm */
+.poi-marker__frame {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2.5px solid #ffffff;
+  background: #0284c7;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.poi-marker__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Mũi tên nhọn chỉ vào vị trí */
+.poi-marker__tip {
+  display: block;
+  width: 0;
+  height: 0;
+  margin-top: -1px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #0284c7;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Nhãn hiển thị tên điểm tham quan ngay bên dưới ghim */
+.poi-marker__title {
+  margin-top: 3px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1.2;
+  text-align: center;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  max-width: 85px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-marker {
+  background: none;
+  border: none;
+}
+
+.user-marker__dot {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 2px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 3px solid #ffffff;
+  animation: user-pulse 1.8s infinite;
+}
+
+@keyframes user-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.55); }
+  70%  { box-shadow: 0 0 0 14px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}

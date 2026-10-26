@@ -1,14 +1,21 @@
-# Môi trường ảo Python
-venv/
-__pycache__/
-*.pyc
-
-# Khóa bí mật & Biến môi trường
+# File môi trường chứa mật khẩu và cấu hình riêng
 .env
+.env.*
+!.env.example
 
-# Thư mục lưu file mp3
-audio_service/media/*.mp3
+# File âm thanh được sinh tự động
+data/audio/
+*.mp3
 
-# Dữ liệu IDE & Docker
-.vscode/
-.idea/
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Log
+*.log
+
+# Các file hệ điều hành
+.DS_Store
+Thumbs.db

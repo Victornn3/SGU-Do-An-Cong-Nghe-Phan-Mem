@@ -1,260 +1,39 @@
-name: Microservices CI/CD Pipeline
+name: POI Service CI/CD Pipeline
 
 on:
   push:
-    branches: [ "dev", "main" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "dev", "main" ]
+    branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  test-and-build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
-      - name: Verify Docker Compose Configuration
+      - name: Install Dependencies
         run: |
-          docker compose config
+          python -m pip install --upgrade pip
+          # Cài đặt thư viện của service và pytest
+          if [ -f services/poi-service/requirements.txt ]; then
+            pip install -r services/poi-service/requirements.txt
+          fi
+          pip install pytest
 
-      - name: Build Docker Images
+      - name: Run Unit Tests with Pytest
         run: |
-          docker compose build
+          cd services/poi-service
+          # Chạy pytest để kiểm thử tự động toàn bộ logic (Geofence, tính khoảng cách,...)
+          pytest -v
 
-      - name: Khởi chạy hệ thống Microservices
+      - name: Build Docker Image
         run: |
-          docker compose up -d
-          echo "Chờ 12 giây để MongoDB, Redis, API Gateway và Worker sẵn sàng..."
-          sleep 12
-
-      - name: Chạy toàn bộ kịch bản kiểm thử E2E (Full Lifecycle Test)
-        run: |
-          python - << 'EOF'
-          import urllib.request
-          import json
-          import sys
-          import time
-
-          BASE_URL = "http://localhost:8000"
-          TOKEN = ""
-
-          def request(method, path, data=None, headers=None):
-              url = f"{BASE_URL}{path}"
-              req = urllib.request.Request(url, method=method)
-              req_headers = headers or {}
-              if data is not None:
-                  req.data = json.dumps(data).encode("utf-8")
-                  req_headers["Content-Type"] = "application/json"
-              if TOKEN:
-                  req_headers["Authorization"] = f"Bearer {TOKEN}"
-              for k, v in req_headers.items():
-                  req.add_header(k, v)
-              try:
-                  with urllib.request.urlopen(req, timeout=10) as res:
-                      status = res.status
-                      body = res.read().decode("utf-8")
-                      return status, json.loads(body) if body else {}
-              except urllib.error.HTTPError as e:
-                  err_body = e.read().decode("utf-8")
-                  try:
-                      return e.code, json.loads(err_body)
-                  except Exception:
-                      return e.code, {}
-              except Exception as e:
-                  print(f"❌ Lỗi kết nối đến {url}: {e}", file=sys.stderr)
-                  sys.exit(1)
-
-          def check_audio_file(filename, max_wait=20):
-              """Gửi request HEAD qua API Gateway để xác minh file MP3 đã được tạo trong media/"""
-              print(f"   ⏳ Đang chờ Worker sinh file âm thanh: {filename}...", flush=True)
-              start = time.time()
-              while time.time() - start < max_wait:
-                  status, _ = request("HEAD", f"/audio/files/{filename}")
-                  if status == 200:
-                      print(f"   🎧 [Audio OK] File {filename} sẵn sàng trên máy chủ!", flush=True)
-                      return True
-                  time.sleep(2)
-              print(f"   ❌ [Audio Fail] Quá hạn {max_wait}s mà file {filename} chưa sinh ra!", file=sys.stderr)
-              sys.exit(1)
-
-          print("\n" + "="*60)
-          print("🚀 BẮT ĐẦU CHU KỲ KIỂM THỬ E2E TOÀN DIỆN")
-          print("="*60)
-
-          # ==========================================
-          # 1. TEST AUTH: ĐĂNG KÝ, ĐĂNG NHẬP & LẤY JWT TOKEN
-          # ==========================================
-          print("\n🔑 [1] Kiểm tra Xác thực (Auth Service)...", flush=True)
-          user_payload = {"username": f"admin_ci_{int(time.time())}", "password": "password123"}
-          reg_status, _ = request("POST", "/auth/register", user_payload)
-          if reg_status not in [200, 201]:
-              print("❌ Đăng ký tài khoản Admin CI thất bại!", file=sys.stderr)
-              sys.exit(1)
-
-          login_status, login_res = request("POST", "/auth/login", user_payload)
-          if login_status != 200 or "access_token" not in login_res:
-              print(f"❌ Đăng nhập thất bại: {login_res}", file=sys.stderr)
-              sys.exit(1)
-
-          TOKEN = login_res["access_token"]
-          print("✅ Lấy JWT Token thành công! Đã cấp quyền Bearer cho các bước tiếp theo.", flush=True)
-
-          # ==========================================
-          # 2. TEST TẠO BẢO TÀNG & FILE MP3 BẢO TÀNG
-          # ==========================================
-          print("\n🏛️ [2] Tạo bảo tàng mới & Kiểm tra Audio...", flush=True)
-          status, _ = request("POST", "/pois/admin/add", {
-              "id": "poi_ci_test",
-              "name": "Bảo tàng CI Test",
-              "description_vi": "Đây là bài thuyết minh tổng quát bảo tàng phục vụ kiểm thử CI.",
-              "lat": 10.7769,
-              "lng": 106.7009,
-              "trigger_radius_meters": 30.0,
-              "qr_code": "QR_POI_CI_TEST",
-              "image": ""
-          })
-          if status not in [200, 201]:
-              print("❌ Tạo bảo tàng thất bại!", file=sys.stderr)
-              sys.exit(1)
-          check_audio_file("poi_ci_test_vi.mp3")
-
-          # ==========================================
-          # 3. TEST TẠO HIỆN VẬT & FILE MP3 HIỆN VẬT
-          # ==========================================
-          print("\n🏺 [3] Thêm hiện vật mới & Kiểm tra Audio...", flush=True)
-          status, _ = request("POST", "/pois/poi_ci_test/artifacts/admin/save", {
-              "artifact_id": "art_ci_01",
-              "name_vi": "Trống Đồng CI",
-              "description_vi": "Mô tả hiện vật trống đồng kiểm tra giọng đọc.",
-              "room": "Gian trưng bày A",
-              "image_url": ""
-          })
-          if status not in [200, 201]:
-              print("❌ Thêm hiện vật thất bại!", file=sys.stderr)
-              sys.exit(1)
-          check_audio_file("poi_ci_test_art_ci_01_vi.mp3")
-
-          # ==========================================
-          # 4. TEST SỬA BẢO TÀNG: XÁC MINH KHÔNG MẤT HIỆN VẬT
-          # ==========================================
-          print("\n🔄 [4] Sửa thông tin bảo tàng (Kiểm tra lỗi ghi đè hiện vật)...", flush=True)
-          status, _ = request("POST", "/pois/admin/add", {
-              "id": "poi_ci_test",
-              "name": "Bảo tàng CI Test (ĐÃ ĐỔI TÊN MỚI)",
-              "description_vi": "Mô tả mới của bảo tàng sau khi biên tập nội dung.",
-              "lat": 10.7769,
-              "lng": 106.7009,
-              "trigger_radius_meters": 40.0,
-              "qr_code": "QR_POI_CI_TEST",
-              "image": ""
-          })
-          check_audio_file("poi_ci_test_vi.mp3")
-
-          # Đọc lại từ CSDL kiểm tra mảng hiện vật
-          _, poi_detail = request("GET", "/pois/poi_ci_test")
-          artifacts = poi_detail.get("artifacts", [])
-          if len(artifacts) == 0:
-              print("❌ [LỖI NGHIÊM TRỌNG] Sửa bảo tàng đã làm mất sạch danh sách hiện vật!", file=sys.stderr)
-              sys.exit(1)
-          print(f"✅ Bảo tồn dữ liệu thành công: Mảng hiện vật vẫn còn nguyên {len(artifacts)} món.", flush=True)
-
-          # ==========================================
-          # 5. TEST SỬA HIỆN VẬT & SINH AUDIO MỚI
-          # ==========================================
-          print("\n✏️ [5] Sửa thông tin hiện vật & Kiểm tra cập nhật Audio...", flush=True)
-          status, _ = request("POST", "/pois/poi_ci_test/artifacts/admin/save", {
-              "artifact_id": "art_ci_01",
-              "name_vi": "Trống Đồng CI (Đã chỉnh sửa)",
-              "description_vi": "Cập nhật câu từ mới cho bài thuyết minh hiện vật.",
-              "room": "Gian trưng bày B",
-              "image_url": ""
-          })
-          check_audio_file("poi_ci_test_art_ci_01_vi.mp3")
-
-          # ==========================================
-          # 6. TEST ĐỊNH VỊ GEOFENCE (NHƯ CLIENT INDEX.HTML)
-          # ==========================================
-          print("\n📍 [6] Giả lập GPS định vị vào trong vùng bảo tàng...", flush=True)
-          status, geo_in = request("POST", "/pois/geofence", {
-              "user_lat": 10.7769,
-              "user_lng": 106.7009,
-              "preferred_lang": "vi"
-          })
-          if not geo_in.get("inside_geofence") or geo_in.get("poi_id") != "poi_ci_test":
-              print(f"❌ Geofence vào vùng thất bại: {geo_in}", file=sys.stderr)
-              sys.exit(1)
-          print(f"   👉 URL Audio bảo tàng trả về: {geo_in.get('audio_url')}")
-          check_audio_file("poi_ci_test_vi.mp3")
-          print("✅ Geofence trong vùng & Audio bảo tàng hoạt động chuẩn xác!", flush=True)
-
-          print("\n🚶 [7] Giả lập GPS di chuyển ra ngoài vùng bảo tàng...", flush=True)
-          _, geo_out = request("POST", "/pois/geofence", {
-              "user_lat": 10.0000,
-              "user_lng": 105.0000,
-              "preferred_lang": "vi"
-          })
-          if geo_out.get("inside_geofence") is not False:
-              print(f"❌ Geofence lỗi: Tọa độ ở xa nhưng vẫn báo bên trong vùng: {geo_out}", file=sys.stderr)
-              sys.exit(1)
-          print("✅ Geofence ngoài vùng hoạt động chuẩn xác!", flush=True)
-
-          # ==========================================
-          # 7. TEST QUÉT MÃ QR (NHƯ CLIENT INDEX.HTML)
-          # ==========================================
-          print("\n📷 [8] Giả lập Quét mã QR hiện vật...", flush=True)
-          status, qr_res = request("GET", "/pois/qr/QR_ART_CI_01")
-          if qr_res.get("type") != "artifact":
-              print(f"❌ Quét QR không nhận diện được hiện vật: {qr_res}", file=sys.stderr)
-              sys.exit(1)
-          check_audio_file("poi_ci_test_art_ci_01_vi.mp3")
-          print("✅ Quét QR nhận diện đúng hiện vật và nghe được âm thanh!", flush=True)
-
-          # ==========================================
-          # 8. TEST XÓA HIỆN VẬT & XÓA BẢO TÀNG (DỌN DỮ LIỆU)
-          # ==========================================
-          print("\n🗑️ [9] Kiểm tra xóa hiện vật...", flush=True)
-          del_art_st, _ = request("DELETE", "/pois/poi_ci_test/artifacts/admin/delete/art_ci_01")
-          if del_art_st not in [200, 204]:
-              print("❌ Lỗi xóa hiện vật!", file=sys.stderr)
-              sys.exit(1)
-
-          _, poi_check = request("GET", "/pois/poi_ci_test")
-          if len(poi_check.get("artifacts", [])) != 0:
-              print("❌ Hiện vật vẫn còn trong MongoDB sau lệnh xóa!", file=sys.stderr)
-              sys.exit(1)
-          print("✅ Xóa hiện vật thành công!", flush=True)
-
-          print("\n🗑️ [10] Kiểm tra xóa bảo tàng...", flush=True)
-          del_poi_st, _ = request("DELETE", "/pois/admin/delete/poi_ci_test")
-          if del_poi_st not in [200, 204]:
-              print("❌ Lỗi xóa bảo tàng!", file=sys.stderr)
-              sys.exit(1)
-
-          not_found_st, _ = request("GET", "/pois/poi_ci_test")
-          if not_found_st != 404:
-              print(f"❌ Bảo tàng vẫn tồn tại sau khi xóa (Mã trả về: {not_found_st})!", file=sys.stderr)
-              sys.exit(1)
-          print("✅ Xóa bảo tàng thành công (Đã kiểm tra trả về 404 chuẩn)!", flush=True)
-
-          print("\n" + "="*60)
-          print("🎉 TẤT CẢ 10/10 HẠNG MỤC KIỂM THỬ ĐÃ ĐẠT CHUẨN 100%!")
-          print("="*60 + "\n")
-          EOF
-
-      - name: In log hỗ trợ chẩn đoán nếu kiểm thử thất bại
-        if: failure()
-        run: |
-          echo "=== LOG CỦA AUDIO WORKER ==="
-          docker compose logs audio_worker
-          echo "=== LOG CỦA MUSEUM SERVICE ==="
-          docker compose logs museum_service
-
-      - name: Dọn dẹp môi trường Docker Compose
-        if: always()
-        run: docker compose down
+          # Kiểm tra xem Dockerfile build thành công hay không
+          docker build -t vanmieu-poi-service:latest -f services/poi-service/Dockerfile .
