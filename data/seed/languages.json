@@ -40,7 +40,21 @@
       "button.pause": "Tạm dừng",
       "notice.contentMissing": "Nội dung thuyết minh bằng ngôn ngữ này đang được cập nhật.",
       "notice.audioMissing": "Chưa có audio cho ngôn ngữ này.",
-      "detail.recommendations": "Địa điểm gợi ý gần đây"
+      "detail.recommendations": "Địa điểm gợi ý gần đây",
+      "status.weakAccuracy": "Đang tại Văn Miếu nhưng độ chính xác GPS yếu (±{acc}m). Tiến lại gần điểm để nghe.",
+      "status.insideGeofence": "Đã vào vùng Geofence: {code} - {poi} ({dist}m)",
+      "status.simOutside": "Vị trí mô phỏng ngoài Geofence (Gần nhất: {dist}m)",
+      "status.realInCampus": "GPS thật: Đang trong khuôn viên (Gần nhất: {nearest})",
+      "status.noCoords": "Đã chọn {code} (điểm chưa có tọa độ)",
+      "status.audioLoadFailed": "Không tải được âm thanh cho điểm {code}.",
+      "status.arrivedTapToPlay": "Đã tới {poi}. Chạm vào màn hình để nghe thuyết minh.",
+      "status.visiting": "Đang tham quan: {poi} ({code})",
+      "status.tapForAudio": "Chạm vào màn hình để cấp quyền phát âm thanh.",
+      "marker.you": "Vị trí của bạn",
+      "marker.youAt": "Vị trí của bạn ({code})",
+      "marker.simulated": "Vị trí GPS mô phỏng",
+      "marker.real": "Vị trí thật (±{acc}m)",
+      "notice.fallbackData": "Đang dùng dữ liệu dự phòng ({reason})."
     }
   },
   {
@@ -84,7 +98,21 @@
       "detail.playAudio": "Listen to this audio guide",
       "button.pause": "Pause",
       "notice.contentMissing": "The narration text in this language is being updated.",
-      "notice.audioMissing": "No audio is available in this language yet."
+      "notice.audioMissing": "No audio is available in this language yet.",
+      "status.weakAccuracy": "You are at the Temple, but GPS accuracy is weak (±{acc} m). Move closer to a point to listen.",
+      "status.insideGeofence": "Entered geofence: {code} - {poi} ({dist} m)",
+      "status.simOutside": "Simulated position is outside every geofence (nearest: {dist} m)",
+      "status.realInCampus": "Real GPS: inside the grounds (nearest: {nearest})",
+      "status.noCoords": "Selected {code} (this point has no coordinates)",
+      "status.audioLoadFailed": "Could not load the audio for point {code}.",
+      "status.arrivedTapToPlay": "You have arrived at {poi}. Tap the screen to listen.",
+      "status.visiting": "Now visiting: {poi} ({code})",
+      "status.tapForAudio": "Tap the screen to allow audio playback.",
+      "marker.you": "Your location",
+      "marker.youAt": "Your location ({code})",
+      "marker.simulated": "Simulated GPS location",
+      "marker.real": "Real location (±{acc} m)",
+      "notice.fallbackData": "Using backup data ({reason})."
     }
   },
   {
@@ -128,7 +156,21 @@
       "detail.playAudio": "收听此景点的语音讲解",
       "button.pause": "暂停",
       "notice.contentMissing": "该语言的讲解内容正在更新中。",
-      "notice.audioMissing": "该语言暂无语音讲解。"
+      "notice.audioMissing": "该语言暂无语音讲解。",
+      "status.weakAccuracy": "您已在文庙内，但 GPS 精度较弱（±{acc} 米）。请靠近景点后收听。",
+      "status.insideGeofence": "已进入地理围栏：{code} - {poi}（{dist} 米）",
+      "status.simOutside": "模拟位置在所有地理围栏之外（最近：{dist} 米）",
+      "status.realInCampus": "真实 GPS：位于园区内（最近：{nearest}）",
+      "status.noCoords": "已选择 {code}（该景点暂无坐标）",
+      "status.audioLoadFailed": "无法加载景点 {code} 的语音。",
+      "status.arrivedTapToPlay": "已到达 {poi}。请点击屏幕收听讲解。",
+      "status.visiting": "正在参观：{poi}（{code}）",
+      "status.tapForAudio": "请点击屏幕以允许播放声音。",
+      "marker.you": "您的位置",
+      "marker.youAt": "您的位置（{code}）",
+      "marker.simulated": "模拟 GPS 位置",
+      "marker.real": "真实位置（±{acc} 米）",
+      "notice.fallbackData": "正在使用备用数据（{reason}）。"
     }
   }
 ]

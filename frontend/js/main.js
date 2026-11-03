@@ -97,12 +97,13 @@ function getDisplayRadius() {
   return best ? Number(best[0]) : DEFAULT_GEOFENCE_RADIUS;
 }
 
-function t(key, fallback) {
+function t(key, fallback, extra = {}) {
   const lang = getCurrentLanguage();
   const raw = lang && lang.ui ? lang.ui[key] : undefined;
-  if (raw === undefined) return fallback;
-  const vars = { radius: getDisplayRadius(), count: poisData.length };
-  return String(raw).replace(/\{(\w+)\}/g, (m, name) => (name in vars ? vars[name] : m));
+  const template = raw !== undefined ? raw : fallback;
+  if (template === undefined) return undefined;
+  const vars = { radius: getDisplayRadius(), count: poisData.length, ...extra };
+  return String(template).replace(/\{(\w+)\}/g, (m, name) => (name in vars ? vars[name] : m));
 }
 
 function htmlLangOf(code) {
@@ -390,7 +391,7 @@ async function fetchPoisAndNarrations() {
   } else {
     console.warn("Dùng danh sách dự phòng do:", reason);
     poisData = getFallbackPois().map(normalizePoi);
-    setMapNotice("poi", `Đang dùng dữ liệu dự phòng (${reason}).`);
+    setMapNotice("poi", t("notice.fallbackData", "Đang dùng dữ liệu dự phòng ({reason}).", { reason }));
   }
 
   applyTranslations(); // cập nhật chữ có biến {radius}/{count} theo dữ liệu điểm
@@ -662,7 +663,7 @@ function renderMapMarkers() {
   });
 }
 
-function updatePersonMarker(lat, lng, popupText = "Vị trí của bạn") {
+function updatePersonMarker(lat, lng, popupText = t("marker.you", "Vị trí của bạn")) {
   if (!leafletMap) return;
   const pos = [lat, lng];
   if (userGpsMarker) {
@@ -682,7 +683,7 @@ function updatePersonMarker(lat, lng, popupText = "Vị trí của bạn") {
 
 function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
   if (gpsMode === "real" && accuracy > LOCATION_CONFIG.maxGpsAccuracyMeters) {
-    setGpsStatus(`Đang tại Văn Miếu nhưng độ chính xác GPS yếu (±${Math.round(accuracy)}m). Tiến lại gần điểm để nghe.`);
+    setGpsStatus(t("status.weakAccuracy", "Đang tại Văn Miếu nhưng độ chính xác GPS yếu (±{acc}m). Tiến lại gần điểm để nghe.", { acc: Math.round(accuracy) }));
     return;
   }
 
@@ -704,7 +705,7 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
   const floatingAudio = document.getElementById("floatingAudioContainer");
 
   if (insidePoi) {
-    setGpsStatus(`Đã vào vùng Geofence: ${insidePoi.poi_code} - ${insidePoi.name} (${Math.round(minDistance)}m)`);
+    setGpsStatus(t("status.insideGeofence", "Đã vào vùng Geofence: {code} - {poi} ({dist}m)", { code: insidePoi.poi_code, poi: getPoiLocalizedName(insidePoi), dist: Math.round(minDistance) }));
     if (floatingAudio) floatingAudio.classList.remove("hidden");
 
     // Khi chuyển sang POI mới, cập nhật ngay lập tức
@@ -730,8 +731,8 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
 
     setGpsStatus(
       gpsMode === "simulated"
-        ? `Vị trí mô phỏng ngoài Geofence (Gần nhất: ${Math.round(minDistance)}m)`
-        : `GPS thật: Đang trong khuôn viên (Gần nhất: ${insidePoi ? insidePoi.name : Math.round(minDistance) + "m"})`
+        ? t("status.simOutside", "Vị trí mô phỏng ngoài Geofence (Gần nhất: {dist}m)", { dist: Math.round(minDistance) })
+        : t("status.realInCampus", "GPS thật: Đang trong khuôn viên (Gần nhất: {nearest})", { nearest: insidePoi ? getPoiLocalizedName(insidePoi) : Math.round(minDistance) + "m" })
     );
   }
 }
@@ -752,13 +753,13 @@ function simulateGpsLocation(poi) {
 
   const hasCoords = typeof poi.lat === "number" && typeof poi.lng === "number";
   if (!hasCoords) {
-    setGpsStatus(`Đã chọn ${poi.poi_code} (POI không có tọa độ)`);
+    setGpsStatus(t("status.noCoords", "Đã chọn {code} (điểm chưa có tọa độ)", { code: poi.poi_code }));
     return;
   }
 
   if (leafletMap) {
     leafletMap.setView([poi.lat, poi.lng], 19);
-    updatePersonMarker(poi.lat, poi.lng, "Vị trí GPS mô phỏng");
+    updatePersonMarker(poi.lat, poi.lng, t("marker.simulated", "Vị trí GPS mô phỏng"));
   }
 
   const simPanel = document.getElementById("simulatorPanel");
@@ -1027,13 +1028,13 @@ async function loadAndPlayAudio(poi, autoPlay = false) {
 
   activePlayer.onerror = () => {
     console.error(`[Audio] Không tải được: ${audioSrc}`);
-    setGpsStatus(`Không tải được âm thanh cho điểm ${poi.poi_code}.`);
+    setGpsStatus(t("status.audioLoadFailed", "Không tải được âm thanh cho điểm {code}.", { code: poi.poi_code }));
   };
 
   if (autoPlay) {
     activePlayer.play().catch((err) => {
       console.warn("Trình duyệt tạm chặn autoplay:", err);
-      setGpsStatus(`Đã tới ${poi.name}. Chạm vào màn hình để nghe thuyết minh.`);
+      setGpsStatus(t("status.arrivedTapToPlay", "Đã tới {poi}. Chạm vào màn hình để nghe thuyết minh.", { poi: getPoiLocalizedName(poi) }));
       
       const unlockAudio = () => {
         activePlayer.play();
@@ -1081,7 +1082,7 @@ function batDauTraiNghiemP00() {
 
   // 3. Ghi nhận phân loại thống kê lượt truy cập
   recordAccessClassification("demo_simulation", false);
-  setGpsStatus("Đang tham quan: Cổng Văn Miếu (P00)");
+  setGpsStatus(t("status.visiting", "Đang tham quan: {poi} ({code})", { poi: getPoiLocalizedName(poisData.find((p) => p.poi_code === DEFAULT_POI_CODE)) || "Cổng Văn Miếu", code: DEFAULT_POI_CODE }));
 
   // 4. Lấy dữ liệu POI P00 từ danh sách đã tải
   const gate = poisData.find((p) => p.poi_code === DEFAULT_POI_CODE) || {
@@ -1100,7 +1101,7 @@ function batDauTraiNghiemP00() {
   // 5. Di chuyển góc nhìn bản đồ và đặt vị trí người dùng tại P00
   if (leafletMap && typeof gate.lat === "number" && typeof gate.lng === "number") {
     leafletMap.setView([gate.lat, gate.lng], 19);
-    updatePersonMarker(gate.lat, gate.lng, "Vị trí của bạn (P00)");
+    updatePersonMarker(gate.lat, gate.lng, t("marker.youAt", "Vị trí của bạn ({code})", { code: "P00" }));
   }
 
   // 6. Hiển thị thanh trình phát âm thanh nổi ở góc dưới
@@ -1157,7 +1158,7 @@ function playDetailAudioManually() {
   if (detailPlayer.paused) {
     detailPlayer.play().catch((err) => {
       console.warn("Không thể tự phát âm thanh chi tiết:", err);
-      setGpsStatus("Chạm vào màn hình để cấp quyền phát âm thanh.");
+      setGpsStatus(t("status.tapForAudio", "Chạm vào màn hình để cấp quyền phát âm thanh."));
     });
   } else {
     detailPlayer.pause();
@@ -1176,7 +1177,7 @@ function startWatchingRealGps() {
       const accuracy = position.coords.accuracy;
 
       if (leafletMap) {
-        updatePersonMarker(lat, lng, `Vị trí thật (±${Math.round(accuracy)}m)`);
+        updatePersonMarker(lat, lng, t("marker.real", "Vị trí thật (±{acc}m)", { acc: Math.round(accuracy) }));
       }
 
       const distToCenter = getDistanceMeters(lat, lng, VAN_MIEU_CENTER[0], VAN_MIEU_CENTER[1]);
