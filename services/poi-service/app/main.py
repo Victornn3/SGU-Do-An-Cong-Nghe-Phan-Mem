@@ -23,6 +23,20 @@ def health_check():
     return {"status": "ok", "service": "poi-service"}
 
 
+@app.get("/api/languages")
+def get_languages(include_inactive: bool = False):
+    """
+    Danh mục ngôn ngữ (dữ liệu cấu hình). Giao diện khách đọc danh sách này để
+    dựng ô chọn ngôn ngữ và chuỗi giao diện, nên thêm ngôn ngữ mới chỉ cần
+    thêm một bản ghi vào collection `languages`, không phải sửa code.
+    """
+    query = {} if include_inactive else {"is_active": True}
+    languages = list(db.languages.find(query).sort("display_order", 1))
+    for lang in languages:
+        lang.pop("_id", None)
+    return {"success": True, "data": languages}
+
+
 @app.get("/api/zones")
 def get_zones():
     """Lấy danh sách các cụm/khu vực tham quan."""

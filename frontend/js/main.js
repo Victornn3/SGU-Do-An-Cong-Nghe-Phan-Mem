@@ -1,8 +1,9 @@
-let currentLang = (() => {
-  const browserLang = (navigator.languages && navigator.languages[0]) || navigator.language || 'vi';
-  const normalized = browserLang.toLowerCase();
-  return normalized.startsWith('zh') ? 'zh' : (normalized.startsWith('en') ? 'en' : 'vi');
-})();
+// Ngôn ngữ nằm trong dữ liệu: collection `languages`, đọc qua API /api/languages.
+// Thêm ngôn ngữ mới chỉ cần thêm một bản ghi, không phải sửa file này.
+const DEFAULT_LANG = 'vi';
+const DEFAULT_GEOFENCE_RADIUS = 15; // mét, khớp PRD (mặc định 15 m, cho phép 10–25 m)
+let currentLang = DEFAULT_LANG;
+let languagesData = []; // [{ code, native_name, flag, html_lang, ui: {...} }]
 let poisData = [];
 let activePoiId = null;
 let previousTab = 'map';
@@ -38,52 +39,20 @@ let userGpsMarker = null;
 let geofenceLayer = null;
 let mapNotices = {};
 
-const POI_NAMES = {
-  vi: {
-    P00: "Cổng Văn Miếu",
-    P01: "Cổng Đại Trung",
-    P02: "Khuê Văn Các",
-    P03: "Nhà Bia Tiến Sĩ",
-    P04: "Giếng Thiên Quang",
-    P05: "Cổng Đại Thành",
-    P06: "Điện Đại Thành",
-    P07: "Nhà Thái Học",
-    P08: "Lầu Trống",
-    P09: "Lầu Chuông",
-    P10: "Vườn Giám"
-  },
-  en: {
-    P00: "Van Mieu Gate",
-    P01: "Dai Trung Gate",
-    P02: "Khue Van Pavilion",
-    P03: "Doctoral Stelae Hall",
-    P04: "Thien Quang Well",
-    P05: "Dai Thanh Gate",
-    P06: "Dai Thanh Sanctuary",
-    P07: "Thai Hoc Hall",
-    P08: "Drum Tower",
-    P09: "Bell Tower",
-    P10: "Giam Garden"
-  },
-  zh: {
-    P00: "文庙门",
-    P01: "大中门",
-    P02: "奎文阁",
-    P03: "进士碑亭",
-    P04: "天光井",
-    P05: "大成门",
-    P06: "大成殿",
-    P07: "太学堂",
-    P08: "鼓楼",
-    P09: "钟楼",
-    P10: "监园"
-  }
-};
+function getPoiTranslation(poi) {
+  return (poi && poi.translations && poi.translations[currentLang]) || null;
+}
 
 function getPoiLocalizedName(poi) {
   if (!poi) return "";
-  const names = POI_NAMES[currentLang] || POI_NAMES.vi;
-  return names[poi.poi_code] || poi.name;
+  const tr = getPoiTranslation(poi);
+  return (tr && tr.name) || poi.name || "";
+}
+
+function getPoiLocalizedDescription(poi) {
+  if (!poi) return "";
+  const tr = getPoiTranslation(poi);
+  return (tr && tr.description) || poi.description || "";
 }
 
 function updateAudioTitles() {
@@ -111,103 +80,182 @@ function updateAudioTitles() {
   }
 }
 
-const UI_TRANSLATIONS = {
-  vi: {
-    "header.title": "Văn Miếu – Quốc Tử Giám",
-    "header.subtitle": "Hệ thống thuyết minh tự động GPS & Geofence",
-    "nav.map": "Bản đồ",
-    "nav.list": "Điểm tham quan",
-    "map.gpsStatus": "Đang định vị Nội tự (Geofence 10m)",
-    "map.simulate": "Giả lập GPS",
-    "map.chooseLocation": "Chọn nhanh vị trí tham quan (Mô phỏng):",
-    "map.zoomIn": "Phóng to",
-    "map.zoomOut": "Thu nhỏ",
-    "map.reset": "Đặt lại bản đồ",
-    "poi.title": "Danh sách điểm tham quan (11 POI)",
-    "poi.description": "Khám phá chi tiết các khu vực và di tích trong khu Nội tự.",
-    "detail.title": "Chi tiết điểm",
-    "detail.introduction": "Giới thiệu thuyết minh",
-    "detail.close": "Đóng",
-    "detail.view": "Xem chi tiết",
-    "audio.title": "Thuyết minh âm thanh",
-    "audio.manual": "Phát thủ công",
-    "audio.geofence": "Geofence (10m)",
-    "gps.title": "Chọn chế độ định vị",
-    "gps.description": "Bạn có thể sử dụng GPS thật hoặc chế độ giả lập để trải nghiệm thuyết minh tại Văn Miếu – Quốc Tử Giám.",
-    "gps.real": "Dùng GPS thật",
-    "gps.simulated": "Dùng GPS giả lập — bắt đầu tại cổng P00",
-    "gps.notice": "Nếu chọn GPS giả lập ngay từ đầu, hệ thống sẽ ghi nhận một lượt tham quan theo chế độ demo tại Văn Miếu. Nếu chọn GPS thật, hệ thống sẽ phân loại lượt truy cập dựa trên vị trí GPS được xác minh. Việc bật GPS giả lập sau khi đã chọn GPS thật chỉ phục vụ kiểm thử và không làm thay đổi phân loại lượt truy cập ban đầu.",
-    "button.details": "Xem chi tiết",
-    "button.close": "Đóng",
-    "button.play": "Phát",
-    "detail.playAudio": "Nghe thuyết minh điểm này",
-    "button.pause": "Tạm dừng"
-  },
-  en: {
-    "header.title": "Temple of Literature – Imperial Academy",
-    "header.subtitle": "Automatic GPS & Geofence Audio Guide",
-    "nav.map": "Map",
-    "nav.list": "Points of Interest",
-    "map.gpsStatus": "Locating the inner sanctuary (10 m geofence)",
-    "map.simulate": "Simulate GPS",
-    "map.chooseLocation": "Choose a simulated visit location:",
-    "map.zoomIn": "Zoom in",
-    "map.zoomOut": "Zoom out",
-    "map.reset": "Reset map",
-    "poi.title": "Points of Interest (11 POIs)",
-    "poi.description": "Explore the areas and monuments within the inner sanctuary.",
-    "detail.title": "Location Details",
-    "detail.introduction": "Audio Guide Introduction",
-    "detail.recommendations": "Nearby Recommended Places",
-    "detail.close": "Close",
-    "detail.view": "View Details",
-    "audio.title": "Audio Guide",
-    "audio.manual": "Manual Playback",
-    "audio.geofence": "Geofence (10 m)",
-    "gps.title": "Choose Location Mode",
-    "gps.description": "Use real GPS or simulated GPS to experience the audio guide at the Temple of Literature – Imperial Academy.",
-    "gps.real": "Use Real GPS",
-    "gps.simulated": "Use Simulated GPS — start at Gate P00",
-    "gps.notice": "If you choose simulated GPS at startup, the system records a demo visit. If you choose real GPS, the system classifies the visit based on the verified GPS location. Enabling simulated GPS later is for testing only and does not change the initial visit classification.",
-    "button.details": "View Details",
-    "button.close": "Close",
-    "button.play": "Play",
-    "detail.playAudio": "Listen to this audio guide",
-    "button.pause": "Pause"
-  },
-  zh: {
-    "header.title": "文庙—国子监",
-    "header.subtitle": "基于 GPS 与地理围栏的自动语音讲解系统",
-    "nav.map": "地图",
-    "nav.list": "参观点",
-    "map.gpsStatus": "正在定位内院区域（地理围栏 10 米）",
-    "map.simulate": "模拟 GPS",
-    "map.chooseLocation": "选择模拟参观位置：",
-    "map.zoomIn": "放大",
-    "map.zoomOut": "缩小",
-    "map.reset": "重置地图",
-    "poi.title": "参观点列表（11 个点）",
-    "poi.description": "探索内院中的各个区域和历史遗迹。",
-    "detail.title": "地点详情",
-    "detail.introduction": "语音讲解介绍",
-    "detail.recommendations": "附近推荐地点",
-    "detail.close": "关闭",
-    "detail.view": "查看详情",
-    "audio.title": "语音讲解",
-    "audio.manual": "手动播放",
-    "audio.geofence": "地理围栏（10 米）",
-    "gps.title": "选择定位模式",
-    "gps.description": "您可以使用真实 GPS 或模拟 GPS，体验文庙—国子监的语音讲解。",
-    "gps.real": "使用真实 GPS",
-    "gps.simulated": "使用模拟 GPS — 从 P00 大门开始",
-    "gps.notice": "如果启动时选择模拟 GPS，系统将记录一次模拟参观。如果选择真实 GPS，系统将根据经过验证的 GPS 位置对访问进行分类。之后启用模拟 GPS 仅用于测试，不会改变初始访问分类。",
-    "button.details": "查看详情",
-    "button.close": "关闭",
-    "button.play": "播放",
-    "detail.playAudio": "收听此景点的语音讲解",
-    "button.pause": "暂停"
+// ---------- Ngôn ngữ & chuỗi giao diện (lấy từ dữ liệu) ----------
+
+function getCurrentLanguage() {
+  return languagesData.find((l) => l.code === currentLang) || null;
+}
+
+function getDisplayRadius() {
+  // Bán kính hiển thị lấy theo dữ liệu điểm (giá trị phổ biến nhất), không viết cứng.
+  const counts = {};
+  poisData.forEach((p) => {
+    const r = Number(p.geofence_radius);
+    if (Number.isFinite(r) && r > 0) counts[r] = (counts[r] || 0) + 1;
+  });
+  const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  return best ? Number(best[0]) : DEFAULT_GEOFENCE_RADIUS;
+}
+
+function t(key, fallback) {
+  const lang = getCurrentLanguage();
+  const raw = lang && lang.ui ? lang.ui[key] : undefined;
+  if (raw === undefined) return fallback;
+  const vars = { radius: getDisplayRadius(), count: poisData.length };
+  return String(raw).replace(/\{(\w+)\}/g, (m, name) => (name in vars ? vars[name] : m));
+}
+
+function htmlLangOf(code) {
+  const lang = languagesData.find((l) => l.code === code);
+  return (lang && lang.html_lang) || code;
+}
+
+function detectInitialLanguage() {
+  const codes = languagesData.map((l) => l.code);
+  const prefs = (navigator.languages && navigator.languages.length)
+    ? navigator.languages
+    : [navigator.language || DEFAULT_LANG];
+  for (const pref of prefs) {
+    const norm = String(pref).toLowerCase();
+    const hit = codes.find((c) => norm === c.toLowerCase() || norm.startsWith(c.toLowerCase() + '-'));
+    if (hit) return hit;
   }
-};
+  return codes.includes(DEFAULT_LANG) ? DEFAULT_LANG : codes[0];
+}
+
+function renderLanguageSelector() {
+  const selector = document.getElementById("langSelect");
+  if (!selector) return;
+  selector.innerHTML = "";
+  languagesData.forEach((lang) => {
+    const option = document.createElement("option");
+    option.value = lang.code;
+    option.textContent = `${lang.flag || ""} ${lang.native_name || lang.name || lang.code}`.trim();
+    selector.appendChild(option);
+  });
+  selector.value = currentLang;
+}
+
+async function loadLanguages() {
+  try {
+    const res = await fetch("/api/languages");
+    if (res.ok) {
+      const json = await res.json();
+      const list = Array.isArray(json) ? json : (json && Array.isArray(json.data) ? json.data : []);
+      if (list.length) languagesData = list;
+    }
+  } catch (err) {
+    console.warn("Không tải được danh sách ngôn ngữ:", err);
+  }
+
+  if (!languagesData.length) {
+    // Dự phòng khi API lỗi: chỉ tiếng Việt, chữ giao diện lấy từ index.html.
+    languagesData = [{ code: DEFAULT_LANG, name: "Vietnamese", native_name: "Tiếng Việt", flag: "🇻🇳", html_lang: "vi", ui: {} }];
+  }
+
+  currentLang = detectInitialLanguage();
+  renderLanguageSelector();
+  document.documentElement.lang = htmlLangOf(currentLang);
+}
+
+// ---------- Thông tin thuyết minh/audio theo ngôn ngữ (cache) ----------
+
+const narrationCache = {};
+const detailNotices = {};
+
+async function fetchNarrationInfo(poi, lang = currentLang) {
+  if (!poi) return null;
+  const key = `${poi.poi_code}|${lang}`;
+  if (key in narrationCache) return narrationCache[key];
+  try {
+    const res = await fetch(`/api/narrations/${encodeURIComponent(poi.poi_code)}?lang=${encodeURIComponent(lang)}`);
+    if (res.ok) {
+      narrationCache[key] = await res.json();
+    } else if (res.status === 404) {
+      narrationCache[key] = { content: null, content_available: false, audio_url: null, audio_available: false };
+    } else {
+      return null; // lỗi máy chủ: chưa biết, không cache
+    }
+  } catch (err) {
+    return null;
+  }
+  return narrationCache[key];
+}
+
+function prefetchNarrations() {
+  poisData.forEach((poi) => fetchNarrationInfo(poi));
+}
+
+function isAudioAvailable(info) {
+  return info ? info.audio_available !== false : true; // chưa biết thì cứ thử phát
+}
+
+function renderDetailNotices() {
+  const el = document.getElementById("detailNotice");
+  if (!el) return;
+  const messages = Object.values(detailNotices);
+  el.textContent = messages.join(" ");
+  el.classList.toggle("hidden", messages.length === 0);
+}
+
+function setDetailNotice(key, message) {
+  if (message) detailNotices[key] = message;
+  else delete detailNotices[key];
+  renderDetailNotices();
+}
+
+// Nạp audio cho một trình phát. Thiếu audio: báo rõ, khóa nút phát, không phát nhầm ngôn ngữ khác.
+async function setPlayerSource(player, poi) {
+  if (!player || !poi) return false;
+  const lang = currentLang;
+  const info = await fetchNarrationInfo(poi, lang);
+  if (lang !== currentLang) return false; // người dùng đã đổi ngôn ngữ trong lúc chờ
+
+  const ok = isAudioAvailable(info);
+  const message = ok ? null : t("notice.audioMissing", "Chưa có audio cho ngôn ngữ này.");
+
+  if (player.id === "audioPlayer") {
+    setMapNotice("audio", message);
+  } else {
+    setDetailNotice("audio", message);
+    const btn = document.getElementById("btnPlayDetail");
+    if (btn) {
+      btn.disabled = !ok;
+      btn.classList.toggle("opacity-50", !ok);
+      btn.classList.toggle("cursor-not-allowed", !ok);
+    }
+  }
+
+  player.style.opacity = ok ? "" : "0.4";
+  player.style.pointerEvents = ok ? "" : "none";
+
+  if (!ok) {
+    player.pause();
+    player.removeAttribute("src");
+    player.load();
+    return false;
+  }
+
+  const url = getAudioUrl(poi);
+  const desired = new URL(url, window.location.href).href;
+  if ((player.currentSrc || player.src) !== desired) {
+    player.src = url;
+    player.load();
+  }
+  return true;
+}
+
+// Hiện nội dung thuyết minh; thiếu bản dịch thì hiện thông báo, không lấy ngôn ngữ khác.
+function applyNarrationContent(poi, info, descriptionEl) {
+  if (!descriptionEl) return;
+  if (info && info.content_available && info.content) {
+    descriptionEl.textContent = info.content;
+    setDetailNotice("content", null);
+  } else if (info) {
+    descriptionEl.textContent = getPoiLocalizedDescription(poi);
+    setDetailNotice("content", t("notice.contentMissing", "Nội dung thuyết minh bằng ngôn ngữ này đang được cập nhật."));
+  }
+}
 
 function getOrCreateSessionId() {
   let sId = sessionStorage.getItem("vm_session_id");
@@ -277,29 +325,26 @@ function setMapNotice(key, message) {
 }
 
 function applyTranslations() {
-  const dictionary = UI_TRANSLATIONS[currentLang] || UI_TRANSLATIONS.vi;
-
   document.querySelectorAll("[data-i18n]").forEach((el) => {
-    const key = el.dataset.i18n;
-    const translatedText = dictionary[key];
+    const translatedText = t(el.dataset.i18n);
     if (translatedText !== undefined && el.children.length === 0) {
       el.textContent = translatedText;
     }
   });
 
   document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
-    const key = el.dataset.i18nPlaceholder;
-    if (dictionary[key] !== undefined) el.placeholder = dictionary[key];
+    const v = t(el.dataset.i18nPlaceholder);
+    if (v !== undefined) el.placeholder = v;
   });
 
   document.querySelectorAll("[data-i18n-title]").forEach((el) => {
-    const key = el.dataset.i18nTitle;
-    if (dictionary[key] !== undefined) el.title = dictionary[key];
+    const v = t(el.dataset.i18nTitle);
+    if (v !== undefined) el.title = v;
   });
 
   document.querySelectorAll("[data-i18n-aria-label]").forEach((el) => {
-    const key = el.dataset.i18nAriaLabel;
-    if (dictionary[key] !== undefined) el.setAttribute("aria-label", dictionary[key]);
+    const v = t(el.dataset.i18nAriaLabel);
+    if (v !== undefined) el.setAttribute("aria-label", v);
   });
 }
 
@@ -348,9 +393,11 @@ async function fetchPoisAndNarrations() {
     setMapNotice("poi", `Đang dùng dữ liệu dự phòng (${reason}).`);
   }
 
+  applyTranslations(); // cập nhật chữ có biến {radius}/{count} theo dữ liệu điểm
   renderPoiList();
   renderMapMarkers();
   centerMapOnGate();
+  prefetchNarrations();
 }
 
 function switchTab(tab) {
@@ -375,7 +422,7 @@ function switchTab(tab) {
 }
 
 async function changeLanguage(lang) {
-  if (!["vi", "en", "zh"].includes(lang)) return;
+  if (!languagesData.some((l) => l.code === lang)) return;
 
   // Nếu ngôn ngữ không thay đổi thì không tải lại âm thanh.
   if (lang === currentLang) return;
@@ -397,15 +444,19 @@ async function changeLanguage(lang) {
 
   // Cập nhật ngôn ngữ hiện tại.
   currentLang = lang;
-  document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
+  document.documentElement.lang = htmlLangOf(lang);
 
   const selector = document.getElementById("langSelect");
   if (selector) selector.value = lang;
 
+  setMapNotice("audio", null);
+  setDetailNotice("audio", null);
+  setDetailNotice("content", null);
   applyTranslations();
   renderPoiList();
   renderMapMarkers();
   updateAudioTitles();
+  prefetchNarrations();
 
   // Tải lại âm thanh của từng trình phát theo POI riêng.
   function reloadPlayerLanguage(player, poiCode, shouldResume) {
@@ -416,8 +467,6 @@ async function changeLanguage(lang) {
     );
 
     if (!poi) return;
-
-    const newAudioUrl = getAudioUrl(poi);
 
     // Dừng file cũ trước khi tải file mới.
     player.pause();
@@ -441,8 +490,7 @@ async function changeLanguage(lang) {
         { once: true }
       );
     }
-    player.src = newAudioUrl;
-    player.load();
+    setPlayerSource(player, poi);
   }
 
   // Cập nhật thanh nghe trên bản đồ.
@@ -485,29 +533,20 @@ async function changeLanguage(lang) {
     detailView && !detailView.classList.contains("hidden");
 
   if (isDetailOpen && detailPoi) {
-  const requestId = ++detailLanguageRequestId;
-  const poiCode = detailPoi.poi_code;
-  const requestedLang = lang;
+    const requestId = ++detailLanguageRequestId;
+    const poiCode = detailPoi.poi_code;
+    const requestedLang = lang;
 
-  const localizedName = getPoiLocalizedName(detailPoi);
+    const localizedName = getPoiLocalizedName(detailPoi);
+    const header = document.getElementById("detailHeaderTitle");
+    const name = document.getElementById("detailName");
+    const description = document.getElementById("detailDescription");
 
-  const header = document.getElementById("detailHeaderTitle");
-  const name = document.getElementById("detailName");
-  const description = document.getElementById("detailDescription");
+    if (header) header.textContent = localizedName;
+    if (name) name.textContent = localizedName;
+    if (description) description.textContent = getPoiLocalizedDescription(detailPoi);
 
-  if (header) header.textContent = localizedName;
-  if (name) name.textContent = localizedName;
-
-  try {
-    const response = await fetch(
-      `/api/narrations/${encodeURIComponent(poiCode)}?lang=${requestedLang}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
+    const info = await fetchNarrationInfo(detailPoi, requestedLang);
 
     // Không dùng kết quả của yêu cầu cũ.
     if (
@@ -518,31 +557,14 @@ async function changeLanguage(lang) {
       return;
     }
 
-    if (typeof data.content === "string" && data.content.trim()) {
-      if (description) {
-        description.textContent = data.content;
-      }
-    } else {
-      console.warn(
-        `API không trả về trường content hợp lệ cho POI ${poiCode}, ngôn ngữ ${requestedLang}:`,
-        data
-      );
-    }
-  } catch (error) {
-    console.error(
-      `Không tải được thuyết minh cho POI ${poiCode} bằng ngôn ngữ ${requestedLang}:`,
-      error
-    );
+    applyNarrationContent(detailPoi, info, description);
   }
-}
 }
 
 function renderPoiList() {
   const container = document.getElementById('poiListContainer');
   if (!container) return;
   container.innerHTML = '';
-
-  const dictionary = UI_TRANSLATIONS[currentLang] || UI_TRANSLATIONS.vi;
 
   poisData.forEach(poi => {
     const card = document.createElement('div');
@@ -554,11 +576,11 @@ function renderPoiList() {
         </div>
         <div>
           <h4 class="font-bold text-sm text-slate-900">${escapeHtml(getPoiLocalizedName(poi))}</h4>
-          <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">${escapeHtml((UI_TRANSLATIONS[currentLang] || UI_TRANSLATIONS.vi)["poi.description"])}</p>
+          <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">${escapeHtml(getPoiLocalizedDescription(poi))}</p>
         </div>
       </div>
       <button onclick="openDetailView('${escapeHtml(poi.poi_code)}')" class="bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center space-x-1 shrink-0 cursor-pointer">
-        <span>${escapeHtml(dictionary["detail.view"] || "Xem chi tiết")}</span>
+        <span>${escapeHtml(t("detail.view", "Xem chi tiết"))}</span>
         <i class="fa-solid fa-chevron-right text-[10px]"></i>
       </button>
     `;
@@ -628,7 +650,7 @@ function renderMapMarkers() {
     marker.on("click", () => openDetailView(poi.poi_code));
     poiMarkers[poi.poi_code] = marker;
 
-    const radius = Number(poi.geofence_radius) || 12;
+    const radius = Number(poi.geofence_radius) || DEFAULT_GEOFENCE_RADIUS;
     L.circle([poi.lat, poi.lng], {
       radius,
       color: "#0284c7",
@@ -670,7 +692,7 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
   poisData.forEach((poi) => {
     if (typeof poi.lat === "number" && typeof poi.lng === "number") {
       const dist = getDistanceMeters(userLat, userLng, poi.lat, poi.lng);
-      const radius = Number(poi.geofence_radius) || 12;
+      const radius = Number(poi.geofence_radius) || DEFAULT_GEOFENCE_RADIUS;
 
       if (dist <= radius && dist < minDistance) {
         minDistance = dist;
@@ -870,8 +892,12 @@ async function openDetailView(poiCode) {
 
   // Hiển thị mô tả mặc định trong khi chờ API.
   if (description) {
-    description.textContent = poi.description || "";
+    description.textContent = getPoiLocalizedDescription(poi);
   }
+
+  // Xóa thông báo dự phòng của lần xem trước.
+  setDetailNotice("audio", null);
+  setDetailNotice("content", null);
 
   // Hiện trang chi tiết.
   document.getElementById("tabMap")?.classList.add("hidden");
@@ -896,48 +922,23 @@ async function openDetailView(poiCode) {
   if (detailPlayer) {
     detailPlayer.pause();
     detailPlayer.currentTime = 0;
-    detailPlayer.src = getAudioUrl(poi);
-    detailPlayer.load();
+    setPlayerSource(detailPlayer, poi);
   }
 
   // Tải nội dung thuyết minh theo ngôn ngữ tại thời điểm gửi yêu cầu.
-  try {
-    const res = await fetch(
-      `/api/narrations/${encodeURIComponent(poiCode)}?lang=${requestLang}`
-    );
+  const narrationData = await fetchNarrationInfo(poi, requestLang);
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
-    }
-
-    const narrationData = await res.json();
-
-    // Chỉ cập nhật nếu đây vẫn là yêu cầu mới nhất,
-    // ngôn ngữ chưa thay đổi và POI vẫn được chọn.
-    if (
-      requestId !== detailLanguageRequestId ||
-      requestLang !== currentLang ||
-      poiCode !== detailAudioPoiId
-    ) {
-      return;
-    }
-
-    if (narrationData.content && description) {
-      description.textContent = narrationData.content;
-    }
-  } catch (error) {
-    // Không để lỗi hoặc phản hồi cũ làm ảnh hưởng giao diện mới.
-    if (
-      requestId === detailLanguageRequestId &&
-      requestLang === currentLang &&
-      poiCode === detailAudioPoiId
-    ) {
-      console.warn(
-        "Không tải được nội dung thuyết minh; giữ mô tả mặc định.",
-        error
-      );
-    }
+  // Chỉ cập nhật nếu đây vẫn là yêu cầu mới nhất,
+  // ngôn ngữ chưa thay đổi và POI vẫn được chọn.
+  if (
+    requestId !== detailLanguageRequestId ||
+    requestLang !== currentLang ||
+    poiCode !== detailAudioPoiId
+  ) {
+    return;
   }
+
+  applyNarrationContent(poi, narrationData, description);
 }
 
 
@@ -1002,7 +1003,7 @@ function transferAudioState(fromPlayer, toPlayer) {
   }
 }
 
-function loadAndPlayAudio(poi, autoPlay = false) {
+async function loadAndPlayAudio(poi, autoPlay = false) {
   if (!poi) return;
 
   const titleText = `${poi.poi_code} - ${getPoiLocalizedName(poi)}`;
@@ -1020,13 +1021,9 @@ function loadAndPlayAudio(poi, autoPlay = false) {
   pauseOtherAudioPlayers(activePlayer);
 
   const audioSrc = getAudioUrl(poi);
-  const desiredUrl = new URL(audioSrc, window.location.href).href;
-  const currentUrl = activePlayer.currentSrc || activePlayer.src;
-
-  if (currentUrl !== desiredUrl) {
-    activePlayer.src = audioSrc;
-    activePlayer.load();
-  }
+  const available = await setPlayerSource(activePlayer, poi);
+  if (!available) return; // thiếu audio: đã báo và khóa trình phát
+  if (mapAudioPoiId !== poi.poi_code) return; // đã chuyển sang điểm khác trong lúc chờ
 
   activePlayer.onerror = () => {
     console.error(`[Audio] Không tải được: ${audioSrc}`);
@@ -1092,7 +1089,7 @@ function batDauTraiNghiemP00() {
     name: "Cổng Văn Miếu",
     lat: 21.02875,
     lng: 105.83615,
-    geofence_radius: 12
+    geofence_radius: DEFAULT_GEOFENCE_RADIUS
   };
 
   activePoiId = gate.poi_code;
@@ -1143,9 +1140,7 @@ async function xacThucVeTuUrl() {
 }
 // KHỞI ĐỘNG HỆ THỐNG
 document.addEventListener("DOMContentLoaded", async () => {
-  const selector = document.getElementById("langSelect");
-  if (selector) selector.value = currentLang;
-  document.documentElement.lang = currentLang === "zh" ? "zh-CN" : currentLang;
+  await loadLanguages();
   applyTranslations();
   await xacThucVeTuUrl();
   initLeafletMap();
@@ -1204,18 +1199,19 @@ function resetZoomMap() {
   if (leafletMap) leafletMap.setView(VAN_MIEU_CENTER, 18);
 }
 
+// Dữ liệu dự phòng khi API lỗi — đồng bộ với data/seed/pois.json
 function getFallbackPois() {
   return [
-    { poi_code: "P00", name: "Cổng Văn Miếu", description: "Cổng chính dẫn vào khu Nội tự.", latitude: 21.02875, longitude: 105.83615, geofence_radius: 12, image_url: "/images/poi_P00_cong_van_mieu.jpg" },
-    { poi_code: "P01", name: "Cổng Đại Trung", description: "Cổng thứ hai dẫn vào không gian Nhập Đạo.", latitude: 21.02925, longitude: 105.83595, geofence_radius: 12, image_url: "/images/poi_P01_cong_dai_trung.jpg" },
-    { poi_code: "P02", name: "Khuê Văn Các", description: "Lầu gác gỗ biểu tượng văn hóa.", latitude: 21.02980, longitude: 105.83575, geofence_radius: 12, image_url: "/images/poi_P02_khue_van_cac.jpg" },
-    { poi_code: "P03", name: "Nhà Bia Tiến Sĩ", description: "Nơi lưu giữ 82 bia Tiến sĩ Di sản thế giới.", latitude: 21.03020, longitude: 105.83540, geofence_radius: 12, image_url: "/images/poi_P03_nha_bia_tien_si.jpg" },
-    { poi_code: "P04", name: "Giếng Thiên Quang", description: "Hồ nước hình vuông soi bóng Khuê Văn Các.", latitude: 21.03010, longitude: 105.83570, geofence_radius: 12, image_url: "/images/poi_P04_gieng_thien_quang.jpg" },
-    { poi_code: "P05", name: "Cổng Đại Thành", description: "Cổng lớn dẫn vào khu vực thờ tự trung tâm.", latitude: 21.03065, longitude: 105.83545, geofence_radius: 12, image_url: "/images/poi_P05_cong_dai_thanh.jpg" },
-    { poi_code: "P06", name: "Điện Đại Thành", description: "Tòa điện thờ linh thiêng Khổng Tử.", latitude: 21.03115, longitude: 105.83530, geofence_radius: 12, image_url: "/images/poi_P06_dien_dai_thanh.jpg" },
-    { poi_code: "P07", name: "Nhà Thái Học", description: "Tòa nhà tôn vinh truyền thống giáo dục.", latitude: 21.03185, longitude: 105.83505, geofence_radius: 12, image_url: "/images/poi_P07_nha_thai_hoc.jpg" },
-    { poi_code: "P08", name: "Lầu Trống", description: "Lầu gác lưu giữ chiếc trống sấm đại lễ.", latitude: 21.03180, longitude: 105.83475, geofence_radius: 12, image_url: "/images/poi_P08_lau_trong.jpg" },
-    { poi_code: "P09", name: "Lầu Chuông", description: "Lầu gác treo quả chuông đồng cổ kính.", latitude: 21.03180, longitude: 105.83535, geofence_radius: 12, image_url: "/images/poi_P09_lau_chuong.jpg" },
-    { poi_code: "P10", name: "Vườn Giám", description: "Khu vườn thanh tịnh phía Tây di tích.", latitude: 21.03080, longitude: 105.83450, geofence_radius: 15, image_url: "/images/poi_P10_vuon_giam.jpg" }
+    {"poi_code": "P00", "name": "Cổng Văn Miếu", "description": "Cổng chính dẫn vào khu Nội tự Văn Miếu - Quốc Tử Giám.", "latitude": 21.027526, "longitude": 105.835622, "geofence_radius": 15, "image_url": "/images/poi_P00_cong_van_mieu.jpg", "translations": {"vi": {"name": "Cổng Văn Miếu", "description": "Cổng chính dẫn vào khu Nội tự Văn Miếu - Quốc Tử Giám."}, "en": {"name": "Van Mieu Gate", "description": "Main gate leading into the inner precinct of the Temple of Literature – Imperial Academy."}, "zh": {"name": "文庙门", "description": "通往文庙—国子监内院的正门。"}}},
+    {"poi_code": "P01", "name": "Cổng Đại Trung", "description": "Cổng thứ hai dẫn vào không gian Nhập Đạo.", "latitude": 21.028129, "longitude": 105.835891, "geofence_radius": 15, "image_url": "/images/poi_P01_cong_dai_trung.jpg", "translations": {"vi": {"name": "Cổng Đại Trung", "description": "Cổng thứ hai dẫn vào không gian Nhập Đạo."}, "en": {"name": "Dai Trung Gate", "description": "The second gate, leading into the Nhap Dao courtyard."}, "zh": {"name": "大中门", "description": "通往“入道”空间的第二道门。"}}},
+    {"poi_code": "P02", "name": "Khuê Văn Các", "description": "Lầu gác gỗ biểu tượng văn hóa của Thủ đô Hà Nội.", "latitude": 21.028575, "longitude": 105.835838, "geofence_radius": 15, "image_url": "/images/poi_P02_khue_van_cac.jpg", "translations": {"vi": {"name": "Khuê Văn Các", "description": "Lầu gác gỗ biểu tượng văn hóa của Thủ đô Hà Nội."}, "en": {"name": "Khue Van Pavilion", "description": "A wooden pavilion, the cultural symbol of Hanoi."}, "zh": {"name": "奎文阁", "description": "木结构楼阁，河内的文化象征。"}}},
+    {"poi_code": "P03", "name": "Nhà Bia Tiến Sĩ", "description": "Nơi lưu giữ 82 bia Tiến sĩ Di sản tư liệu thế giới.", "latitude": 21.028665, "longitude": 105.83615, "geofence_radius": 15, "image_url": "/images/poi_P03_nha_bia_tien_si.jpg", "translations": {"vi": {"name": "Nhà Bia Tiến Sĩ", "description": "Nơi lưu giữ 82 bia Tiến sĩ Di sản tư liệu thế giới."}, "en": {"name": "Doctoral Stelae Hall", "description": "Home of the 82 Doctoral Stelae, a UNESCO-recognised documentary heritage."}, "zh": {"name": "进士碑亭", "description": "保存着82块进士碑，是世界记忆遗产。"}}},
+    {"poi_code": "P04", "name": "Giếng Thiên Quang", "description": "Hồ nước hình vuông soi bóng Khuê Văn Các.", "latitude": 21.028689, "longitude": 105.835903, "geofence_radius": 15, "image_url": "/images/poi_P04_gieng_thien_quang.jpg", "translations": {"vi": {"name": "Giếng Thiên Quang", "description": "Hồ nước hình vuông soi bóng Khuê Văn Các."}, "en": {"name": "Thien Quang Well", "description": "A square pond reflecting the Khue Van Pavilion."}, "zh": {"name": "天光井", "description": "映照奎文阁倒影的方形水池。"}}},
+    {"poi_code": "P05", "name": "Cổng Đại Thành", "description": "Cổng lớn dẫn vào khu vực thờ tự trung tâm.", "latitude": 21.028975, "longitude": 105.836032, "geofence_radius": 15, "image_url": "/images/poi_P05_cong_dai_thanh.jpg", "translations": {"vi": {"name": "Cổng Đại Thành", "description": "Cổng lớn dẫn vào khu vực thờ tự trung tâm."}, "en": {"name": "Dai Thanh Gate", "description": "The grand gate leading to the central worship area."}, "zh": {"name": "大成门", "description": "通往中央祭祀区的大门。"}}},
+    {"poi_code": "P06", "name": "Điện Đại Thành", "description": "Tòa điện thờ linh thiêng Khổng Tử và các bậc hiền triết.", "latitude": 21.029236, "longitude": 105.836131, "geofence_radius": 15, "image_url": "/images/poi_P06_dien_dai_thanh.jpg", "translations": {"vi": {"name": "Điện Đại Thành", "description": "Tòa điện thờ linh thiêng Khổng Tử và các bậc hiền triết."}, "en": {"name": "Dai Thanh Sanctuary", "description": "The sacred sanctuary honouring Confucius and the sages."}, "zh": {"name": "大成殿", "description": "供奉孔子与先贤的神圣大殿。"}}},
+    {"poi_code": "P07", "name": "Nhà Thái Học", "description": "Tòa nhà tôn vinh truyền thống giáo dục và các vị danh nhân.", "latitude": 21.029783, "longitude": 105.836326, "geofence_radius": 15, "image_url": "/images/poi_P07_nha_thai_hoc.jpg", "translations": {"vi": {"name": "Nhà Thái Học", "description": "Tòa nhà tôn vinh truyền thống giáo dục và các vị danh nhân."}, "en": {"name": "Thai Hoc Hall", "description": "A hall honouring the tradition of learning and eminent scholars."}, "zh": {"name": "太学堂", "description": "颂扬教育传统与名士的殿堂。"}}},
+    {"poi_code": "P08", "name": "Lầu Trống", "description": "Lầu gác lưu giữ chiếc trống sấm đại lễ.", "latitude": 21.029879, "longitude": 105.836656, "geofence_radius": 15, "image_url": "/images/poi_P08_lau_trong.jpg", "translations": {"vi": {"name": "Lầu Trống", "description": "Lầu gác lưu giữ chiếc trống sấm đại lễ."}, "en": {"name": "Drum Tower", "description": "A pavilion housing the ceremonial drum."}, "zh": {"name": "鼓楼", "description": "收藏大典鼓的楼阁。"}}},
+    {"poi_code": "P09", "name": "Lầu Chuông", "description": "Lầu gác treo quả chuông đồng cổ kính.", "latitude": 21.030063, "longitude": 105.836138, "geofence_radius": 15, "image_url": "/images/poi_P09_lau_chuong.jpg", "translations": {"vi": {"name": "Lầu Chuông", "description": "Lầu gác treo quả chuông đồng cổ kính."}, "en": {"name": "Bell Tower", "description": "A pavilion housing the ancient bronze bell."}, "zh": {"name": "钟楼", "description": "悬挂古铜钟的楼阁。"}}},
+    {"poi_code": "P10", "name": "Vườn Giám", "description": "Khu vườn thanh tịnh nằm phía Tây khu di tích Văn Miếu - Quốc Tử Giám, không gian xanh mát và lịch sử.", "latitude": 21.028297, "longitude": 105.835066, "geofence_radius": 15, "image_url": "/images/poi_P10_vuon_giam.jpg", "translations": {"vi": {"name": "Vườn Giám", "description": "Khu vườn thanh tịnh nằm phía Tây khu di tích Văn Miếu - Quốc Tử Giám, không gian xanh mát và lịch sử."}, "en": {"name": "Giam Garden", "description": "A tranquil garden on the west side of the site, green and steeped in history."}, "zh": {"name": "监园", "description": "遗址西侧的清幽花园，绿意盎然、饱含历史。"}}},
   ];
 }

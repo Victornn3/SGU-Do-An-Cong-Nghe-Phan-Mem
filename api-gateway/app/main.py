@@ -17,6 +17,8 @@ app.add_middleware(
 SERVICES = {
     "auth": os.getenv("AUTH_SERVICE_URL", "http://auth-service:8001"),
     "pois": os.getenv("POI_SERVICE_URL", "http://poi-service:8002"),
+    # /api/languages do poi-service phục vụ (danh mục ngôn ngữ)
+    "languages": os.getenv("POI_SERVICE_URL", "http://poi-service:8002"),
     "narrations": os.getenv(
         "NARRATION_SERVICE_URL", "http://narration-service:8003"
     ),

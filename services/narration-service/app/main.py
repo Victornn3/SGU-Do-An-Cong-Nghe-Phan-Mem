@@ -21,24 +21,29 @@ AUDIO_BASE_DIR = Path(os.getenv("AUDIO_BASE_DIR", "/data/audio"))
 
 
 class NarrationUpdate(BaseModel):
+    """Nội dung thuyết minh theo mã ngôn ngữ, ví dụ {"vi": "...", "ko": "..."}."""
     poi_id: str
     title: str
-    vi_content: str
-    en_content: str | None = None
-    zh_content: str | None = None
+    contents: dict[str, str]
+
+
+def get_language(code: str) -> dict | None:
+    """Tra ngôn ngữ đang hoạt động trong collection `languages` (dữ liệu, không ghi cứng)."""
+    if not code:
+        return None
+    return db.languages.find_one({"_id": code, "is_active": True})
 
 
 def generate_tts_file(text: str, lang: str, poi_id: str) -> str | None:
-    """Tạo file MP3 thực tế bằng Google Text-to-Speech và kiểm tra dung lượng file."""
+    """Tạo file MP3 bằng Google Text-to-Speech; mã TTS lấy từ collection `languages`."""
     if not text or not text.strip():
         return None
 
-    gtts_lang_map = {
-        "vi": "vi",
-        "en": "en",
-        "zh": "zh-CN"
-    }
-    target_lang = gtts_lang_map.get(lang, "vi")
+    language = get_language(lang)
+    if not language:
+        logger.error(f"Ngôn ngữ '{lang}' không tồn tại hoặc đã tắt, bỏ qua sinh audio cho {poi_id}")
+        return None
+    target_lang = language.get("tts_locale") or lang
 
     folder_path = AUDIO_BASE_DIR / lang
     folder_path.mkdir(parents=True, exist_ok=True)
@@ -88,60 +93,58 @@ def health_check():
 
 @app.get("/api/narrations/{poi_id}")
 def get_narration(poi_id: str, lang: str = "vi"):
-    """Lấy bài thuyết minh theo ID địa điểm và mã ngôn ngữ (vi, en, zh)."""
+    """
+    Lấy bài thuyết minh theo mã điểm và mã ngôn ngữ (lấy từ collection `languages`).
+    Không tự đổi sang ngôn ngữ khác: nếu thiếu nội dung hoặc audio thì báo rõ để
+    giao diện hiện thông báo dự phòng.
+    """
+    if not get_language(lang):
+        raise HTTPException(status_code=404, detail=f"Ngôn ngữ không được hỗ trợ: {lang}")
+
     item = db.narrations.find_one({"target_id": poi_id})
     if not item:
         raise HTTPException(status_code=404, detail="Thuyết minh không tồn tại")
 
-    content_dict = item.get("content", {})
-    audio_paths_dict = item.get("audio_paths", {})
-    audio_status_dict = item.get("audio_status", {})
+    content = (item.get("content", {}).get(lang) or "").strip()
+    audio_path = item.get("audio_paths", {}).get(lang)
+    audio_status = item.get("audio_status", {}).get(lang, "pending")
 
-    content = content_dict.get(lang) or content_dict.get("vi", "")
-    audio_path = audio_paths_dict.get(lang)
-    audio_status = audio_status_dict.get(lang, "pending")
-
-    is_ready = False
-    if audio_path:
-        local_file = AUDIO_BASE_DIR / lang / f"{poi_id}.mp3"
-        is_ready = local_file.is_file() and local_file.stat().st_size > 0
+    # Audio "có" khi file MP3 thật sự tồn tại trong thư mục audio (không chỉ dựa vào DB).
+    local_file = AUDIO_BASE_DIR / lang / f"{poi_id}.mp3"
+    is_ready = local_file.is_file() and local_file.stat().st_size > 0
+    audio_path = audio_path or f"/audio/{lang}/{poi_id}.mp3"
 
     return {
         "poi_id": poi_id,
         "title": item.get("title"),
         "lang": lang,
-        "content": content,
+        "content": content or None,
+        "content_available": bool(content),
         "audio_url": audio_path if is_ready else None,
+        "audio_available": is_ready,
         "audio_status": "completed" if is_ready else audio_status,
     }
 
 
 @app.post("/api/narrations")
 def update_narration(data: NarrationUpdate, background_tasks: BackgroundTasks):
-    """Cập nhật nội dung bài thuyết minh và xếp hàng tạo file MP3 ở background."""
-    current_doc = db.narrations.find_one({"target_id": data.poi_id}) or {}
-    existing_content = current_doc.get("content", {})
+    """Cập nhật nội dung thuyết minh theo mã ngôn ngữ và xếp hàng tạo MP3 ở nền."""
+    if not data.contents:
+        raise HTTPException(status_code=422, detail="Cần ít nhất một ngôn ngữ trong contents")
 
-    contents_to_process = {
-        "vi": data.vi_content,
-        "en": data.en_content if data.en_content is not None else existing_content.get("en", ""),
-        "zh": data.zh_content if data.zh_content is not None else existing_content.get("zh", ""),
-    }
+    unknown = [code for code in data.contents if not get_language(code)]
+    if unknown:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Ngôn ngữ không được hỗ trợ: {', '.join(unknown)}",
+        )
 
-    update_payload = {
-        "target_id": data.poi_id,
-        "title": data.title,
-        "content.vi": contents_to_process["vi"],
-        "audio_status.vi": "processing",
-    }
-
-    if data.en_content is not None:
-        update_payload["content.en"] = data.en_content
-        update_payload["audio_status.en"] = "processing"
-
-    if data.zh_content is not None:
-        update_payload["content.zh"] = data.zh_content
-        update_payload["audio_status.zh"] = "processing"
+    update_payload = {"target_id": data.poi_id, "title": data.title}
+    contents_to_process = {}
+    for code, text in data.contents.items():
+        update_payload[f"content.{code}"] = text
+        update_payload[f"audio_status.{code}"] = "processing"
+        contents_to_process[code] = text
 
     db.narrations.update_one(
         {"target_id": data.poi_id},
@@ -161,7 +164,7 @@ def update_narration(data: NarrationUpdate, background_tasks: BackgroundTasks):
 def trigger_generate_all_audio(background_tasks: BackgroundTasks):
     """
     Kích hoạt tiến trình nền đọc toàn bộ bản ghi trong MongoDB 
-    và sinh đầy đủ 33 file MP3 (11 POI x 3 ngôn ngữ).
+    và sinh file MP3 cho mọi điểm x mọi ngôn ngữ đang hoạt động.
     """
     narrations = list(db.narrations.find({}))
     if not narrations:
@@ -183,6 +186,6 @@ def trigger_generate_all_audio(background_tasks: BackgroundTasks):
 
     return {
         "success": True,
-        "message": f"Đã xếp hàng tiến trình sinh âm thanh cho {len(narrations)} địa điểm (3 ngôn ngữ).",
+        "message": f"Đã xếp hàng tiến trình sinh âm thanh cho {len(narrations)} địa điểm.",
         "total_pois": len(narrations),
     }

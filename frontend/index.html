@@ -71,11 +71,8 @@
           onchange="changeLanguage(this.value)"
           class="bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
         >
+          <!-- Danh sách ngôn ngữ được nạp từ API /api/languages (collection languages) -->
           <option value="vi">🇻🇳 Tiếng Việt</option>
-
-          <option value="en">🇬🇧 English</option>
-
-          <option value="zh">🇨🇳 中文</option>
         </select>
       </div>
     </header>
@@ -101,7 +98,7 @@
             ></span>
 
             <span id="gpsStatusText" data-i18n="map.gpsStatus"
-              >Đang định vị Nội tự (Geofence 10m)</span
+              >Đang định vị Nội tự (Geofence)</span
             >
           </div>
 
@@ -222,7 +219,7 @@
                 id="audioModeBadge"
                 class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded-full"
                 data-i18n="audio.geofence"
-                >Geofence (10m)</span
+                >Geofence</span
               >
 
               <button
@@ -251,7 +248,7 @@
       >
         <div class="mb-3">
           <h2 class="text-sm font-bold text-slate-800" data-i18n="poi.title">
-            Danh sách điểm tham quan (11 POI)
+            Danh sách điểm tham quan
           </h2>
 
           <p class="text-xs text-slate-500" data-i18n="poi.description">
@@ -332,6 +329,13 @@
                 <p
                   id="detailDescription"
                   class="text-xs sm:text-sm text-slate-700 leading-relaxed"
+                ></p>
+
+                <!-- Thông báo dự phòng: thiếu bản dịch hoặc thiếu audio -->
+                <p
+                  id="detailNotice"
+                  class="hidden mt-2 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+                  role="status"
                 ></p>
               </div>
             </div>
