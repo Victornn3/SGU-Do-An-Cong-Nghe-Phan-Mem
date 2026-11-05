@@ -672,31 +672,17 @@
             taiDuLieuTuBackend();
           } else {
             // Fallback nếu tài khoản mật khẩu khớp cấu hình mặc định
-            if (username === "admin" && password === "admin123") {
-              localStorage.setItem("admin_token", "default-admin-token");
-              localStorage.setItem("admin_user", username);
-              document
-                .getElementById("modal-dang-nhap")
-                .classList.add("hidden");
-              hienThBaoNhanh("Đăng nhập thành công!");
-              taiDuLieuTuBackend();
-              return;
-            }
+            errorDiv.textContent = "Tên đăng nhập hoặc mật khẩu không chính xác!";
+            errorDiv.classList.remove("hidden");
+            return;
             errorDiv.textContent =
               data.detail || "Mật khẩu hoặc tài khoản không đúng!";
             errorDiv.classList.remove("hidden");
           }
         } catch (err) {
-          if (username === "admin" && password === "admin123") {
-            localStorage.setItem("admin_token", "default-admin-token");
-            localStorage.setItem("admin_user", username);
-            document.getElementById("modal-dang-nhap").classList.add("hidden");
-            hienThBaoNhanh("Đã kết nối qua phiên quản trị nội bộ.");
-            taiDuLieuTuBackend();
-          } else {
-            errorDiv.textContent = "Không thể kết nối tới Auth Service!";
-            errorDiv.classList.remove("hidden");
-          }
+          console.error("Lỗi kết nối:", err);
+          errorDiv.textContent = "Không thể kết nối tới Auth Service!";
+          errorDiv.classList.remove("hidden");
         } finally {
           submitBtn.disabled = false;
           submitBtn.innerHTML = "Đăng nhập quản trị";
