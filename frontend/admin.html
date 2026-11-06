@@ -515,10 +515,25 @@
                     class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
+
+                <!-- [M7] Ô CHỌN LOẠI VÉ NẰM Ở ĐÂY (Độc lập, đẹp mắt theo đúng chuẩn Tailwind của web) -->
+                <div class="mb-3">
+                  <select
+                    id="select-loai-ve"
+                    class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
+                  >
+                    <option value="STANDARD">🎟️ Vé Chuẩn (STANDARD)</option>
+                    <option value="PRIORITY">⭐ Vé Ưu Tiên (PRIORITY)</option>
+                  </select>
+                </div>
+
+                <!-- NÚT BẤM RIÊNG BIỆT Ở DƯỚI -->
                 <button
                   onclick="sinhMaQrInVe()"
                   class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-blue-600/20 cursor-pointer"
                 >
+                  Sinh mã QR in vé
+                </button>
                   <i class="fa-solid fa-qrcode mr-1"></i> Sinh dải mã QR in vé
                 </button>
               </div>
@@ -1119,6 +1134,10 @@
       async function sinhMaQrInVe() {
         const inputSoLuong = document.getElementById("input-so-luong");
         const soLuong = Number.parseInt(inputSoLuong.value, 10);
+        
+        // [M7] Lấy loại vé người dùng chọn (mặc định STANDARD nếu chưa chọn)
+        const selectLoaiVe = document.getElementById("select-loai-ve");
+        const loaiVe = selectLoaiVe ? selectLoaiVe.value : "STANDARD";
 
         if (!Number.isInteger(soLuong) || soLuong < 1 || soLuong > 50) {
           alert("Vui lòng nhập số lượng từ 1 đến 50.");
@@ -1138,15 +1157,18 @@
             const res = await fetch(`${DUONG_DAN_API}/tickets/create`, {
               method: "POST",
               headers: {
+                "Content-Type": "application/json",
                 Accept: "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
+              // [M7] Gửi loại vé lên backend
+              body: JSON.stringify({ ticket_type: loaiVe }),
             });
             if (res.ok) taoThanhCong++;
           }
 
           await taiDuLieuTuBackend();
-          hienThBaoNhanh(`Đã sinh thành công ${taoThanhCong} mã QR in vé.`);
+          hienThBaoNhanh(`Đã sinh thành công ${taoThanhCong} mã vé (${loaiVe}).`);
         } catch (error) {
           console.error("Lỗi sinh mã QR:", error);
           alert("Lỗi kết nối khi sinh mã QR. Hãy kiểm tra Ticket Service.");
