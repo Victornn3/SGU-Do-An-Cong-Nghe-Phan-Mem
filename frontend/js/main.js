@@ -710,6 +710,8 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
 
     // Khi chuyển sang POI mới, cập nhật ngay lập tức
     if (currentSimulatedPoiId !== insidePoi.poi_code) {
+      // Rời POI cũ: đặt lại cờ để lần sau vào lại POI đó sẽ tự phát lại (PRD KL04)
+      if (currentSimulatedPoiId) autoPlayedPois.delete(currentSimulatedPoiId);
       currentSimulatedPoiId = insidePoi.poi_code;
       activePoiId = insidePoi.poi_code;
       
@@ -724,6 +726,7 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
   } else {
     // Ra ngoài vùng POI (về trạng thái không đứng ở điểm nào nhưng vẫn online)
     if (currentSimulatedPoiId !== null) {
+      autoPlayedPois.delete(currentSimulatedPoiId); // rời vùng: đặt lại cờ tự phát
       currentSimulatedPoiId = null;
       const currentMode = gpsMode === "real" ? "REAL_GPS" : "SIMULATED";
       guiCapNhatTrangThaiPhien(currentMode, null, false, "ACTIVE");
@@ -1165,27 +1168,75 @@ function playDetailAudioManually() {
   }
 }
 
+// Xử lý một vị trí GPS thật (dùng cho cả lần đo đầu và các lần cập nhật sau)
+function handleRealPosition(position) {
+  if (gpsMode !== "real") return;
+
+  const lat = position.coords.latitude;
+  const lng = position.coords.longitude;
+  const accuracy = position.coords.accuracy;
+  lastRealPosition = { lat, lng, accuracy };
+
+  if (leafletMap) {
+    updatePersonMarker(lat, lng, t("marker.real", "Vị trí thật (±{acc}m)", { acc: Math.round(accuracy) }));
+  }
+
+  const distToCenter = getDistanceMeters(lat, lng, VAN_MIEU_CENTER[0], VAN_MIEU_CENTER[1]);
+  if (distToCenter <= LOCATION_CONFIG.siteRadiusMeters) {
+    checkGeofenceTrigger(lat, lng, accuracy);
+  } else {
+    setGpsStatus(t("status.gpsOutside", "Bạn đang ở ngoài khuôn viên Văn Miếu. Hãy chọn điểm trong danh sách để nghe, hoặc dùng chế độ mô phỏng."));
+  }
+}
+
 function startWatchingRealGps() {
   if (realGpsWatchId !== null) return;
 
   realGpsWatchId = navigator.geolocation.watchPosition(
+    handleRealPosition,
+    (err) => console.warn("Lỗi cập nhật GPS ngầm:", err),
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+  );
+}
+
+// Khách chọn dùng GPS thật. Bị từ chối hoặc lỗi thì ứng dụng vẫn dùng được:
+// xem bản đồ, đọc văn bản và nghe thủ công (PRD KL07).
+function batDauGpsThat() {
+  const closeWelcome = () => document.getElementById("welcomeModal")?.classList.add("hidden");
+
+  if (!navigator.geolocation) {
+    closeWelcome();
+    setGpsStatus(t("status.gpsUnavailable", "Không xác định được vị trí. Bạn vẫn có thể xem bản đồ và chọn điểm trong danh sách để nghe."));
+    return;
+  }
+
+  setGpsStatus(t("status.gpsRequesting", "Đang xin quyền vị trí..."));
+  navigator.geolocation.getCurrentPosition(
     (position) => {
-      if (gpsMode !== "real") return;
-
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      const accuracy = position.coords.accuracy;
-
-      if (leafletMap) {
-        updatePersonMarker(lat, lng, t("marker.real", "Vị trí thật (±{acc}m)", { acc: Math.round(accuracy) }));
-      }
-
-      const distToCenter = getDistanceMeters(lat, lng, VAN_MIEU_CENTER[0], VAN_MIEU_CENTER[1]);
-      if (distToCenter <= LOCATION_CONFIG.siteRadiusMeters) {
-        checkGeofenceTrigger(lat, lng, accuracy);
+      closeWelcome();
+      sessionStorage.setItem("vm_experience_started", "1");
+      initialLocationMode = "real";
+      gpsMode = "real";
+      recordAccessClassification("real_gps", true);
+      guiHeartbeatTruyCap();
+      document.getElementById("floatingAudioContainer")?.classList.remove("hidden");
+      startWatchingRealGps();
+      handleRealPosition(position);
+      // Trình duyệt di động chặn tự phát âm thanh: nhắc khách chạm để bật (KL07)
+      if (!autoPlayedPois.size) {
+        setGpsStatus(t("status.gpsGranted", "Đã bật GPS. Chạm vào màn hình để bật âm thanh, rồi đi tới các điểm tham quan."));
       }
     },
-    (err) => console.warn("Lỗi cập nhật GPS ngầm:", err),
+    (err) => {
+      console.warn("Không lấy được vị trí:", err);
+      closeWelcome();
+      gpsMode = null;
+      setGpsStatus(
+        err && err.code === 1
+          ? t("status.gpsDenied", "Bạn đã từ chối quyền vị trí. Vẫn xem được bản đồ và chọn điểm trong danh sách để nghe thuyết minh.")
+          : t("status.gpsUnavailable", "Không xác định được vị trí. Bạn vẫn có thể xem bản đồ và chọn điểm trong danh sách để nghe.")
+      );
+    },
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
   );
 }

@@ -54,7 +54,13 @@
       "marker.youAt": "Vị trí của bạn ({code})",
       "marker.simulated": "Vị trí GPS mô phỏng",
       "marker.real": "Vị trí thật (±{acc}m)",
-      "notice.fallbackData": "Đang dùng dữ liệu dự phòng ({reason})."
+      "notice.fallbackData": "Đang dùng dữ liệu dự phòng ({reason}).",
+      "welcome.useGps": "Dùng vị trí GPS thật",
+      "status.gpsRequesting": "Đang xin quyền vị trí...",
+      "status.gpsGranted": "Đã bật GPS. Chạm vào màn hình để bật âm thanh, rồi đi tới các điểm tham quan.",
+      "status.gpsDenied": "Bạn đã từ chối quyền vị trí. Vẫn xem được bản đồ và chọn điểm trong danh sách để nghe thuyết minh.",
+      "status.gpsUnavailable": "Không xác định được vị trí. Bạn vẫn có thể xem bản đồ và chọn điểm trong danh sách để nghe.",
+      "status.gpsOutside": "Bạn đang ở ngoài khuôn viên Văn Miếu. Hãy chọn điểm trong danh sách để nghe, hoặc dùng chế độ mô phỏng."
     }
   },
   {
@@ -112,7 +118,13 @@
       "marker.youAt": "Your location ({code})",
       "marker.simulated": "Simulated GPS location",
       "marker.real": "Real location (±{acc} m)",
-      "notice.fallbackData": "Using backup data ({reason})."
+      "notice.fallbackData": "Using backup data ({reason}).",
+      "welcome.useGps": "Use my real GPS location",
+      "status.gpsRequesting": "Requesting location permission...",
+      "status.gpsGranted": "GPS is on. Tap the screen to enable sound, then walk to the points of interest.",
+      "status.gpsDenied": "Location permission was denied. You can still browse the map and pick a point from the list to listen.",
+      "status.gpsUnavailable": "Your location could not be determined. You can still browse the map and pick a point from the list to listen.",
+      "status.gpsOutside": "You are outside the Temple of Literature grounds. Pick a point from the list to listen, or use simulation mode."
     }
   },
   {
@@ -170,7 +182,13 @@
       "marker.youAt": "您的位置（{code}）",
       "marker.simulated": "模拟 GPS 位置",
       "marker.real": "真实位置（±{acc} 米）",
-      "notice.fallbackData": "正在使用备用数据（{reason}）。"
+      "notice.fallbackData": "正在使用备用数据（{reason}）。",
+      "welcome.useGps": "使用真实GPS定位",
+      "status.gpsRequesting": "正在请求定位权限……",
+      "status.gpsGranted": "已开启GPS。请点击屏幕以开启声音，然后前往各个景点。",
+      "status.gpsDenied": "您已拒绝定位权限。仍可浏览地图，并从列表中选择景点收听讲解。",
+      "status.gpsUnavailable": "无法确定您的位置。仍可浏览地图，并从列表中选择景点收听讲解。",
+      "status.gpsOutside": "您目前在文庙园区之外。请从列表中选择景点收听，或使用模拟模式。"
     }
   }
 ]
