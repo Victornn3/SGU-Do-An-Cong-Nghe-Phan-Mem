@@ -40,7 +40,7 @@ Phản hồi 200 (rút gọn một phần tử):
   "data": [{
     "_id": "P00", "poi_code": "P00", "name": "Cổng Văn Miếu",
     "latitude": 21.027526, "longitude": 105.835622, "geofence_radius": 15,
-    "status": "PUBLISHED", "coordinate_status": "pending_field_verification",
+    "status": "PUBLISHED", "coordinate_status": "verified",
     "display_order": 0, "image_url": "/images/poi_P00_cong_van_mieu.jpg",
     "translations": {
       "vi": { "name": "Cổng Văn Miếu", "description": "..." },
@@ -134,4 +134,4 @@ Xóa mềm: chuyển POI sang `HIDDEN`, **không** xóa dữ liệu khỏi cơ s
 
 ## 6. Lưu ý vận hành
 - Chạy lại `seed-data` sẽ **ghi đè** các POI có trong `pois.json` (kể cả trạng thái và nội dung đã sửa qua trang admin). POI tạo thêm qua admin không bị xóa.
-- `coordinate_status = pending_field_verification` nghĩa là tọa độ chưa được kiểm chứng ngoài thực địa; chuyển thành `verified` sau khi đã đối chiếu.
+- `coordinate_status = verified`: tọa độ đã được đối chiếu trên Google Maps (chưa đo GPS tại hiện trường). `pending_field_verification` là giá trị mặc định của điểm mới tạo qua API, chưa được đối chiếu.

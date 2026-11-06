@@ -48,7 +48,7 @@ Ghi chú về cách kiểm: các dòng "giả lập" được chạy bằng trì
 
 Kiểm thử tự động (thư mục `tests/`): 23 test đạt, gồm quy tắc bán kính 10–25 m, trạng thái POI, tọa độ, bản dịch và dữ liệu mẫu (11 POI, 3 ngôn ngữ, khóa giao diện đồng nhất). Lệnh: `python -m unittest discover tests -v`. Trang `admin-content.html` và các API quản lý POI đã được chạy thử với dữ liệu giả lập; cần chạy lại trên hệ thống Docker thật bằng `./tests/smoke_api.sh`.
 
-Chưa xác minh: tọa độ 11 POI chưa đối chiếu hết ngoài thực địa (`coordinate_status` vẫn là `pending_field_verification`). Ghi đúng như vậy trong báo cáo, không ghi "đã xác minh".
+Tọa độ 11 POI đã được đối chiếu thủ công trên Google Maps (ảnh vệ tinh) ngày 07/11/2026, `coordinate_status = verified`. Lưu ý: đây là đối chiếu trên bản đồ, chưa đo bằng GPS tại hiện trường; ghi đúng như vậy trong báo cáo.
 
 ## C. 10 câu hỏi–đáp để chuẩn bị bảo vệ
 
@@ -59,7 +59,7 @@ Chưa xác minh: tọa độ 11 POI chưa đối chiếu hết ngoài thực đ�
 5. **Geofence tính ở đâu và vì sao?** Tính trên điện thoại bằng công thức Haversine (một hàm duy nhất trong `main.js`), không phụ thuộc đường truyền và phản hồi ngay khi vào vùng. Server chỉ nhận thống kê. Giao diện có hai chế độ: GPS thật (xin quyền, bị từ chối vẫn dùng thủ công) và mô phỏng vị trí để demo trong nhà.
 6. **DRAFT, PUBLISHED, HIDDEN khác nhau thế nào?** POI mới luôn là DRAFT. Chỉ PUBLISHED được gửi cho khách. HIDDEN là POI bị gỡ khỏi trang khách nhưng vẫn giữ dữ liệu, có thể xuất bản lại.
 7. **Audio tạo bằng cách nào, vì sao không đưa MP3 vào Git?** Văn bản do nhóm biên soạn; MP3 sinh bằng gTTS (`generate_33_audio.py` hoặc tự động khi admin lưu thuyết minh). File MP3 nặng nên bị chặn trong `.gitignore` và được cấp riêng khi triển khai.
-8. **Tọa độ lấy từ đâu, đã chính xác chưa?** Lấy từ Google Maps và đối chiếu ảnh vệ tinh; đánh dấu `pending_field_verification` cho tới khi nhóm đo thực địa. Đây là hạn chế đã biết.
+8. **Tọa độ lấy từ đâu, đã chính xác chưa?** Lấy từ Google Maps và đối chiếu từng điểm trên ảnh vệ tinh, đánh dấu `verified`. Chưa đo bằng GPS tại hiện trường nên sai số vài mét là có thể; bán kính 15 m đủ bù sai số này. Điểm tạo mới qua trang admin mặc định là `pending_field_verification` cho tới khi được đối chiếu.
 9. **Xóa POI thì dữ liệu có mất không?** Không. `DELETE` chỉ chuyển sang HIDDEN (xóa mềm) để tránh mất dữ liệu do thao tác nhầm.
 10. **API ghi dữ liệu được bảo vệ thế nào?** Mọi API ghi và `GET /api/pois/admin/all` yêu cầu token JWT; gateway kiểm tra token trước khi chuyển tiếp (phần của Người 2). Trang quản trị gửi token từ `localStorage.admin_token`. Trước khi phần xác thực của Người 2 được gộp vào, các API này chưa bị chặn ở gateway.
 
@@ -77,4 +77,4 @@ Chưa xác minh: tọa độ 11 POI chưa đối chiếu hết ngoài thực đ�
 
 **Slide 3 – Kiểm thử và hạn chế**
 - 23 test tự động đạt; AC08–AC17 đạt trên trình duyệt giả lập (AC13 đạt một phần)
-- Hạn chế: chưa thử GPS ngoài thực địa; tọa độ chưa đo thực địa; bảo vệ API ghi phụ thuộc phần xác thực của Người 2
+- Hạn chế: chưa thử GPS ngoài thực địa; tọa độ mới đối chiếu trên bản đồ, chưa đo GPS tại hiện trường; bảo vệ API ghi phụ thuộc phần xác thực của Người 2
