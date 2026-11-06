@@ -24,7 +24,8 @@
         "name": "文庙门",
         "description": "通往文庙—国子监内院的正门。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P01",
@@ -51,7 +52,8 @@
         "name": "大中门",
         "description": "通往“入道”空间的第二道门。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P02",
@@ -78,7 +80,8 @@
         "name": "奎文阁",
         "description": "木结构楼阁，河内的文化象征。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P03",
@@ -105,7 +108,8 @@
         "name": "进士碑亭",
         "description": "保存着82块进士碑，是世界记忆遗产。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P04",
@@ -132,7 +136,8 @@
         "name": "天光井",
         "description": "映照奎文阁倒影的方形水池。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P05",
@@ -159,7 +164,8 @@
         "name": "大成门",
         "description": "通往中央祭祀区的大门。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P06",
@@ -186,7 +192,8 @@
         "name": "大成殿",
         "description": "供奉孔子与先贤的神圣大殿。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P07",
@@ -213,7 +220,8 @@
         "name": "太学堂",
         "description": "颂扬教育传统与名士的殿堂。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P08",
@@ -240,7 +248,8 @@
         "name": "鼓楼",
         "description": "收藏大典鼓的楼阁。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P09",
@@ -267,7 +276,8 @@
         "name": "钟楼",
         "description": "悬挂古铜钟的楼阁。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P10",
@@ -294,6 +304,7 @@
         "name": "监园",
         "description": "遗址西侧的清幽花园，绿意盎然、饱含历史。"
       }
-    }
+    },
+    "status": "PUBLISHED"
   }
 ]
