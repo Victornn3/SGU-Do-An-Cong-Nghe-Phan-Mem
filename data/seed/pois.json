@@ -23,6 +23,10 @@
       "zh": {
         "name": "文庙门",
         "description": "通往文庙—国子监内院的正门。"
+      },
+      "ko": {
+        "name": "문묘 정문",
+        "description": "문묘 – 국자감 내부 경내로 들어가는 정문입니다."
       }
     },
     "status": "PUBLISHED"
@@ -51,6 +55,10 @@
       "zh": {
         "name": "大中门",
         "description": "通往“入道”空间的第二道门。"
+      },
+      "ko": {
+        "name": "대중문",
+        "description": "입도(入道) 마당으로 이어지는 두 번째 문입니다."
       }
     },
     "status": "PUBLISHED"
@@ -79,6 +87,10 @@
       "zh": {
         "name": "奎文阁",
         "description": "木结构楼阁，河内的文化象征。"
+      },
+      "ko": {
+        "name": "규문각",
+        "description": "하노이의 문화적 상징인 목조 누각입니다."
       }
     },
     "status": "PUBLISHED"
@@ -107,6 +119,10 @@
       "zh": {
         "name": "进士碑亭",
         "description": "保存着82块进士碑，是世界记忆遗产。"
+      },
+      "ko": {
+        "name": "진사비 전시관",
+        "description": "유네스코가 인정한 기록유산인 진사비 82기가 모셔진 곳입니다."
       }
     },
     "status": "PUBLISHED"
@@ -135,6 +151,10 @@
       "zh": {
         "name": "天光井",
         "description": "映照奎文阁倒影的方形水池。"
+      },
+      "ko": {
+        "name": "천광정",
+        "description": "규문각이 비치는 네모난 연못입니다."
       }
     },
     "status": "PUBLISHED"
@@ -163,6 +183,10 @@
       "zh": {
         "name": "大成门",
         "description": "通往中央祭祀区的大门。"
+      },
+      "ko": {
+        "name": "대성문",
+        "description": "중앙 제사 구역으로 이어지는 웅장한 문입니다."
       }
     },
     "status": "PUBLISHED"
@@ -191,6 +215,10 @@
       "zh": {
         "name": "大成殿",
         "description": "供奉孔子与先贤的神圣大殿。"
+      },
+      "ko": {
+        "name": "대성전",
+        "description": "공자와 성현들을 모신 신성한 전각입니다."
       }
     },
     "status": "PUBLISHED"
@@ -219,6 +247,10 @@
       "zh": {
         "name": "太学堂",
         "description": "颂扬教育传统与名士的殿堂。"
+      },
+      "ko": {
+        "name": "태학당",
+        "description": "학문의 전통과 뛰어난 학자들을 기리는 전각입니다."
       }
     },
     "status": "PUBLISHED"
@@ -247,6 +279,10 @@
       "zh": {
         "name": "鼓楼",
         "description": "收藏大典鼓的楼阁。"
+      },
+      "ko": {
+        "name": "고루(북 누각)",
+        "description": "의례용 북을 보관한 누각입니다."
       }
     },
     "status": "PUBLISHED"
@@ -275,6 +311,10 @@
       "zh": {
         "name": "钟楼",
         "description": "悬挂古铜钟的楼阁。"
+      },
+      "ko": {
+        "name": "종루(종 누각)",
+        "description": "오래된 청동 종을 보관한 누각입니다."
       }
     },
     "status": "PUBLISHED"
@@ -303,6 +343,10 @@
       "zh": {
         "name": "监园",
         "description": "遗址西侧的清幽花园，绿意盎然、饱含历史。"
+      },
+      "ko": {
+        "name": "잠 정원",
+        "description": "유적지 서쪽의 고요하고 푸르며 역사가 깃든 정원입니다."
       }
     },
     "status": "PUBLISHED"

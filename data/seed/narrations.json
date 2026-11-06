@@ -6,17 +6,20 @@
     "content": {
       "vi": "Chào mừng quý khách đến với Văn Miếu – Quốc Tử Giám, Di tích Quốc gia Đặc biệt và là biểu tượng văn hóa, học thuật thiêng liêng của thủ đô Hà Nội cũng như cả nước. Được khởi dựng vào năm 1070 dưới triều vua Lý Thánh Tông để thờ Khổng Tử, các bậc hiền triết và sau đó thành lập Quốc Tử Giám vào năm 1076 dưới thời vua Lý Nhân Tông, nơi đây được ghi nhận là trường đại học đầu tiên của Việt Nam. Trải qua hơn một thiên niên kỷ thăng trầm cùng lịch sử dân tộc, quần thể kiến trúc cổ kính này không chỉ lưu giữ những dấu ấn Nho học uy nghiêm, mà còn là nơi vinh danh hàng nghìn tiến sĩ khoa bảng, thể hiện truyền thống hiếu học, tinh thần tôn sư trọng đạo và đạo lý uống nước nhớ nguồn đáng tự hào của người Việt.",
       "en": "Welcome to the Temple of Literature – Quoc Tu Giam, a Special National Landmark and the sacred cultural and academic symbol of Hanoi and Vietnam. Founded in 1070 by King Ly Thanh Tong to worship Confucius and sages, and later hosting Quoc Tu Giam in 1076 under King Ly Nhân Tông, it is recognized as Vietnam's first university. Surviving over a millennium of history, this ancient complex preserves profound Confucian heritages while honoring thousands of scholarly doctors, reflecting the proud national tradition of learning and respect for education.",
-      "zh": "欢迎来到文庙-国子监！这是越南国家级特别遗迹，也是河内乃至全越南神圣的文化与学术象征。文庙建于1070年（李圣宗时期），最初用于供奉孔子及先贤；1076年李仁宗时期在此设立国子监，被公认为越南的第一所大学。历经千百年的历史沧桑，这片古建筑群不仅保存了庄严的儒学印记，更彰显了越南民族尊师重道、崇尚学习的骄傲传统。"
+      "zh": "欢迎来到文庙-国子监！这是越南国家级特别遗迹，也是河内乃至全越南神圣的文化与学术象征。文庙建于1070年（李圣宗时期），最初用于供奉孔子及先贤；1076年李仁宗时期在此设立国子监，被公认为越南的第一所大学。历经千百年的历史沧桑，这片古建筑群不仅保存了庄严的儒学印记，更彰显了越南民族尊师重道、崇尚学习的骄傲传统。",
+      "ko": "문묘 – 국자감(꾸옥뜨잠)에 오신 것을 환영합니다. 이곳은 국가 특별 사적이자 하노이와 베트남의 신성한 문화·학문의 상징입니다. 1070년 리 타인 똥 왕이 공자와 성현을 모시기 위해 세웠고, 1076년 리 년 똥 왕 때 국자감이 이곳에 설치되어 베트남 최초의 대학으로 여겨집니다. 천 년이 넘는 세월을 견뎌 온 이 오래된 건축군은 깊은 유교 유산을 간직하고 수많은 진사를 기리며, 배움과 교육을 존중해 온 자랑스러운 민족의 전통을 보여 줍니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P00.mp3",
       "en": "/audio/en/P00.mp3",
-      "zh": "/audio/zh/P00.mp3"
+      "zh": "/audio/zh/P00.mp3",
+      "ko": "/audio/ko/P00.mp3"
     }
   },
   {
@@ -26,17 +29,20 @@
     "content": {
       "vi": "Cổng Đại Trung là cánh cửa thứ hai dẫn quý khách bước vào không gian thâm nghiêm của khu Nội tự. Kiến trúc cổng mang kiểu dáng truyền thống với ba gian, mái lợp ngói mũi hài rêu phong. Hai bên tả hữu của cổng chính là hai cửa phụ nhỏ hơn mang tên Thành Đức (Thành tựu đạo đức) và Đạt Tài (Vươn tới tài năng). Tên gọi của các cửa phụ này mang ý nghĩa triết lý sâu sắc của nền giáo dục xưa: Muốn trở thành người tài giỏi giúp ích cho đất nước, trước hết sĩ tử phải rèn luyện phẩm chất đạo đức thật vững vàng, đức và tài phải luôn song hành.",
       "en": "Dai Trung Gate is the second major gateway leading visitors into the solemn inner sanctuary of the complex. Flanking the main entrance are two smaller side gates named Thanh Duc (Achieving Virtue) and Dat Tai (Attaining Talent). These names reflect a profound educational philosophy: to become a person of true capability who serves the nation, one must first cultivate strong moral integrity, ensuring that virtue and talent go hand in hand.",
-      "zh": "大中门是引领游客步入内嗣庄严区域的第二道大门。正门两侧配有两座较小的侧门，分别名为“成德门”与“达才门”。这些门名蕴含着古代教育深刻的哲理：要想成为对国家有用的人才，学子们必须先修养高尚的品德，做到德才兼备。"
+      "zh": "大中门是引领游客步入内嗣庄严区域的第二道大门。正门两侧配有两座较小的侧门，分别名为“成德门”与“达才门”。这些门名蕴含着古代教育深刻的哲理：要想成为对国家有用的人才，学子们必须先修养高尚的品德，做到德才兼备。",
+      "ko": "대중문은 방문객을 경내의 엄숙한 안쪽 구역으로 이끄는 두 번째 주요 문입니다. 정문 양옆에는 성덕(덕을 이룸)과 달재(재능을 이룸)라는 이름의 작은 곁문 두 개가 있습니다. 이 이름에는 깊은 교육 철학이 담겨 있습니다. 나라를 위해 일하는 참된 인재가 되려면 먼저 굳건한 도덕성을 닦아야 하며, 덕과 재능이 함께 가야 한다는 뜻입니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P01.mp3",
       "en": "/audio/en/P01.mp3",
-      "zh": "/audio/zh/P01.mp3"
+      "zh": "/audio/zh/P01.mp3",
+      "ko": "/audio/ko/P01.mp3"
     }
   },
   {
@@ -46,17 +52,20 @@
     "content": {
       "vi": "Đứng trước mặt quý khách là Khuê Văn Các, công trình kiến trúc gỗ đặc sắc được xây dựng vào năm 1805 dưới thời nhà Nguyễn. Gác lầu có kết cấu vuông, hai tầng, tầng trên bằng gỗ với bốn cửa sổ tròn hình mặt trời tỏa chiếu ánh sáng, tượng trưng cho sao Khuê – ngôi sao chủ về văn chương và học thức trong thiên văn học phương Đông. Với kiến trúc thanh thoát, hài hòa và đầy tính nghệ thuật, Khuê Văn Các đã vinh dự được lựa chọn là biểu tượng văn hóa chính thức của Thủ đô Hà Nội ngàn năm văn hiến.",
       "en": "Standing before you is Khue Van Cac, a distinctive wooden architectural masterpiece built in 1805 during the Nguyen Dynasty. The two-story pavilion features a wooden upper floor with four circular sun-like windows, symbolizing the Khue Star—the star of literature and scholarly learning in Eastern astronomy. With its elegant, harmonious, and artistic design, Khue Van Cac has been proudly chosen as the official cultural symbol of Hanoi.",
-      "zh": "呈现在您眼前的是奎文阁，这是一座建于1805年阮朝时期的特色木结构建筑。阁楼为两层方台结构，上层为木质，开有四个象征太阳光芒的圆窗，代表东方天文学中主管文章与学问的“奎星”。凭借其优雅、和谐且极具艺术感的造型，奎文阁已被荣选为千年古都河内的官方文化标志。"
+      "zh": "呈现在您眼前的是奎文阁，这是一座建于1805年阮朝时期的特色木结构建筑。阁楼为两层方台结构，上层为木质，开有四个象征太阳光芒的圆窗，代表东方天文学中主管文章与学问的“奎星”。凭借其优雅、和谐且极具艺术感的造型，奎文阁已被荣选为千年古都河内的官方文化标志。",
+      "ko": "지금 눈앞에 있는 것은 규문각입니다. 응우옌 왕조 시기인 1805년에 지어진 독특한 목조 건축의 걸작입니다. 2층 누각의 위층에는 태양을 닮은 둥근 창이 네 개 있는데, 이는 동양 천문학에서 문장과 학문의 별인 규성(奎星)을 상징합니다. 우아하고 조화로우며 예술적인 디자인 덕분에 규문각은 하노이의 공식 문화 상징으로 선정되었습니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P02.mp3",
       "en": "/audio/en/P02.mp3",
-      "zh": "/audio/zh/P02.mp3"
+      "zh": "/audio/zh/P02.mp3",
+      "ko": "/audio/ko/P02.mp3"
     }
   },
   {
@@ -66,17 +75,20 @@
     "content": {
       "vi": "Khu vực Nhà Bia Tiến Sĩ là không gian lưu giữ những giá trị lịch sử vô giá với 82 tấm bia đá cổ kính đặt trên lưng rùa đá. Mỗi tấm bia là một công trình nghệ thuật chạm khắc tinh xảo, ghi danh tên tuổi, quê quán của các bậc tiến sĩ đỗ đạt qua các khoa thi triều Lê và triều Mạc từ năm 1442 đến năm 1779. Đây không chỉ là nguồn sử liệu quý giá nghiên cứu về khoa bảng Việt Nam, mà vào năm 2011, hệ thống bia Tiến sĩ Văn Miếu đã chính thức được UNESCO ghi danh là Di sản Tư liệu Thế giới thuộc chương trình Ký ức Thế giới.",
       "en": "The Doctors' Stelae area is a space preserving priceless historical values, featuring 82 ancient stone stelae resting on stone tortoises. Each stele is a masterpiece of intricate carving, recording the names and hometowns of successful doctorate scholars from examinations held under the Le and Mac Dynasties between 1442 and 1779. Recognized by UNESCO in 2011 as a Memory of the World Documentary Heritage, these stelae offer invaluable historical insights into Vietnam's imperial examination system.",
-      "zh": "进士碑林是保存无价历史价值的空间，这里竖立着82块驮在石龟背上的古老石碑。每块石碑都是一件雕刻精美的艺术品，镌刻着黎朝与莫朝从1442年至1779年间科举及第者的姓名与籍贯。2011年，文庙进士碑群被联合国教科文组织正式列入《世界记忆名录》，成为人类宝贵的世界文献遗产。"
+      "zh": "进士碑林是保存无价历史价值的空间，这里竖立着82块驮在石龟背上的古老石碑。每块石碑都是一件雕刻精美的艺术品，镌刻着黎朝与莫朝从1442年至1779年间科举及第者的姓名与籍贯。2011年，文庙进士碑群被联合国教科文组织正式列入《世界记忆名录》，成为人类宝贵的世界文献遗产。",
+      "ko": "진사비 구역은 값을 매길 수 없는 역사적 가치를 간직한 공간으로, 돌거북 위에 세워진 오래된 석비 82기가 있습니다. 각 비석은 정교한 조각의 걸작이며, 1442년부터 1779년까지 레 왕조와 막 왕조 시기에 치러진 과거에서 급제한 진사들의 이름과 고향을 기록하고 있습니다. 2011년 유네스코 세계기록유산으로 인정된 이 비석들은 베트남 과거 제도에 대한 귀중한 역사적 통찰을 제공합니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P03.mp3",
       "en": "/audio/en/P03.mp3",
-      "zh": "/audio/zh/P03.mp3"
+      "zh": "/audio/zh/P03.mp3",
+      "ko": "/audio/ko/P03.mp3"
     }
   },
   {
@@ -86,17 +98,20 @@
     "content": {
       "vi": "Nằm ngay khu vực trung tâm của di tích là Giếng Thiên Quang, có hình dáng vuông vắn tuyệt đẹp. Theo triết học phương Đông, hình vuông của giếng tượng trưng cho Đất, trong khi gác Khuê Văn Các tròn ở phía trên tượng trưng cho Trời. Sự kết hợp tinh tế giữa giếng nước vuông và gác vòm tròn thể hiện triết lý 'trời tròn đất vuông', sự hòa hợp hoàn mỹ giữa âm và dương, giữa trí tuệ con người và vũ trụ bao la, tạo nên không gian tĩnh lặng và thanh tịnh cho toàn bộ di tích.",
       "en": "Located in the heart of the complex is Thien Quang Well, featuring a striking square shape. According to Eastern philosophy, the square shape of the well symbolizes Earth, while the circular architecture of Khue Van Cac above represents Heaven. This subtle combination embodies the philosophy of 'heaven is round, earth is square' and the harmonious balance between yin and yang, human wisdom and the vast universe, creating a serene and tranquil atmosphere.",
-      "zh": "位于遗迹核心区的是天光井，呈优美的方形。根据东方哲学，水池的方形象征“地”，而上方的奎文阁则象征“天”。方井与圆阁的巧妙结合体现了“天圆地方”的哲学理念，以及阴阳交融、人与自然和谐统一的宇宙观，为整座遗迹营造出宁静祥和的氛围。"
+      "zh": "位于遗迹核心区的是天光井，呈优美的方形。根据东方哲学，水池的方形象征“地”，而上方的奎文阁则象征“天”。方井与圆阁的巧妙结合体现了“天圆地方”的哲学理念，以及阴阳交融、人与自然和谐统一的宇宙观，为整座遗迹营造出宁静祥和的氛围。",
+      "ko": "경내 한가운데에는 네모난 모양이 인상적인 천광정이 있습니다. 동양 철학에서 우물의 네모난 모양은 땅을, 그 위 규문각의 둥근 건축은 하늘을 상징합니다. 이 절묘한 조합은 '하늘은 둥글고 땅은 네모나다'는 사상과 음과 양, 사람의 지혜와 광대한 우주의 조화로운 균형을 나타내며, 고요하고 평온한 분위기를 만들어 줍니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P04.mp3",
       "en": "/audio/en/P04.mp3",
-      "zh": "/audio/zh/P04.mp3"
+      "zh": "/audio/zh/P04.mp3",
+      "ko": "/audio/ko/P04.mp3"
     }
   },
   {
@@ -106,17 +121,20 @@
     "content": {
       "vi": "Cổng Đại Thành là lối đi chính dẫn quý khách vào khu vực thờ tự linh thiêng nhất của Văn Miếu. Tên gọi 'Đại Thành' mang hàm ý ca ngợi tư tưởng vĩ đại, sự tập đại thành về đạo đức, triết lý giáo dục của Khổng Tử – người thầy vạn thế của nhân loại. Kiến trúc cổng uy nghi, kết hợp với không gian rộng mở xung quanh, chuẩn bị tâm thế tôn kính cho du khách khi sắp tiến vào điện thờ chính.",
       "en": "Dai Thanh Gate is the main entrance leading visitors into the most sacred worship area of the Temple of Literature. The name 'Dai Thanh' (Great Synthesis) praises the profound philosophy and moral teachings of Confucius, the universal teacher of humanity. With its solemn architecture and spacious surroundings, it prepares visitors with a respectful mindset as they approach the main sanctuary.",
-      "zh": "大成门是引领游客进入文庙最神圣祭祀区的正门。“大成”之名意在赞颂孔子——这位万世师表的伟大思想与道德教育的集大成者。其庄严的建筑风格与开阔的周边环境，让游客在走入主殿前怀着崇敬肃穆的心情。"
+      "zh": "大成门是引领游客进入文庙最神圣祭祀区的正门。“大成”之名意在赞颂孔子——这位万世师表的伟大思想与道德教育的集大成者。其庄严的建筑风格与开阔的周边环境，让游客在走入主殿前怀着崇敬肃穆的心情。",
+      "ko": "대성문은 방문객을 문묘에서 가장 신성한 제사 구역으로 이끄는 정문입니다. '대성'(위대한 집대성)이라는 이름은 인류의 만세 스승인 공자의 깊은 철학과 도덕적 가르침을 기립니다. 엄숙한 건축과 넓은 주변 공간은 본전에 다가가는 방문객이 공경하는 마음을 갖추게 해 줍니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P05.mp3",
       "en": "/audio/en/P05.mp3",
-      "zh": "/audio/zh/P05.mp3"
+      "zh": "/audio/zh/P05.mp3",
+      "ko": "/audio/ko/P05.mp3"
     }
   },
   {
@@ -126,17 +144,20 @@
     "content": {
       "vi": "Điện Đại Thành là công trình kiến trúc trọng tâm và linh thiêng nhất của khu Văn Miếu. Tòa đại điện là nơi đặt ban thờ Khổng Tử, cùng các bậc Tứ phối gồm Nhan Tử, Tăng Tử, Tử Tư, Mạnh Tử và Thất thập nhị hiền (72 vị học trò xuất sắc). Không gian bên trong trang hoàng lộng lẫy với hoành phi, câu đối son thếp vàng, thể hiện lòng thành kính sâu sắc của các thế hệ đối với đạo học và những bậc hiền triết truyền bá tri thức nhân loại.",
       "en": "Dai Thanh Hall is the focal and most sacred architectural structure of the Temple of Literature. The grand hall houses the altar of Confucius, alongside his four principal disciples (Yan Hui, Zeng Zi, Zisi, Mencius) and the Seventy-Two Sages. The interior is magnificently decorated with gilded parallel sentences and lacquered boards, reflecting generations of deep reverence for scholarship and ancient sages.",
-      "zh": "大成殿是文庙最核心、最神圣的建筑。大殿内设有孔子神位，以及颜子、曾子、子思、孟子四配和七十二贤人的配享。殿内金碧辉煌，悬挂着镀金红底的横匾与对联，充分表达了后代对儒家道统与先贤先哲的无限敬仰。"
+      "zh": "大成殿是文庙最核心、最神圣的建筑。大殿内设有孔子神位，以及颜子、曾子、子思、孟子四配和七十二贤人的配享。殿内金碧辉煌，悬挂着镀金红底的横匾与对联，充分表达了后代对儒家道统与先贤先哲的无限敬仰。",
+      "ko": "대성전은 문묘의 중심이자 가장 신성한 건축물입니다. 웅장한 전각 안에는 공자의 위패와 네 명의 주요 제자(안회, 증자, 자사, 맹자), 그리고 72현인의 위패가 모셔져 있습니다. 내부는 금박을 입힌 대련과 옻칠한 편액으로 화려하게 장식되어 있어, 학문과 옛 성현을 깊이 공경해 온 여러 세대의 마음을 보여 줍니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P06.mp3",
       "en": "/audio/en/P06.mp3",
-      "zh": "/audio/zh/P06.mp3"
+      "zh": "/audio/zh/P06.mp3",
+      "ko": "/audio/ko/P06.mp3"
     }
   },
   {
@@ -146,17 +167,20 @@
     "content": {
       "vi": "Nhà Thái Học nằm ở khu vực phía sau cùng của quần thể di tích, từng là Quốc Tử Giám xưa – trường đại học cấp cao quốc gia dưới các triều đại phong kiến. Ngày nay, khu nhà Thái Học đã được phục dựng khang trang, là nơi trưng bày, tôn vinh truyền thống hiếu học và thờ phụng các vị vua có công lớn với nền giáo dục nước nhà như Lý Thánh Tông, Lý Nhân Tông, Lê Thánh Tông cùng nhà giáo biểu tượng Chu Văn An.",
       "en": "Located at the very rear of the complex, Thai Hoc Hall was once the imperial Quoc Tu Giam—the highest national institution of learning under feudal dynasties. Today, it has been magnificently reconstructed to honor Vietnam's educational legacy and worship revered monarchs who contributed greatly to national schooling, such as Ly Thanh Tong, Ly Nhân Tông, Le Thanh Tong, and the legendary educator Chu Van An.",
-      "zh": "太学院位于遗迹群的最深处，这里曾是封建王朝时期的国家最高学府——国子监所在地。如今，太学院经过修缮焕然一新，成为弘扬求学传统、供奉对国家教育做出巨大贡献的君王（如李圣宗、李仁宗、黎圣宗）以及一代名师朱文安的殿堂。"
+      "zh": "太学院位于遗迹群的最深处，这里曾是封建王朝时期的国家最高学府——国子监所在地。如今，太学院经过修缮焕然一新，成为弘扬求学传统、供奉对国家教育做出巨大贡献的君王（如李圣宗、李仁宗、黎圣宗）以及一代名师朱文安的殿堂。",
+      "ko": "경내 가장 안쪽에 있는 태학당은 한때 봉건 왕조 시대 최고의 국가 교육 기관이던 황실 국자감이었습니다. 오늘날에는 웅장하게 복원되어 베트남 교육의 유산을 기리고, 리 타인 똥, 리 년 똥, 레 타인 똥, 그리고 전설적인 교육자 쭈 반 안처럼 나라의 교육에 크게 이바지한 존경받는 군주와 스승들을 모시고 있습니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P07.mp3",
       "en": "/audio/en/P07.mp3",
-      "zh": "/audio/zh/P07.mp3"
+      "zh": "/audio/zh/P07.mp3",
+      "ko": "/audio/ko/P07.mp3"
     }
   },
   {
@@ -166,17 +190,20 @@
     "content": {
       "vi": "Nằm đối xứng ở phía bên trái Nhà Thái Học là Lầu Trống, một công trình kiến trúc truyền thống mang dáng dấp cung đình. Bên trong lầu lưu giữ một chiếc trống sấm có kích thước lớn. Tiếng trống trầm hùng vang lên trong các dịp lễ hội lớn, sự kiện văn hóa hay các kỳ thi mang ý nghĩa khích lệ tinh thần học tập, đánh dấu những mốc son lịch sử và tôn vinh truyền thống khoa bảng vẻ vang của dân tộc.",
       "en": "Symmetrically located on the left side of Thai Hoc Hall is the Drum Tower, featuring traditional court-style architecture. Inside hangs a massive ceremonial drum. The deep, powerful beats of the drum during major festivals and cultural events symbolize encouragement for academic pursuits and celebrate the glorious scholarly traditions of the nation.",
-      "zh": "位于太学院左侧对称位置的是鼓楼，具有传统的宫廷建筑风格。楼内悬挂着一面巨大的礼仪大鼓。在重大节日、文化活动或庆典中，雄浑深沉的鼓声激荡回响，象征着对学问的勉励，并颂扬着民族辉煌的科举传统。"
+      "zh": "位于太学院左侧对称位置的是鼓楼，具有传统的宫廷建筑风格。楼内悬挂着一面巨大的礼仪大鼓。在重大节日、文化活动或庆典中，雄浑深沉的鼓声激荡回响，象征着对学问的勉励，并颂扬着民族辉煌的科举传统。",
+      "ko": "태학당 왼쪽에 대칭으로 자리한 고루는 전통 궁정 양식의 건축물입니다. 안에는 거대한 의례용 북이 걸려 있습니다. 큰 축제와 문화 행사 때 울리는 깊고 힘찬 북소리는 학문에 정진하라는 격려를 상징하고 나라의 빛나는 학문 전통을 기립니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P08.mp3",
       "en": "/audio/en/P08.mp3",
-      "zh": "/audio/zh/P08.mp3"
+      "zh": "/audio/zh/P08.mp3",
+      "ko": "/audio/ko/P08.mp3"
     }
   },
   {
@@ -186,17 +213,20 @@
     "content": {
       "vi": "Đối xứng với Lầu Trống ở phía bên phải là Lầu Chuông, nơi treo một quả chuông đồng đúc thủ công vô cùng tinh xảo và cổ kính. Âm thanh chuông ngân nga, thanh tịnh vang vọng khắp không gian di tích mỗi dịp lễ hội. Tiếng chuông không chỉ mang ý nghĩa tâm linh, mà theo quan niệm xưa, nó còn tượng trưng cho tiếng lòng thức tỉnh tâm trí, xua tan ưu phiền, khơi dậy sự minh mẫn, hướng con người ta đến Chân – Thiện – Mỹ và khát vọng vươn tới đỉnh cao tri thức.",
       "en": "Symmetrically balancing the Drum Tower on the right is the Bell Tower, housing an exquisitely crafted ancient bronze bell. The clear, resonant chime echoes throughout the sanctuary during festivals. Beyond its spiritual significance, the bell's sound symbolizes the awakening of the mind, dispelling worries, inspiring clarity, and guiding humanity toward Truth, Goodness, Beauty, and the pursuit of ultimate wisdom.",
-      "zh": "与鼓楼右侧相对的是钟楼，悬挂着一口手工铸造、古朴精致的青铜大钟。节日里，悠扬清越的钟声回荡在遗迹的上空。除了宗教与精神层面的意义外，钟声更象征着心灵的觉醒与启迪，能够涤荡烦恼、激发智慧，引导人们走向真、善、美，并矢志追求知识的崇高境界。"
+      "zh": "与鼓楼右侧相对的是钟楼，悬挂着一口手工铸造、古朴精致的青铜大钟。节日里，悠扬清越的钟声回荡在遗迹的上空。除了宗教与精神层面的意义外，钟声更象征着心灵的觉醒与启迪，能够涤荡烦恼、激发智慧，引导人们走向真、善、美，并矢志追求知识的崇高境界。",
+      "ko": "고루와 대칭을 이루며 오른쪽에 있는 종루에는 정교하게 만든 오래된 청동 종이 있습니다. 축제 때면 맑고 울림 있는 종소리가 경내 전체에 퍼집니다. 종소리는 영적인 의미를 넘어, 마음을 깨우고 근심을 덜며 맑음을 일깨우고 사람을 진(眞)·선(善)·미(美)와 궁극의 지혜를 향해 이끄는 것을 상징합니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P09.mp3",
       "en": "/audio/en/P09.mp3",
-      "zh": "/audio/zh/P09.mp3"
+      "zh": "/audio/zh/P09.mp3",
+      "ko": "/audio/ko/P09.mp3"
     }
   },
   {
@@ -206,17 +236,20 @@
     "content": {
       "vi": "Vườn Giám là khu vườn xanh mát và yên bình nằm ở phía Tây khu di tích Văn Miếu - Quốc Tử Giám. Nơi đây lưu giữ những giá trị cảnh quan thiên nhiên hài hòa, gắn liền với không gian học tập, rèn luyện của các sĩ tử xưa. Dạo bước dưới những tán cây cổ thụ trăm năm, du khách sẽ cảm nhận được sự tĩnh lặng, thư thái, tách biệt hoàn toàn với sự ồn ào của phố thị bên ngoài, qua đó cảm nhận sâu sắc hơn về bầu không gian học thuật cổ kính.",
       "en": "Giam Garden is a lush and peaceful green space located on the western side of the Temple of Literature complex. It preserves harmonious natural landscape values closely associated with the study and training environment of ancient scholars. Walking under centuries-old ancient trees, visitors can feel a serene and relaxing atmosphere, completely detached from the hustle and bustle of the city outside, thereby deeply appreciating the ancient academic environment.",
-      "zh": "监园是位于文庙-国子监建筑群西侧的一片苍翠宁静的绿色空间。这里保留了和谐的自然景观价值，与古代士子的学习和训练环境息息相关。漫步在百年古树下，游客可以感受到宁静祥和的氛围，完全远离外面城市的喧嚣，从而更深刻地领略古老的学术氛围。"
+      "zh": "监园是位于文庙-国子监建筑群西侧的一片苍翠宁静的绿色空间。这里保留了和谐的自然景观价值，与古代士子的学习和训练环境息息相关。漫步在百年古树下，游客可以感受到宁静祥和的氛围，完全远离外面城市的喧嚣，从而更深刻地领略古老的学术氛围。",
+      "ko": "잠 정원은 문묘 경내 서쪽에 있는 푸르고 평화로운 녹지입니다. 옛 학자들의 학문과 수양 환경과 깊이 이어진 조화로운 자연 경관의 가치를 간직하고 있습니다. 수백 년 된 고목 아래를 걸으면 바깥 도시의 번잡함과 완전히 떨어진 고요하고 편안한 분위기를 느낄 수 있어, 옛 학문 환경을 깊이 이해하게 됩니다."
     },
     "audio_status": {
       "vi": "pending",
       "en": "pending",
-      "zh": "pending"
+      "zh": "pending",
+      "ko": "pending"
     },
     "audio_paths": {
       "vi": "/audio/vi/P10.mp3",
       "en": "/audio/en/P10.mp3",
-      "zh": "/audio/zh/P10.mp3"
+      "zh": "/audio/zh/P10.mp3",
+      "ko": "/audio/ko/P10.mp3"
     }
   }
 ]
