@@ -1,6 +1,6 @@
 # Nội dung PRD và PPT – phần của Người 1 (Hân)
 
-Cách dùng: mở file PRD/PPT gốc, thay đúng đoạn tương ứng bằng nội dung dưới đây. Mục A là sửa PRD, mục B là bảng nghiệm thu AC08–AC17, mục C là 10 câu hỏi–đáp, mục D là nội dung slide.
+Tài liệu này tổng hợp các phần cần cập nhật trong PRD/PPT. Mục A là sửa PRD, mục B là bảng nghiệm thu AC08–AC17, mục C là 10 câu hỏi–đáp, mục D là nội dung slide.
 
 ## A. Các chỗ phải sửa trong PRD để khớp mã nguồn
 
@@ -10,6 +10,9 @@ Cách dùng: mở file PRD/PPT gốc, thay đúng đoạn tương ứng bằng n
 | Tiêu đề "Cấu trúc 15 POI thuộc 5 cụm tham quan" | như trên | "Danh sách 11 POI" (P00–P10) |
 | Data Schema: collection `zones` | có | **Xóa** collection `zones` (bảng dưới thay thế) |
 | FAQ "Vì sao không tự dịch hay tạo giọng đọc bằng AI?" | "ngoài phạm vi MVP; audio do Admin tải lên" | Mã nguồn **đang dùng gTTS** để tạo MP3 từ bản dịch do con người viết. Sửa thành: "Bản dịch do nhóm biên soạn, không dịch tự động. Giọng đọc MP3 được tạo bằng gTTS từ văn bản đó." |
+| KL03 "Tiếng Việt là mặc định" | luôn mặc định tiếng Việt | "Ngôn ngữ ban đầu theo ngôn ngữ trình duyệt nếu hệ thống hỗ trợ (vi, en, zh); nếu không thì tiếng Việt." (mã nguồn tự chọn English khi trình duyệt là tiếng Anh) |
+| KL03 "đổi ngôn ngữ không gọi lại API" | không gọi API | "Đổi ngôn ngữ không tải lại danh sách POI và không mất phiên; bài thuyết minh của ngôn ngữ mới được tải một lần rồi lưu tạm." |
+| KL04/KL07 GPS thật | khách cấp quyền GPS, tự phát theo vị trí thật | Màn hình chào có hai cách bắt đầu: "Dùng vị trí GPS thật" (xin quyền; bị từ chối hoặc lỗi thì ứng dụng vẫn dùng được thủ công) và "Bắt đầu với điểm P00" (mô phỏng vị trí, dùng để demo trong nhà) |
 | Open Question 5 | "15 POI" | "11 POI" |
 | Open Question 3 | 5 service chạy chung hay tách | Trả lời: tách thành container riêng (auth, poi, narration, ticket, statistics) cùng một API gateway |
 
@@ -26,20 +29,22 @@ Cách dùng: mở file PRD/PPT gốc, thay đúng đoạn tương ứng bằng n
 
 ## B. Bảng nghiệm thu AC08–AC17 (điền kết quả thật)
 
-Cột "Kết quả" chỉ ghi **ĐẠT** khi đã thấy tận mắt. Mình điền sẵn những dòng có ảnh chụp màn hình bạn gửi ngày 3/11; các dòng còn lại là **CHƯA KIỂM** cho tới khi bạn làm theo cột "Cách thử". Nếu mã AC trong PRD nhóm bạn khác, đổi số cho khớp (PRD gán KL03 → AC08–AC12, KL04 → AC16–AC17, KL05 → AC14, KL07 → AC12 và AC15).
+Cột "Kết quả" chỉ ghi ĐẠT khi tiêu chí đã được chạy thật; các dòng ghi "giả lập" chạy bằng trình duyệt tự động. Mã AC suy ra từ các quy tắc KL03–KL07 trong PRD (KL03 → AC08–AC12, KL04 → AC16–AC17, KL05 → AC14, KL07 → AC12 và AC15); nếu bảng AC của PRD nhóm đánh số khác thì đổi lại cho khớp.
 
 | Mã | Tiêu chí | Cách thử (mở http://localhost) | Kết quả |
 |---|---|---|---|
-| AC08 | Mở app lần đầu, ngôn ngữ mặc định là tiếng Việt | Mở cửa sổ ẩn danh, vào trang, xem giao diện | CHƯA KIỂM |
-| AC09 | Ô chọn ngôn ngữ hiện đúng 3 ngôn ngữ lấy từ `/api/languages` | Bấm ô chọn ngôn ngữ | ĐẠT (ảnh chụp 3/11) |
-| AC10 | Chọn English thì giao diện, tên và mô tả POI chuyển sang English | Chọn English, xem thanh trạng thái và danh sách POI | ĐẠT (ảnh chụp 3/11) |
-| AC11 | Thiếu bản dịch thì hiện "Nội dung đang cập nhật" | Ở trang admin-content, xóa bản dịch en của một POI, mở POI đó ở English | CHƯA KIỂM |
-| AC12 | Thiếu audio thì vô hiệu hóa nút phát, hiện "Chưa có audio cho ngôn ngữ này", không phát ngôn ngữ khác | Đổi tên tạm một file MP3 (`mv data/audio/zh/P00.mp3 data/audio/zh/P00.bak`), chọn tiếng Trung, mở P00; sau đó đổi tên lại | ĐẠT (ảnh chụp 3/11) |
-| AC13 | Đổi ngôn ngữ không tải lại danh sách POI, không mất phiên | DevTools > Network, đổi ngôn ngữ, xem không có yêu cầu `/api/pois` mới | CHƯA KIỂM |
-| AC14 | Nhiều vùng Geofence chồng nhau thì chọn POI gần nhất | Dùng nút mô phỏng vị trí giữa hai POI gần nhau | CHƯA KIỂM |
-| AC15 | Từ chối quyền GPS vẫn xem bản đồ và nghe thủ công | Chặn quyền vị trí cho trang, bấm chọn POI và nút phát | CHƯA KIỂM |
-| AC16 | Vào bán kính 15 m thì audio tự phát một lần | Dùng mô phỏng vị trí trong bán kính một POI | CHƯA KIỂM |
-| AC17 | Bấm Pause thì không tự phát lại khi vẫn đứng trong vùng | Sau AC16, bấm Pause, đợi 10 giây | CHƯA KIỂM |
+| AC08 | Ngôn ngữ ban đầu: tiếng Việt, hoặc theo ngôn ngữ trình duyệt nếu hỗ trợ | Mở cửa sổ ẩn danh, xem giao diện; thử đổi ngôn ngữ trình duyệt | ĐẠT (kiểm bằng trình duyệt giả lập: trình duyệt vi và fr cho `vi`, trình duyệt en cho `en`). Cần sửa câu chữ PRD, xem mục A |
+| AC09 | Ô chọn ngôn ngữ hiện đúng 3 ngôn ngữ lấy từ `/api/languages` | Bấm ô chọn ngôn ngữ | ĐẠT (ảnh chụp 3/11 và giả lập) |
+| AC10 | Chọn English thì giao diện, tên và mô tả POI chuyển sang English | Chọn English, xem thanh trạng thái và danh sách POI | ĐẠT (ảnh chụp 3/11 và giả lập) |
+| AC11 | Thiếu bản dịch thì hiện thông báo "đang cập nhật", không hiện tiếng Việt thay thế | Ở trang admin-content, xóa bản dịch en của một POI, mở POI đó ở English | ĐẠT (giả lập: thông báo "The narration text in this language is being updated.") |
+| AC12 | Thiếu audio thì khóa nút phát, hiện thông báo, không phát ngôn ngữ khác | Đổi tên tạm một file MP3 (`mv data/audio/zh/P00.mp3 data/audio/zh/P00.bak`), chọn tiếng Trung, mở P00; sau đó đổi tên lại | ĐẠT (ảnh chụp 3/11 và giả lập) |
+| AC13 | Đổi ngôn ngữ không tải lại danh sách POI, không mất phiên | DevTools > Network, đổi ngôn ngữ, xem có yêu cầu `/api/pois` mới hay không | ĐẠT MỘT PHẦN (giả lập: không gọi `/api/pois`; thuyết minh của ngôn ngữ mới tải 11 yêu cầu lần đầu, đổi lại lần sau 0 yêu cầu). Khác câu chữ PRD "không gọi lại API", xem mục A |
+| AC14 | Nhiều vùng Geofence chồng nhau thì chọn POI gần nhất | Dùng nút mô phỏng vị trí giữa hai POI gần nhau | ĐẠT (giả lập: P03 và P04 cách nhau 25,8 m; điểm trong cả hai vùng chọn đúng P04 là điểm gần hơn) |
+| AC15 | Từ chối quyền GPS vẫn xem bản đồ và nghe thủ công | Bấm "Dùng vị trí GPS thật", bấm Chặn khi trình duyệt hỏi quyền; sau đó chọn một POI trong danh sách và bấm nút phát | ĐẠT (giả lập: từ chối quyền thì hiện thông báo, màn hình chào đóng, vẫn xem danh sách và nghe thủ công; thông báo có đủ vi, en, zh). Cần thử lại trên điện thoại thật |
+| AC16 | Vào bán kính 15 m thì audio tự phát một lần | Dùng GPS thật hoặc mô phỏng vị trí trong bán kính một POI | ĐẠT (giả lập: vị trí mô phỏng và GPS thật do trình duyệt giả lập cấp, phát đúng 1 lần). Chưa thử ngoài thực địa |
+| AC17 | Bấm Pause thì không tự phát lại khi vẫn đứng trong vùng; rời vùng rồi vào lại thì phát lại | Sau AC16, bấm Pause, đợi 10 giây; sau đó ra ngoài rồi vào lại | ĐẠT (giả lập), **sau khi sửa lỗi**: trước đó cờ "đã tự phát" không được đặt lại khi rời vùng nên vào lại không phát lại |
+
+Ghi chú về cách kiểm: các dòng "giả lập" được chạy bằng trình duyệt tự động với dữ liệu API giả, **chưa thử trên điện thoại thật**. Nên thử lại bằng tay AC14, AC16, AC17 trên http://localhost (nút mô phỏng vị trí) để có ảnh chụp.
 
 Kiểm thử tự động (thư mục `tests/`): 23 test đạt, gồm quy tắc bán kính 10–25 m, trạng thái POI, tọa độ, bản dịch và dữ liệu mẫu (11 POI, 3 ngôn ngữ, khóa giao diện đồng nhất). Lệnh: `python -m unittest discover tests -v`. Trang `admin-content.html` và các API quản lý POI đã được chạy thử với dữ liệu giả lập; cần chạy lại trên hệ thống Docker thật bằng `./tests/smoke_api.sh`.
 
@@ -51,7 +56,7 @@ Chưa xác minh: tọa độ 11 POI chưa đối chiếu hết ngoài thực đ�
 2. **Thêm tiếng Hàn thì làm gì?** Thêm một bản ghi vào `languages.json` (mã `ko`, `tts_locale`, các chuỗi giao diện), thêm `translations.ko` cho POI và nội dung thuyết minh, chạy lại seed. Không sửa code vì giao diện và backend xử lý theo mã ngôn ngữ.
 3. **Thiếu bản dịch hoặc audio thì sao?** Không tự chuyển sang ngôn ngữ khác. API trả `content_available` và `audio_available`; giao diện hiện thông báo và vô hiệu hóa nút phát.
 4. **Vì sao bán kính mặc định 15 m, và đổi được không?** 15 m đủ để bắt vị trí GPS điện thoại ngoài trời mà không kích hoạt nhầm POI bên cạnh. Admin chỉnh được trong khoảng 10–25 m; API từ chối giá trị ngoài khoảng. Con số sẽ được hiệu chỉnh sau pilot.
-5. **Geofence tính ở đâu và vì sao?** Tính trên điện thoại bằng công thức Haversine (một hàm duy nhất trong `main.js`), không phụ thuộc đường truyền và phản hồi ngay khi vào vùng. Server chỉ nhận thống kê.
+5. **Geofence tính ở đâu và vì sao?** Tính trên điện thoại bằng công thức Haversine (một hàm duy nhất trong `main.js`), không phụ thuộc đường truyền và phản hồi ngay khi vào vùng. Server chỉ nhận thống kê. Giao diện có hai chế độ: GPS thật (xin quyền, bị từ chối vẫn dùng thủ công) và mô phỏng vị trí để demo trong nhà.
 6. **DRAFT, PUBLISHED, HIDDEN khác nhau thế nào?** POI mới luôn là DRAFT. Chỉ PUBLISHED được gửi cho khách. HIDDEN là POI bị gỡ khỏi trang khách nhưng vẫn giữ dữ liệu, có thể xuất bản lại.
 7. **Audio tạo bằng cách nào, vì sao không đưa MP3 vào Git?** Văn bản do nhóm biên soạn; MP3 sinh bằng gTTS (`generate_33_audio.py` hoặc tự động khi admin lưu thuyết minh). File MP3 nặng nên bị chặn trong `.gitignore` và được cấp riêng khi triển khai.
 8. **Tọa độ lấy từ đâu, đã chính xác chưa?** Lấy từ Google Maps và đối chiếu ảnh vệ tinh; đánh dấu `pending_field_verification` cho tới khi nhóm đo thực địa. Đây là hạn chế đã biết.
@@ -71,5 +76,5 @@ Chưa xác minh: tọa độ 11 POI chưa đối chiếu hết ngoài thực đ�
 - Kiểm tra dữ liệu: bán kính 10–25 m, tọa độ trong khu vực, bắt buộc tên tiếng Việt
 
 **Slide 3 – Kiểm thử và hạn chế**
-- 23 test tự động đạt; kiểm tay AC09, AC10, AC12 đạt; các AC còn lại ghi đúng trạng thái trong bảng
-- Hạn chế: tọa độ chưa đo thực địa; bảo vệ API ghi phụ thuộc phần xác thực của Người 2
+- 23 test tự động đạt; AC08–AC17 đạt trên trình duyệt giả lập (AC13 đạt một phần)
+- Hạn chế: chưa thử GPS ngoài thực địa; tọa độ chưa đo thực địa; bảo vệ API ghi phụ thuộc phần xác thực của Người 2
