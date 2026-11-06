@@ -503,9 +503,17 @@
 
               <div class="space-y-3 pt-2">
                 <div>
-                  <label class="block text-xs font-semibold text-slate-700 mb-1"
-                    >Số lượng mã QR cần sinh</label
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Loại vé phát hành</label>
+                  <select
+                    id="select-loai-ve"
+                    class="w-full text-xs font-semibold border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   >
+                    <option value="STANDARD">Vé Thường (VM-STD-xxxxxx)</option>
+                    <option value="PRIORITY">Vé Ưu Tiên (VM-PRI-xxxxxx)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Số lượng mã QR cần sinh</label>
                   <input
                     type="number"
                     id="input-so-luong"
@@ -515,25 +523,10 @@
                     class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
-
-                <!-- [M7] Ô CHỌN LOẠI VÉ NẰM Ở ĐÂY (Độc lập, đẹp mắt theo đúng chuẩn Tailwind của web) -->
-                <div class="mb-3">
-                  <select
-                    id="select-loai-ve"
-                    class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
-                  >
-                    <option value="STANDARD">🎟️ Vé Chuẩn (STANDARD)</option>
-                    <option value="PRIORITY">⭐ Vé Ưu Tiên (PRIORITY)</option>
-                  </select>
-                </div>
-
-                <!-- NÚT BẤM RIÊNG BIỆT Ở DƯỚI -->
                 <button
                   onclick="sinhMaQrInVe()"
                   class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-blue-600/20 cursor-pointer"
                 >
-                  Sinh mã QR in vé
-                </button>
                   <i class="fa-solid fa-qrcode mr-1"></i> Sinh dải mã QR in vé
                 </button>
               </div>
@@ -554,7 +547,7 @@
                   <input
                     type="text"
                     id="input-ma-quet"
-                    placeholder="Nhập mã vé (VD: VM-STD-101)..."
+                    placeholder="Nhập mã vé (VD: VM-STD-ABC123)..."
                     class="flex-1 text-xs border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   />
                   <button
@@ -592,10 +585,11 @@
                     <tr
                       class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200"
                     >
-                      <th class="py-3 px-4">Mã Vé (Token)</th>
+                      <th class="py-3 px-4">Mã Vé</th>
+                      <th class="py-3 px-4">Loại Vé</th>
                       <th class="py-3 px-4">Mã QR In Vé</th>
-                      <th class="py-3 px-4">Trạng Thái Quét</th>
-                      <th class="py-3 px-4">Thời Gian Quét Lần Đầu</th>
+                      <th class="py-3 px-4">Trạng Thái</th>
+                      <th class="py-3 px-4">Quét Lần Đầu / Lần Cuối</th>
                       <th class="py-3 px-4 text-right">Thao Tác</th>
                     </tr>
                   </thead>
@@ -1069,7 +1063,7 @@
       // Tab danh mục POI đã được bỏ khỏi trang quản trị.
       function closeDetailView() {}
 
-      // --- 6. QUẢN LÝ VÉ & QR CODE IN LÊN VÉ ---
+      // --- 6. QUẢN LÝ VÉ & QR CODE IN LÊN VÉ (ĐÃ NÂNG CẤP M7) ---
       function hienThiBangVe() {
         const thanBang = document.getElementById("bang-danh-sach-ve");
         if (!thanBang) return;
@@ -1077,26 +1071,32 @@
 
         danhSachVe.forEach((ve) => {
           const maVe = ve.ticket_code || ve.code || "-";
-          // Kiểm tra triệt để tất cả các khóa trạng thái từ Backend
+          const loaiVe = (ve.ticket_type || "STANDARD").toUpperCase();
+          const isPriority = loaiVe === "PRIORITY";
           const isScanned = Boolean(ve.is_used || ve.scanned || ve.is_scanned);
 
-          // Lấy đúng trường thời gian quét từ Backend
-          let rawTime = ve.scanned_at || ve.scannedAt || ve.used_at;
-          let thoiGianHienThi = "-";
-          if (rawTime && rawTime !== "-") {
+          // Xử lý thời gian quét đầu và cuối (M6)
+          const timeFormat = (timeStr) => {
+            if (!timeStr || timeStr === "-") return "-";
             try {
-              const d = new Date(rawTime);
-              thoiGianHienThi = isNaN(d.getTime())
-                ? rawTime
-                : d.toLocaleString("vi-VN");
+              const d = new Date(timeStr);
+              return isNaN(d.getTime()) ? timeStr : d.toLocaleTimeString("vi-VN") + " " + d.toLocaleDateString("vi-VN");
             } catch (e) {
-              thoiGianHienThi = rawTime;
+              return timeStr;
             }
-          }
+          };
+
+          const lanDau = timeFormat(ve.first_accessed_at || ve.scanned_at);
+          const lanCuoi = timeFormat(ve.last_accessed_at);
 
           const targetUserUrl = `${window.location.origin}/index.html?ticket=${encodeURIComponent(maVe)}`;
           const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(targetUserUrl)}`;
           const userWebLink = `/index.html?ticket=${encodeURIComponent(maVe)}`;
+
+          // Huy hiệu loại vé (M7)
+          const loaiVeBadge = isPriority
+            ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold border border-amber-300">⭐ PRIORITY</span>`
+            : `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold border border-blue-200">STANDARD</span>`;
 
           const trangThaiQuet = isScanned
             ? `<span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>Đã quét</span>`
@@ -1105,6 +1105,7 @@
           thanBang.innerHTML += `
             <tr class="hover:bg-slate-50 transition">
               <td class="py-3 px-4 font-mono font-bold text-slate-900">${maVe}</td>
+              <td class="py-3 px-4">${loaiVeBadge}</td>
               <td class="py-3 px-4">
                 <div class="flex items-center gap-2">
                   <a href="${qrUrl}" target="_blank" class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 text-xs font-semibold bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100" title="Bấm để lấy ảnh QR in lên phôi vé">
@@ -1116,7 +1117,10 @@
                 </div>
               </td>
               <td class="py-3 px-4">${trangThaiQuet}</td>
-              <td class="py-3 px-4 text-slate-600 font-mono text-[11px]">${thoiGianHienThi}</td>
+              <td class="py-3 px-4 text-slate-600 font-mono text-[11px]">
+                <div><span class="text-slate-400">Đầu:</span> ${lanDau}</div>
+                <div><span class="text-slate-400">Cuối:</span> ${lanCuoi}</div>
+              </td>
               <td class="py-3 px-4 text-right">
                 <button onclick="quetNhanh('${maVe}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold transition cursor-pointer">
                   Quét mã này
@@ -1127,16 +1131,13 @@
         });
 
         const nhanSoLuong = document.getElementById("nhan-so-luong-ve");
-        if (nhanSoLuong)
-          nhanSoLuong.innerText = `Tổng: ${danhSachVe.length} vé`;
+        if (nhanSoLuong) nhanSoLuong.innerText = `Tổng: ${danhSachVe.length} vé`;
       }
 
       async function sinhMaQrInVe() {
         const inputSoLuong = document.getElementById("input-so-luong");
-        const soLuong = Number.parseInt(inputSoLuong.value, 10);
-        
-        // [M7] Lấy loại vé người dùng chọn (mặc định STANDARD nếu chưa chọn)
         const selectLoaiVe = document.getElementById("select-loai-ve");
+        const soLuong = Number.parseInt(inputSoLuong.value, 10);
         const loaiVe = selectLoaiVe ? selectLoaiVe.value : "STANDARD";
 
         if (!Number.isInteger(soLuong) || soLuong < 1 || soLuong > 50) {
@@ -1144,9 +1145,7 @@
           return;
         }
 
-        const nutSinhMa = document.querySelector(
-          'button[onclick="sinhMaQrInVe()"]',
-        );
+        const nutSinhMa = document.querySelector('button[onclick="sinhMaQrInVe()"]');
         if (nutSinhMa) nutSinhMa.disabled = true;
 
         try {
@@ -1157,18 +1156,17 @@
             const res = await fetch(`${DUONG_DAN_API}/tickets/create`, {
               method: "POST",
               headers: {
+                "Accept": "application/json",
                 "Content-Type": "application/json",
-                Accept: "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
-              // [M7] Gửi loại vé lên backend
               body: JSON.stringify({ ticket_type: loaiVe }),
             });
             if (res.ok) taoThanhCong++;
           }
 
           await taiDuLieuTuBackend();
-          hienThBaoNhanh(`Đã sinh thành công ${taoThanhCong} mã vé (${loaiVe}).`);
+          hienThBaoNhanh(`Đã sinh thành công ${taoThanhCong} mã QR vé loại ${loaiVe}.`);
         } catch (error) {
           console.error("Lỗi sinh mã QR:", error);
           alert("Lỗi kết nối khi sinh mã QR. Hãy kiểm tra Ticket Service.");
