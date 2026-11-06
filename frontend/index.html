@@ -102,14 +102,26 @@
             >
           </div>
 
-          <button
-            onclick="toggleSimulator()"
-            class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-location-crosshairs"></i>
+          <div class="flex items-center space-x-1.5">
+            <button
+              id="btnGpsMap"
+              type="button"
+              onclick="batDauGpsThat()"
+              class="bg-white hover:bg-sky-50 border border-sky-600 text-sky-700 text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
+            >
+              <i class="fa-solid fa-satellite-dish"></i>
+              <span data-i18n="map.realGps">GPS thật</span>
+            </button>
 
-            <span data-i18n="map.simulate">Giả lập GPS</span>
-          </button>
+            <button
+              onclick="toggleSimulator()"
+              class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
+            >
+              <i class="fa-solid fa-location-crosshairs"></i>
+
+              <span data-i18n="map.simulate">Giả lập GPS</span>
+            </button>
+          </div>
         </div>
 
         <!-- Bảng chọn giả lập GPS (Ẩn/Hiện) -->
@@ -420,9 +432,8 @@
           Văn Miếu – Quốc Tử Giám
         </h2>
 
-        <p class="mt-2 text-xs leading-relaxed text-slate-600">
-          Chào mừng bạn đến với di tích. Bấm bắt đầu để khám phá và nghe thuyết
-          minh tự động tại điểm đầu tiên: <strong>Cổng Văn Miếu (P00)</strong>.
+        <p class="mt-2 text-xs leading-relaxed text-slate-600" data-i18n="welcome.intro">
+          Chào mừng bạn đến với di tích. Bấm bắt đầu để khám phá và nghe thuyết minh tự động tại điểm đầu tiên: Cổng Văn Miếu (P00).
         </p>
 
         <!-- Nút bấm bắt đầu với POI P00 -->
@@ -433,7 +444,7 @@
           class="mt-5 w-full rounded-xl bg-sky-600 hover:bg-sky-700 px-4 py-3 text-xs font-bold text-white transition shadow-md shadow-sky-600/20 cursor-pointer flex items-center justify-center space-x-2"
         >
           <i class="fa-solid fa-play"></i>
-          <span>Bắt đầu với điểm P00</span>
+          <span data-i18n="welcome.startP00">Bắt đầu với điểm P00 (mô phỏng)</span>
         </button>
 
         <!-- Dùng vị trí GPS thật (từ chối vẫn dùng được thủ công) -->
@@ -447,7 +458,7 @@
           <span data-i18n="welcome.useGps">Dùng vị trí GPS thật</span>
         </button>
 
-        <p class="mt-3 text-[11px] text-slate-400">Chạm để bắt đầu</p>
+        <p class="mt-3 text-[11px] text-slate-400" data-i18n="welcome.tap">Chạm để bắt đầu</p>
       </div>
     </div>
 
@@ -482,6 +493,7 @@
 
     <!-- File JS riêng -->
 
-    <script src="js/main.js?v=3"></script>
+    <script src="js/main.js?v=4"></script>
+    <script src="js/gps.js?v=4"></script>
   </body>
 </html>

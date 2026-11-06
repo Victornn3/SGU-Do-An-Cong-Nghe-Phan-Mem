@@ -60,7 +60,12 @@
       "status.gpsGranted": "Đã bật GPS. Chạm vào màn hình để bật âm thanh, rồi đi tới các điểm tham quan.",
       "status.gpsDenied": "Bạn đã từ chối quyền vị trí. Vẫn xem được bản đồ và chọn điểm trong danh sách để nghe thuyết minh.",
       "status.gpsUnavailable": "Không xác định được vị trí. Bạn vẫn có thể xem bản đồ và chọn điểm trong danh sách để nghe.",
-      "status.gpsOutside": "Bạn đang ở ngoài khuôn viên Văn Miếu. Hãy chọn điểm trong danh sách để nghe, hoặc dùng chế độ mô phỏng."
+      "status.gpsOutside": "Bạn đang ở ngoài khuôn viên Văn Miếu. Hãy chọn điểm trong danh sách để nghe, hoặc dùng chế độ mô phỏng.",
+      "welcome.intro": "Chào mừng bạn đến với di tích. Bấm bắt đầu để khám phá và nghe thuyết minh tự động tại điểm đầu tiên: Cổng Văn Miếu (P00).",
+      "welcome.startP00": "Bắt đầu với điểm P00 (mô phỏng)",
+      "welcome.tap": "Chạm để bắt đầu",
+      "map.realGps": "GPS thật",
+      "status.gpsActive": "Đang dùng GPS thật."
     }
   },
   {
@@ -124,7 +129,12 @@
       "status.gpsGranted": "GPS is on. Tap the screen to enable sound, then walk to the points of interest.",
       "status.gpsDenied": "Location permission was denied. You can still browse the map and pick a point from the list to listen.",
       "status.gpsUnavailable": "Your location could not be determined. You can still browse the map and pick a point from the list to listen.",
-      "status.gpsOutside": "You are outside the Temple of Literature grounds. Pick a point from the list to listen, or use simulation mode."
+      "status.gpsOutside": "You are outside the Temple of Literature grounds. Pick a point from the list to listen, or use simulation mode.",
+      "welcome.intro": "Welcome to the heritage site. Tap start to explore and hear the automatic audio guide at the first stop: the Văn Miếu Gate (P00).",
+      "welcome.startP00": "Start at stop P00 (simulation)",
+      "welcome.tap": "Tap to begin",
+      "map.realGps": "Real GPS",
+      "status.gpsActive": "Using real GPS."
     }
   },
   {
@@ -188,7 +198,12 @@
       "status.gpsGranted": "已开启GPS。请点击屏幕以开启声音，然后前往各个景点。",
       "status.gpsDenied": "您已拒绝定位权限。仍可浏览地图，并从列表中选择景点收听讲解。",
       "status.gpsUnavailable": "无法确定您的位置。仍可浏览地图，并从列表中选择景点收听讲解。",
-      "status.gpsOutside": "您目前在文庙园区之外。请从列表中选择景点收听，或使用模拟模式。"
+      "status.gpsOutside": "您目前在文庙园区之外。请从列表中选择景点收听，或使用模拟模式。",
+      "welcome.intro": "欢迎来到文庙遗址。点击开始，即可在第一个景点“文庙大门（P00）”收听自动语音讲解。",
+      "welcome.startP00": "从景点 P00 开始（模拟）",
+      "welcome.tap": "点击开始",
+      "map.realGps": "真实GPS",
+      "status.gpsActive": "正在使用真实GPS。"
     }
   }
 ]
