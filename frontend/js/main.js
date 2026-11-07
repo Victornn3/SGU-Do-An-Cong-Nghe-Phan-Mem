@@ -1109,33 +1109,27 @@ function batDauTraiNghiemP00() {
   loadAndPlayAudio(gate, true);
 }
 
-async function xacThucVeTuUrl() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const ticketCode = urlParams.get("ticket");
-
-  if (!ticketCode) return;
-
-  if (sessionStorage.getItem("vm_scanned_ticket") === ticketCode) return;
-
-  try {
-    const res = await fetch(`/api/tickets/scan/${encodeURIComponent(ticketCode)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" }
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok && data.success) {
-      sessionStorage.setItem("vm_scanned_ticket", ticketCode);
-      console.log(`[Ticket] Kích hoạt thành công vé ${ticketCode}`);
-    }
-  } catch (err) {
-    console.error("[Ticket] Lỗi gửi xác thực vé:", err);
-  }
+// Cổng vé (ticket-gate.js, Người 2): chỉ cho vào khi có vé hợp lệ hoặc chế độ Demo.
+// Nếu bị chặn, chờ khách nhập vé (trang tải lại) hoặc bấm "Vào chế độ Demo" rồi mới khởi tạo.
+async function kiemTraCongVe() {
+  if (!window.VMTicketGate) return true; // chưa nạp ticket-gate.js: không chặn
+  const result = await window.VMTicketGate.verify();
+  if (result && result.allowed) return true;
+  await new Promise((resolve) => {
+    const timer = setInterval(() => {
+      if (sessionStorage.getItem("vm_ticket_demo") === "true") {
+        clearInterval(timer);
+        resolve();
+      }
+    }, 200);
+  });
+  return true;
 }
-// KHỞI ĐỘNG HỆ THỐNG
+
 document.addEventListener("DOMContentLoaded", async () => {
   await loadLanguages();
   applyTranslations();
-  await xacThucVeTuUrl();
+  await kiemTraCongVe();
   initLeafletMap();
   await fetchPoisAndNarrations();
   renderSimulatorButtons();

@@ -135,3 +135,11 @@ Xóa mềm: chuyển POI sang `HIDDEN`, **không** xóa dữ liệu khỏi cơ s
 ## 6. Lưu ý vận hành
 - Chạy lại `seed-data` sẽ **ghi đè** các POI có trong `pois.json` (kể cả trạng thái và nội dung đã sửa qua trang admin). POI tạo thêm qua admin không bị xóa.
 - `coordinate_status = verified`: tọa độ đã được đối chiếu trên Google Maps (chưa đo GPS tại hiện trường). `pending_field_verification` là giá trị mặc định của điểm mới tạo qua API, chưa được đối chiếu.
+
+## 7. Quyền truy cập tại gateway (do Người 2 cài, JWT)
+- **Công khai (không cần token):** `GET /api/languages`, `GET /api/pois`, `GET /api/pois/{poi_code}`, `GET /api/narrations/{poi_code}`.
+- **Cần token quản trị (`Authorization: Bearer <token>`):** `GET /api/pois/admin/all`, `POST/PUT/PATCH/DELETE /api/pois…`, `POST /api/narrations`, `POST /api/narrations/generate-all`.
+- Lấy token: `POST /api/auth/login` (xem tài liệu của Người 2). Trang `admin-content.html` dùng token do `admin.html` lưu trong `localStorage` với khóa `admin_token`.
+- Ví dụ sinh audio khi gateway đã bật JWT:
+  `curl -X POST http://localhost:8000/api/narrations/generate-all -H "Authorization: Bearer <token>"`
+- Giao diện khách gọi `VMTicketGate.verify()` (file `ticket-gate.js` của Người 2) trước khi nạp dữ liệu; vé không hợp lệ thì bị chặn, bấm "Chế độ Demo" thì vào thẳng.
