@@ -743,6 +743,12 @@ function simulateGpsLocation(poi) {
   gpsMode = "simulated";
   activePoiId = poi.poi_code;
 
+  // Rời điểm cũ: đặt lại cờ tự phát để lần sau vào lại điểm đó sẽ phát lại (PRD KL04).
+  // Phải làm TRƯỚC khi ghi đè currentSimulatedPoiId bên dưới.
+  if (currentSimulatedPoiId && currentSimulatedPoiId !== poi.poi_code) {
+    autoPlayedPois.delete(currentSimulatedPoiId);
+  }
+
   const hasCoords = typeof poi.lat === "number" && typeof poi.lng === "number";
   if (!hasCoords) {
     setGpsStatus(t("status.noCoords", "Đã chọn {code} (điểm chưa có tọa độ)", { code: poi.poi_code }));
