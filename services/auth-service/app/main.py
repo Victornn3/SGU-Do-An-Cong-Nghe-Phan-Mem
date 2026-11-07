@@ -16,7 +16,7 @@ app = FastAPI(title="Auth Service", version="2.0.0")
 
 # Lấy biến môi trường (M3)
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://mongo:27017")
-MONGO_DB = os.getenv("MONGO_DATABASE", "van_mieu")
+MONGO_DB = os.getenv("MONGO_DATABASE", "vm_auth")
 JWT_SECRET = os.getenv("JWT_SECRET")
 
 # Cảnh báo bảo mật nếu không cấu hình JWT_SECRET qua biến môi trường

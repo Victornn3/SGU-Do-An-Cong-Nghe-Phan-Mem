@@ -16,7 +16,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(os.getenv("SEED_DATA_DIR", BASE_DIR / "data" / "seed"))
 
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
-MONGODB_DB = os.getenv("MONGODB_DB", "van_mieu")
+# Mỗi service một database riêng (database-per-service)
+DB_AUTH = os.getenv("MONGODB_DB_AUTH", "vm_auth")
+DB_POI = os.getenv("MONGODB_DB_POI", "vm_poi")
+DB_NARRATION = os.getenv("MONGODB_DB_NARRATION", "vm_narration")
+DB_TICKET = os.getenv("MONGODB_DB_TICKET", "vm_ticket")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "change-me-before-demo")
 
@@ -104,30 +108,33 @@ def seed_admin(db):
         )
 
 
-def ensure_indexes(db):
-    db.pois.create_index("poi_code", unique=True)
-    db.narrations.create_index("target_id", unique=True)
-    db.tickets.create_index("ticket_code", unique=True)
-    db.admins.create_index("username", unique=True)
+def ensure_indexes(db_poi, db_narration, db_ticket, db_auth):
+    db_poi.pois.create_index("poi_code", unique=True)
+    db_narration.narrations.create_index("target_id", unique=True)
+    db_ticket.tickets.create_index("ticket_code", unique=True)
+    db_auth.admins.create_index("username", unique=True)
 
 
 def main() -> int:
-    print(f"[seed] Connecting {MONGODB_URI} / {MONGODB_DB}")
+    print(f"[seed] Connecting {MONGODB_URI} / auth={DB_AUTH} poi={DB_POI} narration={DB_NARRATION} ticket={DB_TICKET}")
     client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=15000)
     client.admin.command("ping")
-    db = client[MONGODB_DB]
+    db_auth = client[DB_AUTH]
+    db_poi = client[DB_POI]
+    db_narration = client[DB_NARRATION]
+    db_ticket = client[DB_TICKET]
 
-    ensure_indexes(db)
+    ensure_indexes(db_poi, db_narration, db_ticket, db_auth)
 
     # Đã lược bỏ zones.json, chỉ load pois và narrations
     pois = load_json("pois.json")
     narrations = load_json("narrations.json")
 
-    p_up, p_mod = upsert_many(db.pois, pois, "poi_code")
+    p_up, p_mod = upsert_many(db_poi.pois, pois, "poi_code")
 
     # Danh mục ngôn ngữ: thêm ngôn ngữ mới chỉ cần thêm 1 bản ghi vào languages.json
     languages = load_json("languages.json")
-    l_up, l_mod = upsert_many(db.languages, languages, "code")
+    l_up, l_mod = upsert_many(db_poi.languages, languages, "code")
     print("[seed] languages upserted={0} modified={1}".format(l_up, l_mod))
 
     narration_docs = []
@@ -137,18 +144,18 @@ def main() -> int:
         if "approved" not in doc:
             doc["approved"] = True
         narration_docs.append(doc)
-    n_up, n_mod = upsert_many(db.narrations, narration_docs, "target_id")
+    n_up, n_mod = upsert_many(db_narration.narrations, narration_docs, "target_id")
 
-    seed_admin(db)
+    seed_admin(db_auth)
 
     print(
         "[seed] pois upserted={0} modified={1} total={2}".format(
-            p_up, p_mod, db.pois.count_documents({})
+            p_up, p_mod, db_poi.pois.count_documents({})
         )
     )
     print(
         "[seed] narrations upserted={0} modified={1} total={2}".format(
-            n_up, n_mod, db.narrations.count_documents({})
+            n_up, n_mod, db_narration.narrations.count_documents({})
         )
     )
     print(f"[seed] admin user ready: {ADMIN_USERNAME}")

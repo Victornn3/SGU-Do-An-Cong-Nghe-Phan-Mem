@@ -1,4 +1,7 @@
 import os
+import json
+import urllib.parse
+import urllib.request
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional, List
 from fastapi import FastAPI, HTTPException, Query
@@ -8,7 +11,8 @@ from pymongo import MongoClient, UpdateOne
 app = FastAPI(title="Statistics Service", version="2.0.0")
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://mongo:27017")
-MONGO_DB = os.getenv("MONGO_DATABASE", "van_mieu")
+MONGO_DB = os.getenv("MONGO_DATABASE", "vm_stats")
+TICKET_SERVICE_URL = os.getenv("TICKET_SERVICE_URL", "http://ticket-service:8004")
 
 client = MongoClient(MONGO_URL)
 db = client[MONGO_DB]
@@ -26,8 +30,6 @@ def setup_indexes():
     try:
         db.active_sessions.create_index("last_seen", expireAfterSeconds=SESSION_TIMEOUT_SECONDS)
         db.active_sessions.create_index("session_id", unique=True)
-        db.tickets.create_index("ticket_code", unique=True)
-        db.tickets.create_index("first_accessed_at")
     except Exception as e:
         print(f"Lưu ý tạo Index: {e}")
 
@@ -140,16 +142,33 @@ def record_visit(data: VisitRecordRequest):
     return {"success": True, "session_id": data.session_id}
 
 
+def fetch_ticket_summary(start=None, end=None) -> dict:
+    """
+    Lấy số liệu vé từ ticket-service qua API (bảng tickets thuộc database của ticket-service,
+    statistics-service không đọc thẳng). Lỗi kết nối thì trả 0 và ghi log, không làm hỏng dashboard.
+    """
+    url = f"{TICKET_SERVICE_URL}/api/tickets/summary"
+    if start and end:
+        url += "?" + urllib.parse.urlencode({"start": start.isoformat(), "end": end.isoformat()})
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        print(f"Không lấy được số liệu vé từ ticket-service: {e}")
+        return {"total_created": 0, "total_scanned": 0, "standard_scanned": 0,
+                "priority_scanned": 0, "scanned_in_range": 0}
+
+
 @app.get("/api/stats/tickets")
 def get_ticket_stats():
     """
     [M9] Thống kê vé duy nhất: Phân loại theo STANDARD và PRIORITY
     """
-    total_created = db.tickets.count_documents({})
-    total_scanned = db.tickets.count_documents({"is_used": True})
-    
-    standard_scanned = db.tickets.count_documents({"is_used": True, "ticket_type": "STANDARD"})
-    priority_scanned = db.tickets.count_documents({"is_used": True, "ticket_type": "PRIORITY"})
+    summary = fetch_ticket_summary()
+    total_created = summary["total_created"]
+    total_scanned = summary["total_scanned"]
+    standard_scanned = summary["standard_scanned"]
+    priority_scanned = summary["priority_scanned"]
 
     scan_rate = round((total_scanned / total_created * 100), 2) if total_created > 0 else 0.0
 
@@ -176,8 +195,8 @@ def get_overview_dashboard(start_date: Optional[str] = None, end_date: Optional[
     online_visitors_count = db.active_sessions.count_documents({"last_seen": {"$gte": cutoff}})
 
     visit_filter = {}
-    scanned_ticket_filter = {"is_used": True}
     poi_history_filter = {}
+    range_start = range_end = None
 
     if start_date and end_date:
         try:
@@ -189,11 +208,8 @@ def get_overview_dashboard(start_date: Optional[str] = None, end_date: Optional[
             
             date_range = {"$gte": start_local.astimezone(timezone.utc), "$lte": end_local.astimezone(timezone.utc)}
             visit_filter["created_at"] = date_range
-            # Lọc theo first_accessed_at (M6 chuẩn hóa) hoặc fallback scanned_at
-            scanned_ticket_filter["$or"] = [
-                {"first_accessed_at": date_range},
-                {"scanned_at": date_range}
-            ]
+            # Số vé quét trong khoảng ngày do ticket-service tính (lọc first_accessed_at / scanned_at)
+            range_start, range_end = date_range["$gte"], date_range["$lte"]
             poi_history_filter["created_at"] = date_range
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=f"Khoảng ngày không hợp lệ: {exc}")
@@ -205,8 +221,9 @@ def get_overview_dashboard(start_date: Optional[str] = None, end_date: Optional[
         historical_poi_visits[poi] = db.poi_history.count_documents(f)
 
     total_historical_visits = db.visits.count_documents(visit_filter)
-    total_tickets_scanned = db.tickets.count_documents(scanned_ticket_filter)
-    total_tickets_created = db.tickets.count_documents({})
+    ticket_summary = fetch_ticket_summary(range_start, range_end)
+    total_tickets_scanned = ticket_summary["scanned_in_range"]
+    total_tickets_created = ticket_summary["total_created"]
     scan_rate = round(total_tickets_scanned / total_tickets_created * 100, 2) if total_tickets_created else 0.0
 
     return {

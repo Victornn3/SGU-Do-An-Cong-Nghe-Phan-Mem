@@ -11,7 +11,7 @@ from pymongo import MongoClient, ReturnDocument
 app = FastAPI(title="Ticket Service", version="2.0.0")
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://mongo:27017")
-MONGO_DB = os.getenv("MONGO_DATABASE", "van_mieu")
+MONGO_DB = os.getenv("MONGO_DATABASE", "vm_ticket")
 USER_WEB_BASE_URL = os.getenv("USER_WEB_BASE_URL", "http://localhost/index.html")
 
 client = MongoClient(MONGO_URL)
@@ -61,6 +61,47 @@ def format_ticket(ticket: dict) -> dict:
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "ticket-service"}
+
+
+@app.on_event("startup")
+def setup_indexes():
+    """Bảng tickets thuộc ticket-service nên chỉ service này tạo chỉ mục."""
+    try:
+        db.tickets.create_index("ticket_code", unique=True)
+        db.tickets.create_index("first_accessed_at")
+    except Exception as e:
+        print(f"Lưu ý tạo Index: {e}")
+
+
+@app.get("/api/tickets/summary")
+def get_ticket_summary(start: Optional[str] = None, end: Optional[str] = None):
+    """
+    Số liệu tổng hợp vé cho statistics-service (gọi qua API thay vì đọc thẳng bảng tickets).
+    start/end (ISO 8601, có múi giờ) chỉ dùng để đếm số vé quét lần đầu trong khoảng đó.
+    """
+    total_created = db.tickets.count_documents({})
+    total_scanned = db.tickets.count_documents({"is_used": True})
+    standard_scanned = db.tickets.count_documents({"is_used": True, "ticket_type": "STANDARD"})
+    priority_scanned = db.tickets.count_documents({"is_used": True, "ticket_type": "PRIORITY"})
+
+    scanned_in_range = total_scanned
+    if start and end:
+        try:
+            date_range = {"$gte": datetime.fromisoformat(start), "$lte": datetime.fromisoformat(end)}
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=f"Khoảng thời gian không hợp lệ: {exc}")
+        scanned_in_range = db.tickets.count_documents({
+            "is_used": True,
+            "$or": [{"first_accessed_at": date_range}, {"scanned_at": date_range}],
+        })
+
+    return {
+        "total_created": total_created,
+        "total_scanned": total_scanned,
+        "standard_scanned": standard_scanned,
+        "priority_scanned": priority_scanned,
+        "scanned_in_range": scanned_in_range,
+    }
 
 
 @app.get("/api/tickets")

@@ -5,16 +5,18 @@ from pymongo import MongoClient
 from gtts import gTTS
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://mongo:27017")
-MONGO_DB = os.getenv("MONGO_DATABASE", "van_mieu")
+MONGO_DB = os.getenv("MONGO_DATABASE", "vm_narration")  # narrations
+MONGO_DB_POI = os.getenv("MONGO_DATABASE_POI", "vm_poi")  # languages (thuộc poi-service)
 AUDIO_BASE_DIR = Path(os.getenv("AUDIO_BASE_DIR", "/data/audio"))
 
 client = MongoClient(MONGO_URL)
 db = client[MONGO_DB]
+db_poi = client[MONGO_DB_POI]
 
 # Mã ngôn ngữ và mã TTS lấy từ collection `languages` (không ghi cứng trong code)
 LANG_MAP = {
     lang["_id"]: lang.get("tts_locale") or lang["_id"]
-    for lang in db.languages.find({"is_active": True})
+    for lang in db_poi.languages.find({"is_active": True})
 }
 if not LANG_MAP:
     print("[Error] Chưa có ngôn ngữ nào trong collection languages (chạy seed-data trước)!")

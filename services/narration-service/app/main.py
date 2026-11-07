@@ -1,5 +1,8 @@
 import os
+import json
+import time
 import logging
+import urllib.request
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
@@ -12,7 +15,7 @@ logger = logging.getLogger("narration-service")
 app = FastAPI(title="Narration & Audio Service", version="1.0.0")
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://mongo:27017")
-MONGO_DB = os.getenv("MONGO_DATABASE", "van_mieu")
+MONGO_DB = os.getenv("MONGO_DATABASE", "vm_narration")
 
 client = MongoClient(MONGO_URL)
 db = client[MONGO_DB]
@@ -27,11 +30,34 @@ class NarrationUpdate(BaseModel):
     contents: dict[str, str]
 
 
+# Danh mục ngôn ngữ thuộc poi-service (database vm_poi). Narration-service không đọc
+# thẳng database của service khác mà hỏi qua API, rồi giữ bản nhớ tạm vài chục giây.
+POI_SERVICE_URL = os.getenv("POI_SERVICE_URL", "http://poi-service:8002")
+LANGUAGE_CACHE_SECONDS = 30
+_language_cache = {"at": 0.0, "data": {}}
+
+
+def _load_languages() -> dict:
+    now = time.monotonic()
+    if _language_cache["data"] and now - _language_cache["at"] < LANGUAGE_CACHE_SECONDS:
+        return _language_cache["data"]
+    try:
+        with urllib.request.urlopen(f"{POI_SERVICE_URL}/api/languages", timeout=5) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+        data = {item["code"]: item for item in payload.get("data", []) if item.get("code")}
+        _language_cache["at"] = now
+        _language_cache["data"] = data
+        return data
+    except Exception as e:
+        logger.error(f"Không lấy được danh mục ngôn ngữ từ poi-service: {e}")
+        return _language_cache["data"]  # dùng bản cũ nếu có
+
+
 def get_language(code: str) -> dict | None:
-    """Tra ngôn ngữ đang hoạt động trong collection `languages` (dữ liệu, không ghi cứng)."""
+    """Tra ngôn ngữ đang hoạt động (lấy từ poi-service qua API, không ghi cứng)."""
     if not code:
         return None
-    return db.languages.find_one({"_id": code, "is_active": True})
+    return _load_languages().get(code)
 
 
 def generate_tts_file(text: str, lang: str, poi_id: str) -> str | None:
