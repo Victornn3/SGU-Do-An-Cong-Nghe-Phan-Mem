@@ -4,8 +4,10 @@ services:
   mongo:
     image: mongo:7
     restart: unless-stopped
-    ports:
-      - "27017:27017"
+    # [M11] ĐÃ ĐÓNG CỔNG 27017 RA NGOÀI ĐỂ ĐẢM BẢO AN TOÀN
+    # (Nếu cần dùng MongoDB Compass để xem DB khi dev, chỉ mở nội bộ: - "127.0.0.1:27017:27017")
+    expose:
+      - "27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
@@ -19,7 +21,7 @@ services:
         ]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
       start_period: 10s
 
   auth-service:
@@ -29,9 +31,15 @@ services:
     environment:
       MONGO_URL: mongodb://mongo:27017
       MONGO_DATABASE: van_mieu
+      JWT_SECRET: ${JWT_SECRET:-vanmieu_prod_secret_key_2026}
     depends_on:
       mongo:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   poi-service:
     build:
@@ -43,6 +51,11 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   narration-service:
     build:
@@ -57,6 +70,11 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   ticket-service:
     build:
@@ -65,9 +83,15 @@ services:
     environment:
       MONGO_URL: mongodb://mongo:27017
       MONGO_DATABASE: van_mieu
+      USER_WEB_BASE_URL: ${USER_WEB_BASE_URL:-http://localhost/index.html}
     depends_on:
       mongo:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   statistics-service:
     build:
@@ -79,6 +103,11 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   api-gateway:
     build:
@@ -87,6 +116,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      JWT_SECRET: ${JWT_SECRET:-vanmieu_prod_secret_key_2026}
       AUTH_SERVICE_URL: http://auth-service:8001
       POI_SERVICE_URL: http://poi-service:8002
       NARRATION_SERVICE_URL: http://narration-service:8003
