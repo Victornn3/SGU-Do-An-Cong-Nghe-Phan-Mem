@@ -49,6 +49,11 @@ def is_public_request(method: str, service: str, path: str) -> bool:
     if service == "auth" and clean_path == "login":
         return True
 
+    # 2b. Danh sách quản trị đầy đủ (gồm điểm nháp/ẩn): bắt buộc phải có token,
+    # phải đặt TRƯỚC quy tắc cho phép GET /api/pois bên dưới.
+    if service == "pois" and clean_path.startswith("admin"):
+        return False
+
     # 3. Khách xem điểm tham quan & ngôn ngữ (Chỉ cho phép GET)
     if service in ["pois", "languages"] and method == "GET":
         return True
