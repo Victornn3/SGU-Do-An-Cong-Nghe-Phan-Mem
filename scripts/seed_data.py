@@ -125,6 +125,11 @@ def main() -> int:
 
     p_up, p_mod = upsert_many(db.pois, pois, "poi_code")
 
+    # Danh mục ngôn ngữ: thêm ngôn ngữ mới chỉ cần thêm 1 bản ghi vào languages.json
+    languages = load_json("languages.json")
+    l_up, l_mod = upsert_many(db.languages, languages, "code")
+    print("[seed] languages upserted={0} modified={1}".format(l_up, l_mod))
+
     narration_docs = []
     for item in narrations:
         doc = dict(item)

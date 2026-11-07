@@ -1,12 +1,11 @@
 import os
-import time
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Optional
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from pymongo import MongoClient
+from typing import Dict, Optional, List
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel, Field
+from pymongo import MongoClient, UpdateOne
 
-app = FastAPI(title="Statistics Service", version="1.0.0")
+app = FastAPI(title="Statistics Service", version="2.0.0")
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://mongo:27017")
 MONGO_DB = os.getenv("MONGO_DATABASE", "van_mieu")
@@ -14,33 +13,39 @@ MONGO_DB = os.getenv("MONGO_DATABASE", "van_mieu")
 client = MongoClient(MONGO_URL)
 db = client[MONGO_DB]
 
-# Lưu phiên đang online thực tế: { "session_id": { "poi_id": "P00", "last_seen": timestamp } }
-active_sessions: Dict[str, dict] = {}
-SESSION_TIMEOUT_SECONDS = 20  # Quá 20 giây không có heartbeat thì coi như đã rời web
+SESSION_TIMEOUT_SECONDS = 25  # Quá 25 giây không có heartbeat thì coi như đã rời web
+ALL_POIS = ["P00", "P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10"]
 
 
-def clean_dead_sessions():
-    """Tự động loại bỏ các phiên đã tắt trình duyệt hoặc rời trang"""
-    now = time.time()
-    dead = [s_id for s_id, info in active_sessions.items() if now - info.get("last_seen", 0) > SESSION_TIMEOUT_SECONDS]
-    for s_id in dead:
-        active_sessions.pop(s_id, None)
+@app.on_event("startup")
+def setup_indexes():
+    """
+    [M9] Tạo TTL Index trong MongoDB để lưu phiên bền vững.
+    MongoDB sẽ tự động dọn các bản ghi hết hạn mà không làm nghẽn RAM ứng dụng.
+    """
+    try:
+        db.active_sessions.create_index("last_seen", expireAfterSeconds=SESSION_TIMEOUT_SECONDS)
+        db.active_sessions.create_index("session_id", unique=True)
+        db.tickets.create_index("ticket_code", unique=True)
+        db.tickets.create_index("first_accessed_at")
+    except Exception as e:
+        print(f"Lưu ý tạo Index: {e}")
 
 
 class VisitRecordRequest(BaseModel):
-    session_id: str
-    initial_mode: str | None = None
-    access_type: str
+    session_id: str = Field(..., min_length=3, max_length=64)
+    initial_mode: Optional[str] = "unknown"
+    access_type: str = Field(..., max_length=32)
     is_real_visit: bool = False
-    timestamp: str | None = None
+    timestamp: Optional[str] = None
 
 
 class SessionLocationPayload(BaseModel):
-    session_id: str
-    gps_mode: str
-    poi_id: Optional[str] = None
-    inside_geofence: bool
-    status: Optional[str] = "ACTIVE"
+    session_id: str = Field(..., min_length=3, max_length=64)
+    gps_mode: str = Field(default="SIMULATED", max_length=20)
+    poi_id: Optional[str] = Field(None, max_length=10)
+    inside_geofence: bool = False
+    status: Optional[str] = Field(default="ACTIVE", max_length=10)
     timestamp: Optional[str] = None
 
 
@@ -51,68 +56,66 @@ def health_check():
 
 @app.post("/api/stats/session-location")
 def update_session_location(data: SessionLocationPayload):
-    """Cập nhật vị trí thời gian thực và chống đếm trùng lượt nghe tự động POI"""
-    clean_dead_sessions()
+    """
+    [M9] Cập nhật vị trí phiên online vào MongoDB (Bền vững, không mất khi restart server).
+    """
+    now_utc = datetime.now(timezone.utc)
     
     if data.status == "OFFLINE":
-        active_sessions.pop(data.session_id, None)
-    else:
-        old_info = active_sessions.get(data.session_id, {})
-        previous_poi = old_info.get("poi_id")
-        valid_poi = data.poi_id if data.inside_geofence and data.poi_id else None
+        # Khách chủ động tắt web hoặc thoát
+        db.active_sessions.delete_one({"session_id": data.session_id})
+        return {"success": True, "session_id": data.session_id, "status": "OFFLINE"}
 
-        # Mỗi session_id chỉ có một POI hiện tại. Nếu yêu cầu cũ đến trễ, bỏ qua để không ghi đè vị trí mới hơn.
-        received_at = time.time()
-        client_timestamp = data.timestamp
-        if client_timestamp:
-            try:
-                parsed = datetime.fromisoformat(client_timestamp.replace("Z", "+00:00"))
-                received_at = parsed.timestamp()
-            except (ValueError, TypeError):
-                pass
+    valid_poi = data.poi_id if (data.inside_geofence and data.poi_id in ALL_POIS) else None
 
-        if old_info.get("last_client_timestamp", 0) > received_at:
-            old_info["last_seen"] = time.time()
-            active_sessions[data.session_id] = old_info
-            return {
-                "success": True,
-                "session_id": data.session_id,
-                "current_poi": old_info.get("poi_id"),
-                "ignored_stale_update": True,
-            }
+    # Lấy thông tin phiên cũ để kiểm tra đổi POI
+    old_session = db.active_sessions.find_one({"session_id": data.session_id})
+    previous_poi = old_session.get("poi_id") if old_session else None
 
-        # Cập nhật phiên hiện tại
-        active_sessions[data.session_id] = {
-            "poi_id": valid_poi,
-            "last_seen": time.time(),
-            "last_client_timestamp": received_at,
-            "gps_mode": data.gps_mode,
-        }
-
-        # Chỉ ghi nhận vào poi_history khi phiên đi vào POI hợp lệ và đổi sang POI khác
-        if valid_poi and valid_poi != previous_poi:
-            db.poi_history.insert_one({
+    # Lưu / Cập nhật phiên trực tiếp vào MongoDB
+    db.active_sessions.update_one(
+        {"session_id": data.session_id},
+        {
+            "$set": {
                 "session_id": data.session_id,
                 "poi_id": valid_poi,
-                "created_at": datetime.now(timezone.utc)
-            })
+                "gps_mode": data.gps_mode,
+                "inside_geofence": data.inside_geofence,
+                "last_seen": now_utc,
+            }
+        },
+        upsert=True
+    )
+
+    # Ghi nhận lịch sử nếu khách bước vào một POI mới
+    if valid_poi and valid_poi != previous_poi:
+        db.poi_history.insert_one({
+            "session_id": data.session_id,
+            "poi_id": valid_poi,
+            "created_at": now_utc
+        })
 
     return {
         "success": True,
         "session_id": data.session_id,
-        "current_poi": active_sessions.get(data.session_id, {}).get("poi_id"),
+        "current_poi": valid_poi,
     }
 
 
 @app.get("/api/stats/poi-occupancy")
 def get_poi_occupancy():
-    """Trả về số người đang online thực tế tại từng POI (phục vụ Tab 1 thời gian thực)"""
-    clean_dead_sessions()
-    all_pois = ["P00", "P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10"]
-    counts = {poi: 0 for poi in all_pois}
-
-    for info in active_sessions.values():
-        p_id = info.get("poi_id")
+    """
+    [M9] Đếm số khách thời gian thực tại từng POI từ MongoDB.
+    Chỉ lấy các phiên có last_seen trong vòng 20 giây trở lại đây.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(seconds=SESSION_TIMEOUT_SECONDS)
+    
+    # Lấy danh sách phiên còn sống trong MongoDB
+    active_docs = list(db.active_sessions.find({"last_seen": {"$gte": cutoff}}))
+    
+    counts = {poi: 0 for poi in ALL_POIS}
+    for doc in active_docs:
+        p_id = doc.get("poi_id")
         if p_id in counts:
             counts[p_id] += 1
 
@@ -121,6 +124,7 @@ def get_poi_occupancy():
 
 @app.post("/api/stats/visit")
 def record_visit(data: VisitRecordRequest):
+    """Ghi nhận lượt truy cập (Chống trùng session_id)"""
     existing_session = db.visits.find_one({"session_id": data.session_id})
     if existing_session:
         return {"success": True, "message": "Phiên đã tồn tại.", "updated": False}
@@ -136,25 +140,24 @@ def record_visit(data: VisitRecordRequest):
     return {"success": True, "session_id": data.session_id}
 
 
-@app.get("/api/stats/visits")
-def get_visit_stats():
-    total_visits = db.visits.count_documents({})
-    demo_simulation = db.visits.count_documents({"access_type": "demo_simulation"})
-    return {
-        "success": True,
-        "total_sessions": total_visits,
-        "demo_simulation_visits": demo_simulation,
-    }
-
-
 @app.get("/api/stats/tickets")
 def get_ticket_stats():
+    """
+    [M9] Thống kê vé duy nhất: Phân loại theo STANDARD và PRIORITY
+    """
     total_created = db.tickets.count_documents({})
     total_scanned = db.tickets.count_documents({"is_used": True})
-    scan_rate = round((total_scanned / total_created * 100), 2) if total_created > 0 else 0
+    
+    standard_scanned = db.tickets.count_documents({"is_used": True, "ticket_type": "STANDARD"})
+    priority_scanned = db.tickets.count_documents({"is_used": True, "ticket_type": "PRIORITY"})
+
+    scan_rate = round((total_scanned / total_created * 100), 2) if total_created > 0 else 0.0
+
     return {
         "total_tickets_created": total_created,
         "total_tickets_scanned": total_scanned,
+        "standard_scanned": standard_scanned,
+        "priority_scanned": priority_scanned,
         "scan_rate_percentage": scan_rate,
     }
 
@@ -163,50 +166,59 @@ def get_ticket_stats():
 @app.get("/api/stats/overview")
 def get_overview_dashboard(start_date: Optional[str] = None, end_date: Optional[str] = None):
     """
-    Cung cấp số liệu thời gian thực (Tab 1) và số liệu tích lũy, lọc theo ngày (Tab 4)
+    [M9] Cung cấp số liệu tổng hợp cho Dashboard và Báo cáo lịch sử
     """
-    clean_dead_sessions()
     ticket_stats = get_ticket_stats()
     occupancy_stats = get_poi_occupancy()
+
+    # Tính số khách online thời gian thực từ MongoDB
+    cutoff = datetime.now(timezone.utc) - timedelta(seconds=SESSION_TIMEOUT_SECONDS)
+    online_visitors_count = db.active_sessions.count_documents({"last_seen": {"$gte": cutoff}})
 
     visit_filter = {}
     scanned_ticket_filter = {"is_used": True}
     poi_history_filter = {}
+
     if start_date and end_date:
         try:
             vn_tz = timezone(timedelta(hours=7))
             start_local = datetime.fromisoformat(start_date).replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=vn_tz)
             end_local = datetime.fromisoformat(end_date).replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=vn_tz)
             if start_local > end_local:
-                raise ValueError("start_date must be on or before end_date")
+                raise ValueError("start_date phải trước hoặc cùng ngày với end_date")
+            
             date_range = {"$gte": start_local.astimezone(timezone.utc), "$lte": end_local.astimezone(timezone.utc)}
             visit_filter["created_at"] = date_range
-            scanned_ticket_filter["scanned_at"] = date_range
+            # Lọc theo first_accessed_at (M6 chuẩn hóa) hoặc fallback scanned_at
+            scanned_ticket_filter["$or"] = [
+                {"first_accessed_at": date_range},
+                {"scanned_at": date_range}
+            ]
             poi_history_filter["created_at"] = date_range
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=f"Khoảng ngày không hợp lệ: {exc}")
 
-    # Thống kê lịch sử ghé thăm tích lũy từng POI từ bảng poi_history
+    # Thống kê lịch sử POI
     historical_poi_visits = {}
-    all_pois = ["P00", "P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10"]
-    for poi in all_pois:
+    for poi in ALL_POIS:
         f = {"poi_id": poi, **poi_history_filter}
         historical_poi_visits[poi] = db.poi_history.count_documents(f)
 
-    total_historical_visits = db.visits.count_documents(visit_filter if visit_filter else {})
+    total_historical_visits = db.visits.count_documents(visit_filter)
     total_tickets_scanned = db.tickets.count_documents(scanned_ticket_filter)
     total_tickets_created = db.tickets.count_documents({})
-    scan_rate = round(total_tickets_scanned / total_tickets_created * 100, 2) if total_tickets_created else 0
-    online_visitors_count = len(active_sessions)
+    scan_rate = round(total_tickets_scanned / total_tickets_created * 100, 2) if total_tickets_created else 0.0
 
     return {
         "success": True,
-        "online_visitors": online_visitors_count,  # Dành cho Tab 1 (nhảy số tức thì, thoát về 0)
+        "online_visitors": online_visitors_count,
         "total_tickets_created": total_tickets_created,
         "total_tickets_scanned": total_tickets_scanned,
+        "standard_scanned": ticket_stats.get("standard_scanned", 0),
+        "priority_scanned": ticket_stats.get("priority_scanned", 0),
         "scan_rate_percentage": scan_rate,
         "poi_occupancy": occupancy_stats,
-        "historical_poi_visits": historical_poi_visits,  # Dành cho Tab 4 (lịch sử POI)
-        "total_historical_visits": total_historical_visits, # Dành cho Tab 4 (tổng khách tích lũy)
+        "historical_poi_visits": historical_poi_visits,
+        "total_historical_visits": total_historical_visits,
         "tickets": ticket_stats,
     }

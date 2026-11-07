@@ -71,11 +71,8 @@
           onchange="changeLanguage(this.value)"
           class="bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
         >
+          <!-- Danh sách ngôn ngữ được nạp từ API /api/languages (collection languages) -->
           <option value="vi">🇻🇳 Tiếng Việt</option>
-
-          <option value="en">🇬🇧 English</option>
-
-          <option value="zh">🇨🇳 中文</option>
         </select>
       </div>
     </header>
@@ -101,18 +98,30 @@
             ></span>
 
             <span id="gpsStatusText" data-i18n="map.gpsStatus"
-              >Đang định vị Nội tự (Geofence 10m)</span
+              >Đang định vị Nội tự (Geofence)</span
             >
           </div>
 
-          <button
-            onclick="toggleSimulator()"
-            class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-location-crosshairs"></i>
+          <div class="flex items-center space-x-1.5">
+            <button
+              id="btnGpsMap"
+              type="button"
+              onclick="batDauGpsThat()"
+              class="bg-white hover:bg-sky-50 border border-sky-600 text-sky-700 text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
+            >
+              <i class="fa-solid fa-satellite-dish"></i>
+              <span data-i18n="map.realGps">GPS thật</span>
+            </button>
 
-            <span data-i18n="map.simulate">Giả lập GPS</span>
-          </button>
+            <button
+              onclick="toggleSimulator()"
+              class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
+            >
+              <i class="fa-solid fa-location-crosshairs"></i>
+
+              <span data-i18n="map.simulate">Giả lập GPS</span>
+            </button>
+          </div>
         </div>
 
         <!-- Bảng chọn giả lập GPS (Ẩn/Hiện) -->
@@ -222,7 +231,7 @@
                 id="audioModeBadge"
                 class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded-full"
                 data-i18n="audio.geofence"
-                >Geofence (10m)</span
+                >Geofence</span
               >
 
               <button
@@ -251,7 +260,7 @@
       >
         <div class="mb-3">
           <h2 class="text-sm font-bold text-slate-800" data-i18n="poi.title">
-            Danh sách điểm tham quan (11 POI)
+            Danh sách điểm tham quan
           </h2>
 
           <p class="text-xs text-slate-500" data-i18n="poi.description">
@@ -332,6 +341,13 @@
                 <p
                   id="detailDescription"
                   class="text-xs sm:text-sm text-slate-700 leading-relaxed"
+                ></p>
+
+                <!-- Thông báo dự phòng: thiếu bản dịch hoặc thiếu audio -->
+                <p
+                  id="detailNotice"
+                  class="hidden mt-2 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+                  role="status"
                 ></p>
               </div>
             </div>
@@ -416,9 +432,8 @@
           Văn Miếu – Quốc Tử Giám
         </h2>
 
-        <p class="mt-2 text-xs leading-relaxed text-slate-600">
-          Chào mừng bạn đến với di tích. Bấm bắt đầu để khám phá và nghe thuyết
-          minh tự động tại điểm đầu tiên: <strong>Cổng Văn Miếu (P00)</strong>.
+        <p class="mt-2 text-xs leading-relaxed text-slate-600" data-i18n="welcome.intro">
+          Chào mừng bạn đến với di tích. Bấm bắt đầu để khám phá và nghe thuyết minh tự động tại điểm đầu tiên: Cổng Văn Miếu (P00).
         </p>
 
         <!-- Nút bấm bắt đầu với POI P00 -->
@@ -429,10 +444,21 @@
           class="mt-5 w-full rounded-xl bg-sky-600 hover:bg-sky-700 px-4 py-3 text-xs font-bold text-white transition shadow-md shadow-sky-600/20 cursor-pointer flex items-center justify-center space-x-2"
         >
           <i class="fa-solid fa-play"></i>
-          <span>Bắt đầu với điểm P00</span>
+          <span data-i18n="welcome.startP00">Bắt đầu với điểm P00 (mô phỏng)</span>
         </button>
 
-        <p class="mt-3 text-[11px] text-slate-400">Chạm để bắt đầu</p>
+        <!-- Dùng vị trí GPS thật (từ chối vẫn dùng được thủ công) -->
+        <button
+          id="btnGpsThat"
+          type="button"
+          onclick="batDauGpsThat()"
+          class="mt-2 w-full rounded-xl border border-sky-600 px-4 py-3 text-xs font-bold text-sky-700 hover:bg-sky-50 transition cursor-pointer flex items-center justify-center space-x-2"
+        >
+          <i class="fa-solid fa-location-crosshairs"></i>
+          <span data-i18n="welcome.useGps">Dùng vị trí GPS thật</span>
+        </button>
+
+        <p class="mt-3 text-[11px] text-slate-400" data-i18n="welcome.tap">Chạm để bắt đầu</p>
       </div>
     </div>
 
@@ -467,6 +493,8 @@
 
     <!-- File JS riêng -->
 
-    <script src="js/main.js?v=3"></script>
+    <script src="ticket-gate.js?v=1"></script>
+    <script src="js/main.js?v=6"></script>
+    <script src="js/gps.js?v=5"></script>
   </body>
 </html>

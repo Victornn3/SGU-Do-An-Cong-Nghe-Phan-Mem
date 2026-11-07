@@ -11,11 +11,14 @@ AUDIO_BASE_DIR = Path(os.getenv("AUDIO_BASE_DIR", "/data/audio"))
 client = MongoClient(MONGO_URL)
 db = client[MONGO_DB]
 
+# Mã ngôn ngữ và mã TTS lấy từ collection `languages` (không ghi cứng trong code)
 LANG_MAP = {
-    "vi": "vi",
-    "en": "en",
-    "zh": "zh-CN"
+    lang["_id"]: lang.get("tts_locale") or lang["_id"]
+    for lang in db.languages.find({"is_active": True})
 }
+if not LANG_MAP:
+    print("[Error] Chưa có ngôn ngữ nào trong collection languages (chạy seed-data trước)!")
+    sys.exit(1)
 
 narrations = list(db.narrations.find({}))
 if not narrations:
@@ -52,4 +55,4 @@ for item in narrations:
         except Exception as e:
             print(f"Lỗi: {e}")
 
-print(f"\nHoàn tất! Tổng cộng {total}/33 file âm thanh đã sẵn sàng tại {AUDIO_BASE_DIR}.")
+print(f"\nHoàn tất! Tổng cộng {total} file âm thanh đã sẵn sàng tại {AUDIO_BASE_DIR}.")

@@ -6,11 +6,30 @@
     "description": "Cổng chính dẫn vào khu Nội tự Văn Miếu - Quốc Tử Giám.",
     "latitude": 21.027526,
     "longitude": 105.835622,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 0,
     "image_url": "/images/poi_P00_cong_van_mieu.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Cổng Văn Miếu",
+        "description": "Cổng chính dẫn vào khu Nội tự Văn Miếu - Quốc Tử Giám."
+      },
+      "en": {
+        "name": "Van Mieu Gate",
+        "description": "Main gate leading into the inner precinct of the Temple of Literature – Imperial Academy."
+      },
+      "zh": {
+        "name": "文庙门",
+        "description": "通往文庙—国子监内院的正门。"
+      },
+      "ko": {
+        "name": "문묘 정문",
+        "description": "문묘 – 국자감 내부 경내로 들어가는 정문입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P01",
@@ -19,11 +38,30 @@
     "description": "Cổng thứ hai dẫn vào không gian Nhập Đạo.",
     "latitude": 21.028129,
     "longitude": 105.835891,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 1,
     "image_url": "/images/poi_P01_cong_dai_trung.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Cổng Đại Trung",
+        "description": "Cổng thứ hai dẫn vào không gian Nhập Đạo."
+      },
+      "en": {
+        "name": "Dai Trung Gate",
+        "description": "The second gate, leading into the Nhap Dao courtyard."
+      },
+      "zh": {
+        "name": "大中门",
+        "description": "通往“入道”空间的第二道门。"
+      },
+      "ko": {
+        "name": "대중문",
+        "description": "입도(入道) 마당으로 이어지는 두 번째 문입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P02",
@@ -32,11 +70,30 @@
     "description": "Lầu gác gỗ biểu tượng văn hóa của Thủ đô Hà Nội.",
     "latitude": 21.028575,
     "longitude": 105.835838,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 2,
     "image_url": "/images/poi_P02_khue_van_cac.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Khuê Văn Các",
+        "description": "Lầu gác gỗ biểu tượng văn hóa của Thủ đô Hà Nội."
+      },
+      "en": {
+        "name": "Khue Van Pavilion",
+        "description": "A wooden pavilion, the cultural symbol of Hanoi."
+      },
+      "zh": {
+        "name": "奎文阁",
+        "description": "木结构楼阁，河内的文化象征。"
+      },
+      "ko": {
+        "name": "규문각",
+        "description": "하노이의 문화적 상징인 목조 누각입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P03",
@@ -44,12 +101,31 @@
     "name": "Nhà Bia Tiến Sĩ",
     "description": "Nơi lưu giữ 82 bia Tiến sĩ Di sản tư liệu thế giới.",
     "latitude": 21.028665,
-    "longitude": 105.836150,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "longitude": 105.83615,
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 3,
     "image_url": "/images/poi_P03_nha_bia_tien_si.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Nhà Bia Tiến Sĩ",
+        "description": "Nơi lưu giữ 82 bia Tiến sĩ Di sản tư liệu thế giới."
+      },
+      "en": {
+        "name": "Doctoral Stelae Hall",
+        "description": "Home of the 82 Doctoral Stelae, a UNESCO-recognised documentary heritage."
+      },
+      "zh": {
+        "name": "进士碑亭",
+        "description": "保存着82块进士碑，是世界记忆遗产。"
+      },
+      "ko": {
+        "name": "진사비 전시관",
+        "description": "유네스코가 인정한 기록유산인 진사비 82기가 모셔진 곳입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P04",
@@ -58,11 +134,30 @@
     "description": "Hồ nước hình vuông soi bóng Khuê Văn Các.",
     "latitude": 21.028689,
     "longitude": 105.835903,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 4,
     "image_url": "/images/poi_P04_gieng_thien_quang.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Giếng Thiên Quang",
+        "description": "Hồ nước hình vuông soi bóng Khuê Văn Các."
+      },
+      "en": {
+        "name": "Thien Quang Well",
+        "description": "A square pond reflecting the Khue Van Pavilion."
+      },
+      "zh": {
+        "name": "天光井",
+        "description": "映照奎文阁倒影的方形水池。"
+      },
+      "ko": {
+        "name": "천광정",
+        "description": "규문각이 비치는 네모난 연못입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P05",
@@ -71,11 +166,30 @@
     "description": "Cổng lớn dẫn vào khu vực thờ tự trung tâm.",
     "latitude": 21.028975,
     "longitude": 105.836032,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 5,
     "image_url": "/images/poi_P05_cong_dai_thanh.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Cổng Đại Thành",
+        "description": "Cổng lớn dẫn vào khu vực thờ tự trung tâm."
+      },
+      "en": {
+        "name": "Dai Thanh Gate",
+        "description": "The grand gate leading to the central worship area."
+      },
+      "zh": {
+        "name": "大成门",
+        "description": "通往中央祭祀区的大门。"
+      },
+      "ko": {
+        "name": "대성문",
+        "description": "중앙 제사 구역으로 이어지는 웅장한 문입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P06",
@@ -84,11 +198,30 @@
     "description": "Tòa điện thờ linh thiêng Khổng Tử và các bậc hiền triết.",
     "latitude": 21.029236,
     "longitude": 105.836131,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 6,
     "image_url": "/images/poi_P06_dien_dai_thanh.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Điện Đại Thành",
+        "description": "Tòa điện thờ linh thiêng Khổng Tử và các bậc hiền triết."
+      },
+      "en": {
+        "name": "Dai Thanh Sanctuary",
+        "description": "The sacred sanctuary honouring Confucius and the sages."
+      },
+      "zh": {
+        "name": "大成殿",
+        "description": "供奉孔子与先贤的神圣大殿。"
+      },
+      "ko": {
+        "name": "대성전",
+        "description": "공자와 성현들을 모신 신성한 전각입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P07",
@@ -97,11 +230,30 @@
     "description": "Tòa nhà tôn vinh truyền thống giáo dục và các vị danh nhân.",
     "latitude": 21.029783,
     "longitude": 105.836326,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 7,
     "image_url": "/images/poi_P07_nha_thai_hoc.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Nhà Thái Học",
+        "description": "Tòa nhà tôn vinh truyền thống giáo dục và các vị danh nhân."
+      },
+      "en": {
+        "name": "Thai Hoc Hall",
+        "description": "A hall honouring the tradition of learning and eminent scholars."
+      },
+      "zh": {
+        "name": "太学堂",
+        "description": "颂扬教育传统与名士的殿堂。"
+      },
+      "ko": {
+        "name": "태학당",
+        "description": "학문의 전통과 뛰어난 학자들을 기리는 전각입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P08",
@@ -110,11 +262,30 @@
     "description": "Lầu gác lưu giữ chiếc trống sấm đại lễ.",
     "latitude": 21.029879,
     "longitude": 105.836656,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 8,
     "image_url": "/images/poi_P08_lau_trong.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Lầu Trống",
+        "description": "Lầu gác lưu giữ chiếc trống sấm đại lễ."
+      },
+      "en": {
+        "name": "Drum Tower",
+        "description": "A pavilion housing the ceremonial drum."
+      },
+      "zh": {
+        "name": "鼓楼",
+        "description": "收藏大典鼓的楼阁。"
+      },
+      "ko": {
+        "name": "고루(북 누각)",
+        "description": "의례용 북을 보관한 누각입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P09",
@@ -123,11 +294,30 @@
     "description": "Lầu gác treo quả chuông đồng cổ kính.",
     "latitude": 21.030063,
     "longitude": 105.836138,
-    "geofence_radius": 12,
-    "coordinate_status": "simulation_pending_field_verification",
+    "geofence_radius": 15,
+    "coordinate_status": "verified",
     "display_order": 9,
     "image_url": "/images/poi_P09_lau_chuong.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Lầu Chuông",
+        "description": "Lầu gác treo quả chuông đồng cổ kính."
+      },
+      "en": {
+        "name": "Bell Tower",
+        "description": "A pavilion housing the ancient bronze bell."
+      },
+      "zh": {
+        "name": "钟楼",
+        "description": "悬挂古铜钟的楼阁。"
+      },
+      "ko": {
+        "name": "종루(종 누각)",
+        "description": "오래된 청동 종을 보관한 누각입니다."
+      }
+    },
+    "status": "PUBLISHED"
   },
   {
     "_id": "P10",
@@ -137,9 +327,28 @@
     "latitude": 21.028297,
     "longitude": 105.835066,
     "geofence_radius": 15,
-    "coordinate_status": "simulation_pending_field_verification",
+    "coordinate_status": "verified",
     "display_order": 10,
     "image_url": "/images/poi_P10_vuon_giam.jpg",
-    "is_active": true
+    "is_active": true,
+    "translations": {
+      "vi": {
+        "name": "Vườn Giám",
+        "description": "Khu vườn thanh tịnh nằm phía Tây khu di tích Văn Miếu - Quốc Tử Giám, không gian xanh mát và lịch sử."
+      },
+      "en": {
+        "name": "Giam Garden",
+        "description": "A tranquil garden on the west side of the site, green and steeped in history."
+      },
+      "zh": {
+        "name": "监园",
+        "description": "遗址西侧的清幽花园，绿意盎然、饱含历史。"
+      },
+      "ko": {
+        "name": "잠 정원",
+        "description": "유적지 서쪽의 고요하고 푸르며 역사가 깃든 정원입니다."
+      }
+    },
+    "status": "PUBLISHED"
   }
 ]
