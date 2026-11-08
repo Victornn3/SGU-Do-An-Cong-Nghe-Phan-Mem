@@ -11,7 +11,7 @@ from .validation import ValidationError, build_poi_fields, validate_status
 app = FastAPI(title="POI & GPS Service", version="1.1.0")
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://mongo:27017")
-MONGO_DB = os.getenv("MONGO_DATABASE", "van_mieu")
+MONGO_DB = os.getenv("MONGO_DATABASE", "vm_poi")
 
 client = MongoClient(MONGO_URL)
 db = client[MONGO_DB]
