@@ -27,7 +27,8 @@ let autoPlayedPois = new Set(); // Bộ nhớ lưu các POI đã tự động ph
 // Cấu hình kiểm tra GPS và Geofence
 const LOCATION_CONFIG = {
   maxGpsAccuracyMeters: 30,       // Sai số tối đa chấp nhận để kích hoạt Geofence POI (30m)
-  siteRadiusMeters: 220           // Bán kính bao trọn toàn bộ khuôn viên Văn Miếu từ tâm
+  siteRadiusMeters: 220,          // Coi là "trong khuôn viên" khi cách điểm tham quan gần nhất không quá 220m
+  nearSiteMeters: 300             // Chỉ cho bật chế độ GPS thật khi cách điểm tham quan gần nhất không quá 300m
 };
 
 let VAN_MIEU_CENTER = [21.03020, 105.83540]; // Tâm địa lý toàn khu (Nhà bia / Giếng Thiên Quang)
@@ -258,12 +259,23 @@ function applyNarrationContent(poi, info, descriptionEl) {
   }
 }
 
+// Mã khách gắn với MÃ VÉ: một vé là một khách, dù quét lại bao nhiêu lần hay mở trên
+// bao nhiêu điện thoại (lượt ghé mỗi điểm vì vậy cũng chỉ tính 1 lần cho mỗi vé).
+// Không có vé (Xem thử ứng dụng) thì mỗi điện thoại là một khách (lưu trong localStorage).
 function getOrCreateSessionId() {
-  let sId = sessionStorage.getItem("vm_session_id");
+  const ticket = (new URLSearchParams(window.location.search).get("ticket") || "").trim().toUpperCase();
+  if (/^VM-(STD|PRI)-[A-Z0-9]+$/.test(ticket) && sessionStorage.getItem("vm_ticket_demo") !== "true") {
+    return "ve_" + ticket;
+  }
+  const key = "vm_session_demo";
+  let sId = null;
+  try { sId = localStorage.getItem(key); } catch (e) { /* trình duyệt chặn bộ nhớ */ }
+  if (!sId) sId = sessionStorage.getItem("vm_session_id");
   if (!sId) {
     sId = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
-    sessionStorage.setItem("vm_session_id", sId);
   }
+  try { localStorage.setItem(key, sId); } catch (e) { /* bỏ qua */ }
+  sessionStorage.setItem("vm_session_id", sId);
   return sId;
 }
 
@@ -715,6 +727,9 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
   } else {
     // Ra ngoài vùng POI (về trạng thái không đứng ở điểm nào nhưng vẫn online)
     if (currentSimulatedPoiId !== null) {
+      // Vừa rời điểm: tắt thuyết minh đang phát (chỉ làm một lần lúc rời, để khách
+      // tự bấm nghe lại ở ngoài vùng thì GPS cập nhật sau đó không tắt ngang)
+      dungThuyetMinhKhiRaNgoaiVung();
       autoPlayedPois.delete(currentSimulatedPoiId); // rời vùng: đặt lại cờ tự phát
       currentSimulatedPoiId = null;
       const currentMode = gpsMode === "real" ? "REAL_GPS" : "SIMULATED";
@@ -1002,6 +1017,26 @@ function transferAudioState(fromPlayer, toPlayer) {
   }
 }
 
+// Khách ra khỏi vùng của mọi điểm: dừng thuyết minh tự động trên thanh nghe bản đồ
+// (tua về đầu, vẫn giữ bài để khách tự bấm nghe lại nếu muốn). Trang chi tiết chỉ bị
+// dừng khi đang phát đúng điểm vừa rời; khách tự mở điểm khác để nghe thì không ảnh hưởng.
+function dungThuyetMinhKhiRaNgoaiVung() {
+  const mapPlayer = document.getElementById("audioPlayer");
+  if (mapPlayer && !mapPlayer.paused) {
+    mapPlayer.pause();
+    try { mapPlayer.currentTime = 0; } catch (e) { /* chưa tải xong */ }
+  }
+  const detailPlayer = document.getElementById("audioPlayerDetail");
+  if (detailPlayer && !detailPlayer.paused && mapAudioPoiId && detailAudioPoiId === mapAudioPoiId) {
+    detailPlayer.pause();
+  }
+}
+
+// Thuyết minh tự động chỉ được phát khi khách vẫn đang ở trong vùng của điểm đó
+function vanOTrongVung(poi) {
+  return Boolean(poi) && currentSimulatedPoiId === poi.poi_code;
+}
+
 async function loadAndPlayAudio(poi, autoPlay = false) {
   if (!poi) return;
 
@@ -1023,6 +1058,7 @@ async function loadAndPlayAudio(poi, autoPlay = false) {
   const available = await setPlayerSource(activePlayer, poi);
   if (!available) return; // thiếu audio: đã báo và khóa trình phát
   if (mapAudioPoiId !== poi.poi_code) return; // đã chuyển sang điểm khác trong lúc chờ
+  if (autoPlay && !vanOTrongVung(poi)) return; // đã ra ngoài vùng trong lúc chờ tải
 
   activePlayer.onerror = () => {
     console.error(`[Audio] Không tải được: ${audioSrc}`);
@@ -1035,6 +1071,8 @@ async function loadAndPlayAudio(poi, autoPlay = false) {
       setGpsStatus(t("status.arrivedTapToPlay", "Đã tới {poi}. Chạm vào màn hình để nghe thuyết minh.", { poi: getPoiLocalizedName(poi) }));
       
       const unlockAudio = () => {
+        // Chạm màn hình sau khi đã rời điểm (vd. bấm "Sân trống") thì không phát nữa
+        if (!vanOTrongVung(poi) || mapAudioPoiId !== poi.poi_code) return;
         activePlayer.play();
         document.removeEventListener("click", unlockAudio);
       };

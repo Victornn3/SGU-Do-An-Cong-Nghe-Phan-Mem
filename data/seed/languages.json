@@ -68,7 +68,11 @@
       "status.gpsActive": "Đang dùng vị trí thật của bạn.",
       "audio.rewind10": "Lùi 10 giây",
       "audio.forward10": "Tới 10 giây",
-      "audio.speed": "Tốc độ đọc"
+      "audio.speed": "Tốc độ đọc",
+      "status.gpsTooFar": "Bạn đang cách Văn Miếu khoảng {dist} nên chưa dùng được chế độ GPS thật. Chế độ này chỉ dùng được khi bạn ở trong hoặc gần khu di tích. Hãy chọn chế độ giả lập để nghe thử.",
+      "status.gpsDeniedChooseSim": "Bạn chưa cho phép truy cập vị trí nên chưa dùng được chế độ GPS thật. Hãy chọn chế độ giả lập để nghe thử.",
+      "status.gpsUnavailableChooseSim": "Không xác định được vị trí của bạn nên chưa dùng được chế độ GPS thật. Hãy chọn chế độ giả lập để nghe thử.",
+      "status.gpsNotSupported": "Thiết bị không hỗ trợ định vị nên chưa dùng được chế độ GPS thật. Hãy chọn chế độ giả lập để nghe thử."
     }
   },
   {
@@ -140,7 +144,11 @@
       "status.gpsActive": "Using your real location.",
       "audio.rewind10": "Back 10 seconds",
       "audio.forward10": "Forward 10 seconds",
-      "audio.speed": "Playback speed"
+      "audio.speed": "Playback speed",
+      "status.gpsTooFar": "You are about {dist} from the Temple of Literature, so real GPS mode is not available. It only works when you are inside or near the site. Please choose simulation mode to preview.",
+      "status.gpsDeniedChooseSim": "Location access was not allowed, so real GPS mode is not available. Please choose simulation mode to preview.",
+      "status.gpsUnavailableChooseSim": "Your location could not be determined, so real GPS mode is not available. Please choose simulation mode to preview.",
+      "status.gpsNotSupported": "This device does not support location, so real GPS mode is not available. Please choose simulation mode to preview."
     }
   },
   {
@@ -212,7 +220,11 @@
       "status.gpsActive": "正在使用您的真实位置。",
       "audio.rewind10": "后退10秒",
       "audio.forward10": "前进10秒",
-      "audio.speed": "播放速度"
+      "audio.speed": "播放速度",
+      "status.gpsTooFar": "您距离文庙约 {dist}，暂时无法使用真实 GPS 模式。该模式仅在您位于景区内或附近时可用。请选择模拟模式试听。",
+      "status.gpsDeniedChooseSim": "您未允许访问位置，暂时无法使用真实 GPS 模式。请选择模拟模式试听。",
+      "status.gpsUnavailableChooseSim": "无法确定您的位置，暂时无法使用真实 GPS 模式。请选择模拟模式试听。",
+      "status.gpsNotSupported": "此设备不支持定位，无法使用真实 GPS 模式。请选择模拟模式试听。"
     }
   },
   {
@@ -284,7 +296,11 @@
       "status.gpsActive": "실제 위치를 사용 중입니다.",
       "audio.rewind10": "10초 뒤로",
       "audio.forward10": "10초 앞으로",
-      "audio.speed": "재생 속도"
+      "audio.speed": "재생 속도",
+      "status.gpsTooFar": "현재 문묘에서 약 {dist} 떨어져 있어 실제 GPS 모드를 사용할 수 없습니다. 이 모드는 유적지 안이나 근처에서만 사용할 수 있습니다. 시뮬레이션 모드를 선택해 미리 들어 보세요.",
+      "status.gpsDeniedChooseSim": "위치 접근을 허용하지 않아 실제 GPS 모드를 사용할 수 없습니다. 시뮬레이션 모드를 선택해 미리 들어 보세요.",
+      "status.gpsUnavailableChooseSim": "위치를 확인할 수 없어 실제 GPS 모드를 사용할 수 없습니다. 시뮬레이션 모드를 선택해 미리 들어 보세요.",
+      "status.gpsNotSupported": "이 기기는 위치 기능을 지원하지 않아 실제 GPS 모드를 사용할 수 없습니다. 시뮬레이션 모드를 선택해 미리 들어 보세요."
     }
   }
 ]

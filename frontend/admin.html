@@ -188,10 +188,6 @@
             class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2"
           >
             <span>Thống kê & Truy cập</span>
-            <span
-              class="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold uppercase tracking-wider"
-              >Phiên bản 1.0</span
-            >
           </h2>
           <p id="mo-ta-trang" class="text-xs text-slate-500 mt-0.5">
             Giám sát lượt quét nguyên tử và phân loại nguồn truy cập thực tế
@@ -320,32 +316,29 @@
                   </div>
                   <span
                     class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full"
-                    >Lần đầu</span
+                    >Sử dụng</span
                   >
                 </div>
                 <h4
                   class="text-slate-500 text-xs font-semibold uppercase tracking-wider"
                 >
-                  Tổng Vé Đã Quét
+                  Vé Đã Quét
                 </h4>
-                <p
-                  id="thong-ke-da-quet"
-                  class="text-3xl font-extrabold text-slate-900 mt-1"
-                >
-                  0
+                <p class="text-3xl font-extrabold text-slate-900 mt-1">
+                  <span id="thong-ke-da-quet">0</span><span
+                    class="text-lg font-semibold text-slate-400"
+                  > / <span id="thong-ke-da-quet-tren">0</span></span>
                 </p>
               </div>
               <div class="mt-4 text-xs text-slate-500 border-t pt-2">
                 <span
-                  >Cơ chế:
-                  <strong class="text-slate-700"
-                    >Chống đếm trùng nguyên tử</strong
-                  ></span
+                  ><strong id="thong-ke-ty-le" class="text-emerald-600">0%</strong>
+                  vé đã được sử dụng</span
                 >
               </div>
             </div>
 
-            <!-- CARD 4: TỶ LỆ QUÉT HỢP LỆ -->
+            <!-- CARD 4: ĐIỂM ĐÔNG NHẤT LÚC NÀY -->
             <div
               class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between"
             >
@@ -354,27 +347,27 @@
                   <div
                     class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl font-bold shadow-inner"
                   >
-                    <i class="fa-solid fa-chart-line"></i>
+                    <i class="fa-solid fa-location-dot"></i>
                   </div>
                   <span
                     class="text-xs font-semibold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full"
-                    >Quy chuẩn</span
+                    >Lúc này</span
                   >
                 </div>
                 <h4
                   class="text-slate-500 text-xs font-semibold uppercase tracking-wider"
                 >
-                  Tỷ Lệ Quét Hợp Lệ
+                  Điểm Đông Nhất Lúc Này
                 </h4>
                 <p
-                  id="thong-ke-ty-le"
-                  class="text-3xl font-extrabold text-purple-600 mt-1"
+                  id="thong-ke-diem-dong-nhat"
+                  class="text-2xl font-extrabold text-slate-400 mt-1 truncate"
                 >
-                  0.0%
+                  —
                 </p>
               </div>
-              <div class="mt-4 text-xs text-slate-400 border-t pt-2">
-                <span>(Đã quét / Tổng tạo) × 100%</span>
+              <div class="mt-4 text-xs text-slate-500 border-t pt-2">
+                <span id="thong-ke-diem-dong-nhat-chu">Chưa có khách tại điểm nào</span>
               </div>
             </div>
           </div>
@@ -457,23 +450,7 @@
           </div>
 
           <!-- CARD THỐNG KÊ CỘNG DỒN -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div
-              class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"
-            >
-              <span class="text-xs text-slate-500 uppercase font-bold"
-                >Tổng lượt khách tích lũy</span
-              >
-              <p
-                id="bao-cao-tong-luot-khach"
-                class="text-3xl font-extrabold text-slate-900 mt-2"
-              >
-                0
-              </p>
-              <p class="text-[11px] text-slate-400 mt-1">
-                Cộng dồn tất cả các ngày (không bị mất khi tắt web)
-              </p>
-            </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div
               class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"
             >
@@ -487,8 +464,40 @@
                 0
               </p>
               <p class="text-[11px] text-slate-400 mt-1">
-                Số khách đã xác thực qua phôi vé
+                Mỗi vé chỉ tính 1 lần, dù quét lại nhiều lần hay trên nhiều thiết bị
               </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"
+            >
+              <span class="text-xs text-slate-500 uppercase font-bold"
+                >Điểm đông khách nhất</span
+              >
+              <p
+                id="bao-cao-diem-dong-nhat"
+                class="text-xl font-extrabold text-blue-700 mt-2 truncate"
+              >
+                —
+              </p>
+              <p id="bao-cao-diem-dong-nhat-chu" class="text-[11px] text-slate-400 mt-1">
+                Chưa có lượt ghé thăm nào
+              </p>
+            </div>
+          </div>
+
+          <!-- XẾP HẠNG CÁC ĐIỂM THEO LƯỢT GHÉ THĂM -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <div class="flex items-start justify-between mb-5">
+              <div>
+                <h3 class="font-bold text-slate-900 text-base">Điểm tham quan có nhiều khách nhất</h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Xếp hạng theo số lượt khách ghé vào từng điểm, theo khoảng ngày đang lọc (để trống là toàn thời gian)
+                </p>
+              </div>
+              <span id="bao-cao-tong-luot-ghe" class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full">0 lượt ghé</span>
+            </div>
+            <div id="bao-cao-xep-hang-poi" class="space-y-2.5">
+              <p class="text-xs text-slate-400">Chưa có dữ liệu.</p>
             </div>
           </div>
         </section>
@@ -582,7 +591,7 @@
                     <th class="py-3 px-4">Trạng thái</th>
                     <th class="py-3 px-4">Quét lần đầu</th>
                     <th class="py-3 px-4">Quét lần cuối</th>
-                    <th class="py-3 px-4 text-right">Thao tác</th>
+                                        <th class="py-3 px-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody id="bang-danh-sach-ve" class="divide-y divide-slate-100 text-xs text-slate-700">
@@ -754,6 +763,7 @@
       let danhSachPoiThucTe = [];
       let danhSachThuyetMinh = {};
       let dangTaiDuLieu = false;
+      let soLanTai = 0; // đánh số mỗi lần tải để bỏ qua kết quả cũ về muộn
 
       window.addEventListener("DOMContentLoaded", () => {
         kiemTraDangNhap();
@@ -858,9 +868,12 @@
         const elDaQuet = document.getElementById("thong-ke-da-quet");
         const elTyLe = document.getElementById("thong-ke-ty-le");
 
+        const elTren = document.getElementById("thong-ke-da-quet-tren");
+
         if (elTongVe) elTongVe.textContent = tong.toLocaleString();
         if (elDaQuet) elDaQuet.textContent = daXacMinh.toLocaleString();
-        if (elTyLe) elTyLe.textContent = `${tyLe.toFixed(1)}%`;
+        if (elTren) elTren.textContent = tong.toLocaleString();
+        if (elTyLe) elTyLe.textContent = `${Math.round(tyLe)}%`;
       }
 
       // --- 3. ĐỒNG BỘ DỮ LIỆU TỪ TOÀN BỘ MICROSERVICES ---
@@ -869,8 +882,11 @@
         startDate = null,
         endDate = null,
       ) {
-        if (dangTaiDuLieu) return;
+        // Tải ngầm (tự cập nhật) thì nhường lần tải đang chạy; thao tác của admin
+        // (Lọc dữ liệu, Xóa lọc, nút tải lại) luôn chạy ngay
+        if (dangTaiDuLieu && isSilent) return;
         dangTaiDuLieu = true;
+        const maLanTai = ++soLanTai;
 
         let statsUrl = `${DUONG_DAN_API}/stats/dashboard`;
         if (startDate && endDate) {
@@ -911,6 +927,9 @@
               data: await layJson(url),
             })),
           );
+
+          // Đã có lần tải mới hơn (vd. admin vừa bấm Xóa lọc) thì bỏ kết quả này
+          if (maLanTai !== soLanTai) return;
 
           const duLieu = {};
           const loi = [];
@@ -975,19 +994,78 @@
             hienThBaoNhanh("Đã tải dữ liệu thành công.");
           }
         } finally {
-          dangTaiDuLieu = false;
+          if (maLanTai === soLanTai) dangTaiDuLieu = false;
         }
       }
 
       function capNhatTabBaoCao(stats) {
-        const elKhach = document.getElementById("bao-cao-tong-luot-khach");
         const elVe = document.getElementById("bao-cao-tong-ve-quet");
-        const tongKhach =
-          stats.total_historical_visits ?? stats.total_visits ?? 0;
         const tongVeQuet = stats.total_tickets_scanned ?? 0;
-        if (elKhach) elKhach.textContent = Number(tongKhach).toLocaleString();
         if (elVe) elVe.textContent = Number(tongVeQuet).toLocaleString();
+        hienThiXepHangPoi(stats.historical_poi_visits);
       }
+
+      // Xếp hạng điểm tham quan theo lượt khách ghé vào (historical_poi_visits
+      // của statistics-service, đã lọc theo khoảng ngày nếu có).
+      function hienThiXepHangPoi(luotGhe) {
+        const khung = document.getElementById("bao-cao-xep-hang-poi");
+        if (!khung || !luotGhe || typeof luotGhe !== "object") return;
+
+        const tenDiem = {};
+        (danhSachPoiThucTe || []).forEach((p) => {
+          const ma = p.poi_code || p.code;
+          const ten = (p.translations && p.translations.vi && p.translations.vi.name) || p.name || ma;
+          tenDiem[ma] = String(ten).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        });
+        const xepHang = Object.entries(luotGhe)
+          .map(([ma, so]) => ({ ma, ten: tenDiem[ma] || ma, so: Number(so) || 0 }))
+          .sort((a, b) => b.so - a.so || a.ma.localeCompare(b.ma));
+        const tong = xepHang.reduce((s, d) => s + d.so, 0);
+        const lonNhat = Math.max(1, ...xepHang.map((d) => d.so));
+        const fmt = (n) => Number(n).toLocaleString("vi-VN");
+
+        document.getElementById("bao-cao-tong-luot-ghe").textContent = `${fmt(tong)} lượt ghé`;
+        const elTop = document.getElementById("bao-cao-diem-dong-nhat");
+        const elTopChu = document.getElementById("bao-cao-diem-dong-nhat-chu");
+        if (tong && xepHang.length) {
+          elTop.innerHTML = xepHang[0].ten;
+          elTopChu.textContent = `${fmt(xepHang[0].so)} lượt ghé`;
+        } else {
+          elTop.textContent = "—";
+          elTopChu.textContent = "Chưa có lượt ghé thăm nào";
+        }
+
+        if (!xepHang.length) {
+          khung.innerHTML = '<p class="text-xs text-slate-400">Chưa có dữ liệu.</p>';
+          return;
+        }
+        khung.innerHTML = xepHang.map((d, i) => `
+          <div class="grid items-center gap-3" style="grid-template-columns: 28px 160px 1fr 110px" title="${d.ten}: ${fmt(d.so)} lượt ghé">
+            <span class="w-6 h-6 rounded-md ${i === 0 && d.so ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"} text-[11px] font-bold flex items-center justify-center">${i + 1}</span>
+            <span class="text-xs text-slate-700 truncate">${d.ten}</span>
+            <div class="h-4 bg-slate-50 rounded">
+              <div class="h-full bg-blue-600 rounded-r transition-all duration-700" style="width: ${(d.so / lonNhat) * 100}%; min-width: ${d.so ? 4 : 0}px; border-top-left-radius: 2px; border-bottom-left-radius: 2px"></div>
+            </div>
+            <span class="text-xs text-right ${d.so ? "text-slate-900 font-semibold" : "text-slate-300"}">${fmt(d.so)}</span>
+          </div>`).join("");
+      }
+
+      // Ngày hôm nay theo giờ máy (dạng yyyy-mm-dd, giống giá trị của ô chọn ngày)
+      function ngayHomNay() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      }
+
+      // Không cho chọn ngày sau hôm nay trên lịch
+      function gioiHanNgayLoc() {
+        ["filter-tu-ngay", "filter-den-ngay"].forEach((id) => {
+          const o = document.getElementById(id);
+          if (o) o.max = ngayHomNay();
+        });
+      }
+      gioiHanNgayLoc();
+      document.getElementById("filter-tu-ngay")?.addEventListener("focus", gioiHanNgayLoc);
+      document.getElementById("filter-den-ngay")?.addEventListener("focus", gioiHanNgayLoc);
 
       function apDungBoLocBaoCao() {
         const tuNgay = document.getElementById("filter-tu-ngay").value;
@@ -998,6 +1076,11 @@
         }
         if (tuNgay > denNgay) {
           alert("Ngày bắt đầu không được sau ngày kết thúc.");
+          return;
+        }
+        const homNay = ngayHomNay();
+        if (tuNgay > homNay || denNgay > homNay) {
+          alert(`Không thể lọc ngày trong tương lai. Vui lòng chọn ngày từ hôm nay (${homNay.split("-").reverse().join("/")}) trở về trước.`);
           return;
         }
         hienThBaoNhanh(`Đang lọc báo cáo từ ${tuNgay} đến ${denNgay}...`);
@@ -1086,10 +1169,15 @@
         // Nhớ tab trên URL (admin.html#poi) để tải lại trang vẫn đứng đúng tab
         history.replaceState(null, "", maTab === "thong-ke" ? location.pathname : "#" + maTab);
         if (maTab === "poi" && window.PoiAdmin) window.PoiAdmin.load();
+        // Tab Thống kê và Báo cáo dùng chung một lần tải: tải lại ngay khi chuyển tab để
+        // tab Báo cáo không hiện tạm số liệu chưa lọc (và ngược lại)
+        if (["thong-ke", "bao-cao"].includes(maTab) && localStorage.getItem("admin_token")) {
+          taiLaiTheoTabDangMo();
+        }
 
         if (tieuDeTabs[maTab]) {
           document.getElementById("tieu-de-trang").innerHTML =
-            `<span>${tieuDeTabs[maTab]["tieu de"]}</span> <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold uppercase tracking-wider">Phiên bản 1.0</span>`;
+            `<span>${tieuDeTabs[maTab]["tieu de"]}</span>`;
           document.getElementById("mo-ta-trang").innerText =
             tieuDeTabs[maTab]["mo ta"];
         }
@@ -1122,6 +1210,30 @@
         });
 
         return ketQua;
+      }
+
+      // Thẻ "Điểm đông nhất lúc này": điểm có nhiều người đang có mặt nhất (thời gian thực)
+      function capNhatDiemDongNhatLucNay(danhSachPoi, mapSoNguoi) {
+        const elTen = document.getElementById("thong-ke-diem-dong-nhat");
+        const elChu = document.getElementById("thong-ke-diem-dong-nhat-chu");
+        if (!elTen || !elChu) return;
+        let top = null;
+        danhSachPoi.forEach((poi) => {
+          const ma = poi.poi_code || poi.code;
+          const so = mapSoNguoi.has(ma) ? Number(mapSoNguoi.get(ma)) || 0 : 0;
+          if (so > 0 && (!top || so > top.so)) top = { ten: poi.name || ma, so };
+        });
+        if (top) {
+          elTen.textContent = top.ten;
+          elTen.title = top.ten;
+          elTen.className = "text-2xl font-extrabold text-purple-600 mt-1 truncate";
+          elChu.textContent = `${top.so.toLocaleString("vi-VN")} người đang có mặt`;
+        } else {
+          elTen.textContent = "—";
+          elTen.title = "";
+          elTen.className = "text-2xl font-extrabold text-slate-400 mt-1 truncate";
+          elChu.textContent = "Chưa có khách tại điểm nào";
+        }
       }
 
       function hienThiHeatmapPoi(occupancyData = null) {
@@ -1167,6 +1279,7 @@
               ];
 
         const mapSoNguoi = chuanHoaSoNguoiTheoPoi(occupancyData);
+        capNhatDiemDongNhatLucNay(danhSachHienThi, mapSoNguoi);
 
         danhSachHienThi.forEach((poi) => {
           const ma = poi.poi_code || poi.code;
@@ -1512,15 +1625,28 @@
         const dangOtabThongKe =
           tabThongKe && !tabThongKe.classList.contains("hidden");
 
-        // Nếu đang ở Tab 1, không bị kẹt tải và đã đăng nhập thì tự động cập nhật
-        if (
-          dangOtabThongKe &&
-          !dangTaiDuLieu &&
-          localStorage.getItem("admin_token")
-        ) {
-          taiDuLieuTuBackend(true); // true: tải ngầm, không hiện toast thông báo làm phiền
-        }
+        const tabBaoCao = document.getElementById("tab-bao-cao");
+        const dangOtabBaoCao =
+          tabBaoCao && !tabBaoCao.classList.contains("hidden");
+
+        if (dangTaiDuLieu || !localStorage.getItem("admin_token")) return;
+
+        // Đang ở tab Thống kê hoặc tab Báo cáo thì tự động cập nhật (tải ngầm, không hiện thông báo)
+        if (dangOtabThongKe || dangOtabBaoCao) taiLaiTheoTabDangMo();
       }, 3000);
+
+      // Tải ngầm theo tab đang mở: tab Báo cáo giữ nguyên khoảng ngày đang lọc (nếu đã chọn đủ 2 ngày)
+      function taiLaiTheoTabDangMo() {
+        const tabBaoCao = document.getElementById("tab-bao-cao");
+        if (tabBaoCao && !tabBaoCao.classList.contains("hidden")) {
+          const tuNgay = document.getElementById("filter-tu-ngay").value;
+          const denNgay = document.getElementById("filter-den-ngay").value;
+          const coLoc = tuNgay && denNgay && tuNgay <= denNgay;
+          taiDuLieuTuBackend(true, coLoc ? tuNgay : null, coLoc ? denNgay : null);
+        } else {
+          taiDuLieuTuBackend(true);
+        }
+      }
     </script>
     <script src="js/admin-poi.js"></script>
   </body>
