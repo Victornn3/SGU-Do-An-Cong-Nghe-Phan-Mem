@@ -45,21 +45,21 @@
       overlay.innerHTML = `
         <div style="background: #1e293b; border: 1px solid #334155; border-radius: 16px; max-width: 420px; width: 100%; padding: 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);">
           <div style="font-size: 48px; margin-bottom: 12px;">🎟️</div>
-          <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700; color: #f8fafc;">Cổng Soát Vé Văn Miếu</h2>
-          <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Vui lòng quét mã QR trên vé vào cổng để kích hoạt thuyết minh tự động.</p>
+          <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700; color: #f8fafc;">Xác nhận vé tham quan</h2>
+          <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Quét mã QR in trên vé, hoặc nhập mã vé bên dưới để bắt đầu nghe thuyết minh.</p>
           
           ${errorMessage ? `<div style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;">${errorMessage}</div>` : ""}
 
           <form id="gate-form" style="display: flex; gap: 8px; margin-bottom: 16px;">
-            <input type="text" id="manual-ticket-input" placeholder="Nhập mã vé (VD: VM-STD-ABC123)" 
+            <input type="text" id="manual-ticket-input" placeholder="Mã vé, ví dụ VM-STD-ABC123" 
               style="flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 14px; outline: none;">
             <button type="submit" style="background: #d97706; hover:background: #b45309; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Vào</button>
           </form>
 
           <div style="border-top: 1px dashed #334155; padding-top: 16px; margin-top: 16px;">
-            <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">Dành cho Giám khảo / Kiểm thử:</p>
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">Chưa có vé?</p>
             <button id="btn-demo-mode" style="background: #334155; color: #cbd5e1; border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer;">
-              🚀 Vào thẳng chế độ Demo (Bỏ qua vé)
+              Xem thử ứng dụng
             </button>
           </div>
         </div>
@@ -96,7 +96,7 @@
         display: flex; align-items: center; gap: 8px;
       `;
       toast.innerHTML = `
-        <span>${isPriority ? "⭐ Vé Ưu Tiên (Priority)" : "🎟️ Vé Chuẩn (Standard)"}:</span>
+        <span>${isPriority ? "⭐ Vé ưu tiên" : "🎟️ Vé thường"}:</span>
         <span style="color: #fde68a;">${ticket.ticket_code}</span>
       `;
       document.body.appendChild(toast);

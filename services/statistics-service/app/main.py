@@ -30,6 +30,7 @@ def setup_indexes():
     try:
         db.active_sessions.create_index("last_seen", expireAfterSeconds=SESSION_TIMEOUT_SECONDS)
         db.active_sessions.create_index("session_id", unique=True)
+        db.poi_history.create_index([("session_id", 1), ("poi_id", 1)])
     except Exception as e:
         print(f"Lưu ý tạo Index: {e}")
 
@@ -70,9 +71,12 @@ def update_session_location(data: SessionLocationPayload):
 
     valid_poi = data.poi_id if (data.inside_geofence and data.poi_id in ALL_POIS) else None
 
-    # Lấy thông tin phiên cũ để kiểm tra đổi POI
-    old_session = db.active_sessions.find_one({"session_id": data.session_id})
-    previous_poi = old_session.get("poi_id") if old_session else None
+    # Mỗi khách (session_id gắn với mã vé, xem getOrCreateSessionId ở frontend) chỉ được tính
+    # MỘT lượt ghé cho mỗi điểm, dù ra vào lại, mở lại trang, quét lại vé hay dùng máy khác. Kiểm tra trong lịch sử (bền vững) chứ không
+    # dựa vào active_sessions, vì bản ghi đó tự xóa sau 25 giây không có heartbeat.
+    already_visited = bool(valid_poi) and db.poi_history.find_one(
+        {"session_id": data.session_id, "poi_id": valid_poi}, {"_id": 1}
+    ) is not None
 
     # Lưu / Cập nhật phiên trực tiếp vào MongoDB
     db.active_sessions.update_one(
@@ -89,8 +93,8 @@ def update_session_location(data: SessionLocationPayload):
         upsert=True
     )
 
-    # Ghi nhận lịch sử nếu khách bước vào một POI mới
-    if valid_poi and valid_poi != previous_poi:
+    # Ghi nhận lượt ghé lần đầu khách này tới điểm này
+    if valid_poi and not already_visited:
         db.poi_history.insert_one({
             "session_id": data.session_id,
             "poi_id": valid_poi,

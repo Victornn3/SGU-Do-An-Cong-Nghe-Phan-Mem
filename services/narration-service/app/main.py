@@ -8,6 +8,9 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from pymongo import MongoClient
 from gtts import gTTS
+from concurrent.futures import ThreadPoolExecutor
+
+from .translate import TranslationError, translate_fields
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("narration-service")
@@ -28,6 +31,17 @@ class NarrationUpdate(BaseModel):
     poi_id: str
     title: str
     contents: dict[str, str]
+
+
+class AutoNarrationRequest(BaseModel):
+    """Admin chỉ nhập tiếng Việt; các ngôn ngữ khác được dịch tự động."""
+    poi_id: str
+    name: str
+    description: str = ""
+    narration: str = ""  # bỏ trống thì dùng mô tả làm nội dung thuyết minh
+    # Admin tự sửa một số ô của ngôn ngữ khác, ví dụ {"en": {"name": "Van Lake"}}.
+    # Ô nào có nội dung thì dùng nguyên văn, ô nào trống thì vẫn dịch tự động.
+    overrides: dict[str, dict[str, str]] = {}
 
 
 # Danh mục ngôn ngữ thuộc poi-service (database vm_poi). Narration-service không đọc
@@ -183,6 +197,88 @@ def update_narration(data: NarrationUpdate, background_tasks: BackgroundTasks):
     return {
         "success": True,
         "message": "Đã lưu nội dung. File MP3 đang được tự động khởi tạo trong nền.",
+    }
+
+
+@app.post("/api/narrations/auto")
+def auto_translate_narration(data: AutoNarrationRequest, background_tasks: BackgroundTasks):
+    """
+    Nhận tên, mô tả, thuyết minh tiếng Việt; dịch sang mọi ngôn ngữ đang bật,
+    lưu thuyết minh và tạo MP3 ở nền cho tất cả ngôn ngữ.
+    Trả về tên/mô tả đã dịch để trang quản trị lưu vào translations của POI.
+    """
+    name = data.name.strip()
+    description = data.description.strip()
+    narration_vi = data.narration.strip() or description or name
+    if not name:
+        raise HTTPException(status_code=422, detail="Thiếu tên tiếng Việt")
+    if not get_language("vi"):
+        raise HTTPException(status_code=503, detail="Không đọc được danh mục ngôn ngữ từ poi-service")
+
+    source = {"name": name, "description": description, "narration": narration_vi}
+    targets = [code for code in _load_languages() if code != "vi"]
+
+    def work(code):
+        language = get_language(code) or {}
+        # Mã dịch giống mã giọng đọc (vd zh -> zh-CN)
+        target = language.get("tts_locale") or code
+        manual = {
+            key: str(value).strip()
+            for key, value in (data.overrides.get(code) or {}).items()
+            if key in source and str(value or "").strip()
+        }
+        to_translate = {key: value for key, value in source.items() if key not in manual}
+        try:
+            return code, {**translate_fields(to_translate, target), **manual}, None
+        except TranslationError as exc:
+            logger.error(f"Dịch sang {code} thất bại: {exc}")
+            return code, None, str(exc)
+
+    translations = {"vi": {"name": name, "description": description}}
+    contents = {"vi": narration_vi}
+    failed = {}
+    with ThreadPoolExecutor(max_workers=max(1, len(targets))) as pool:
+        for code, result, error in pool.map(work, targets):
+            if result is None:
+                failed[code] = error
+                continue
+            translations[code] = {"name": result["name"], "description": result["description"]}
+            contents[code] = result["narration"]
+
+    update_payload = {"target_id": data.poi_id, "title": name}
+    for code, text in contents.items():
+        update_payload[f"content.{code}"] = text
+        update_payload[f"audio_status.{code}"] = "processing"
+    db.narrations.update_one({"target_id": data.poi_id}, {"$set": update_payload}, upsert=True)
+
+    background_tasks.add_task(process_tts_background, data.poi_id, contents)
+
+    return {
+        "success": True,
+        "translations": translations,
+        "narration_languages": list(contents.keys()),
+        "failed_languages": failed,
+        "message": "Đã dịch và xếp hàng tạo MP3 cho các ngôn ngữ.",
+    }
+
+
+@app.delete("/api/narrations/{poi_id}")
+def delete_narration(poi_id: str):
+    """Xóa thuyết minh của một POI và mọi file MP3 của POI đó (dùng khi xóa hẳn POI)."""
+    if "/" in poi_id or ".." in poi_id or not poi_id.strip():
+        raise HTTPException(status_code=400, detail="Mã POI không hợp lệ")
+    result = db.narrations.delete_many({"target_id": poi_id})
+    removed_files = []
+    if AUDIO_BASE_DIR.is_dir():
+        for lang_dir in AUDIO_BASE_DIR.iterdir():
+            mp3 = lang_dir / f"{poi_id}.mp3"
+            if lang_dir.is_dir() and mp3.is_file():
+                mp3.unlink()
+                removed_files.append(f"{lang_dir.name}/{poi_id}.mp3")
+    return {
+        "success": True,
+        "deleted_narrations": result.deleted_count,
+        "deleted_audio_files": removed_files,
     }
 
 

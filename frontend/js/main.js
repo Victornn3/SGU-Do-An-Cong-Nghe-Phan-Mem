@@ -27,7 +27,8 @@ let autoPlayedPois = new Set(); // Bộ nhớ lưu các POI đã tự động ph
 // Cấu hình kiểm tra GPS và Geofence
 const LOCATION_CONFIG = {
   maxGpsAccuracyMeters: 30,       // Sai số tối đa chấp nhận để kích hoạt Geofence POI (30m)
-  siteRadiusMeters: 220           // Bán kính bao trọn toàn bộ khuôn viên Văn Miếu từ tâm
+  siteRadiusMeters: 220,          // Coi là "trong khuôn viên" khi cách điểm tham quan gần nhất không quá 220m
+  nearSiteMeters: 300             // Chỉ cho bật chế độ GPS thật khi cách điểm tham quan gần nhất không quá 300m
 };
 
 let VAN_MIEU_CENTER = [21.03020, 105.83540]; // Tâm địa lý toàn khu (Nhà bia / Giếng Thiên Quang)
@@ -258,12 +259,23 @@ function applyNarrationContent(poi, info, descriptionEl) {
   }
 }
 
+// Mã khách gắn với MÃ VÉ: một vé là một khách, dù quét lại bao nhiêu lần hay mở trên
+// bao nhiêu điện thoại (lượt ghé mỗi điểm vì vậy cũng chỉ tính 1 lần cho mỗi vé).
+// Không có vé (Xem thử ứng dụng) thì mỗi điện thoại là một khách (lưu trong localStorage).
 function getOrCreateSessionId() {
-  let sId = sessionStorage.getItem("vm_session_id");
+  const ticket = (new URLSearchParams(window.location.search).get("ticket") || "").trim().toUpperCase();
+  if (/^VM-(STD|PRI)-[A-Z0-9]+$/.test(ticket) && sessionStorage.getItem("vm_ticket_demo") !== "true") {
+    return "ve_" + ticket;
+  }
+  const key = "vm_session_demo";
+  let sId = null;
+  try { sId = localStorage.getItem(key); } catch (e) { /* trình duyệt chặn bộ nhớ */ }
+  if (!sId) sId = sessionStorage.getItem("vm_session_id");
   if (!sId) {
     sId = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
-    sessionStorage.setItem("vm_session_id", sId);
   }
+  try { localStorage.setItem(key, sId); } catch (e) { /* bỏ qua */ }
+  sessionStorage.setItem("vm_session_id", sId);
   return sId;
 }
 
@@ -380,7 +392,7 @@ async function fetchPoisAndNarrations() {
   } else {
     console.warn("Dùng danh sách dự phòng do:", reason);
     poisData = getFallbackPois().map(normalizePoi);
-    setMapNotice("poi", t("notice.fallbackData", "Đang dùng dữ liệu dự phòng ({reason}).", { reason }));
+    setMapNotice("poi", t("notice.fallbackData", "Chưa tải được dữ liệu mới nhất, đang hiển thị danh sách lưu sẵn.", { reason }));
   }
 
   applyTranslations(); // cập nhật chữ có biến {radius}/{count} theo dữ liệu điểm
@@ -672,7 +684,7 @@ function updatePersonMarker(lat, lng, popupText = t("marker.you", "Vị trí c�
 
 function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
   if (gpsMode === "real" && accuracy > LOCATION_CONFIG.maxGpsAccuracyMeters) {
-    setGpsStatus(t("status.weakAccuracy", "Đang tại Văn Miếu nhưng độ chính xác GPS yếu (±{acc}m). Tiến lại gần điểm để nghe.", { acc: Math.round(accuracy) }));
+    setGpsStatus(t("status.weakAccuracy", "Tín hiệu định vị đang yếu (sai số khoảng {acc} m). Hãy tiến lại gần điểm tham quan để nghe.", { acc: Math.round(accuracy) }));
     return;
   }
 
@@ -694,7 +706,7 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
   const floatingAudio = document.getElementById("floatingAudioContainer");
 
   if (insidePoi) {
-    setGpsStatus(t("status.insideGeofence", "Đã vào vùng Geofence: {code} - {poi} ({dist}m)", { code: insidePoi.poi_code, poi: getPoiLocalizedName(insidePoi), dist: Math.round(minDistance) }));
+    setGpsStatus(t("status.insideGeofence", "Bạn đang ở {poi}", { code: insidePoi.poi_code, poi: getPoiLocalizedName(insidePoi), dist: Math.round(minDistance) }));
     if (floatingAudio) floatingAudio.classList.remove("hidden");
 
     // Khi chuyển sang POI mới, cập nhật ngay lập tức
@@ -715,6 +727,9 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
   } else {
     // Ra ngoài vùng POI (về trạng thái không đứng ở điểm nào nhưng vẫn online)
     if (currentSimulatedPoiId !== null) {
+      // Vừa rời điểm: tắt thuyết minh đang phát (chỉ làm một lần lúc rời, để khách
+      // tự bấm nghe lại ở ngoài vùng thì GPS cập nhật sau đó không tắt ngang)
+      dungThuyetMinhKhiRaNgoaiVung();
       autoPlayedPois.delete(currentSimulatedPoiId); // rời vùng: đặt lại cờ tự phát
       currentSimulatedPoiId = null;
       const currentMode = gpsMode === "real" ? "REAL_GPS" : "SIMULATED";
@@ -723,8 +738,8 @@ function checkGeofenceTrigger(userLat, userLng, accuracy = 0) {
 
     setGpsStatus(
       gpsMode === "simulated"
-        ? t("status.simOutside", "Vị trí mô phỏng ngoài Geofence (Gần nhất: {dist}m)", { dist: Math.round(minDistance) })
-        : t("status.realInCampus", "GPS thật: Đang trong khuôn viên (Gần nhất: {nearest})", { nearest: insidePoi ? getPoiLocalizedName(insidePoi) : Math.round(minDistance) + "m" })
+        ? t("status.simOutside", "Bạn chưa ở gần điểm tham quan nào", { dist: Math.round(minDistance) })
+        : t("status.realInCampus", "Bạn đang ở trong khuôn viên Văn Miếu. Hãy đi tới các điểm tham quan để nghe thuyết minh.", { nearest: insidePoi ? getPoiLocalizedName(insidePoi) : Math.round(minDistance) + "m" })
     );
   }
 }
@@ -751,13 +766,13 @@ function simulateGpsLocation(poi) {
 
   const hasCoords = typeof poi.lat === "number" && typeof poi.lng === "number";
   if (!hasCoords) {
-    setGpsStatus(t("status.noCoords", "Đã chọn {code} (điểm chưa có tọa độ)", { code: poi.poi_code }));
+    setGpsStatus(t("status.noCoords", "Điểm {code} chưa có vị trí trên bản đồ", { code: poi.poi_code }));
     return;
   }
 
   if (leafletMap) {
     leafletMap.setView([poi.lat, poi.lng], 19);
-    updatePersonMarker(poi.lat, poi.lng, t("marker.simulated", "Vị trí GPS mô phỏng"));
+    updatePersonMarker(poi.lat, poi.lng, t("marker.simulated", "Vị trí của bạn"));
   }
 
   const simPanel = document.getElementById("simulatorPanel");
@@ -1002,6 +1017,26 @@ function transferAudioState(fromPlayer, toPlayer) {
   }
 }
 
+// Khách ra khỏi vùng của mọi điểm: dừng thuyết minh tự động trên thanh nghe bản đồ
+// (tua về đầu, vẫn giữ bài để khách tự bấm nghe lại nếu muốn). Trang chi tiết chỉ bị
+// dừng khi đang phát đúng điểm vừa rời; khách tự mở điểm khác để nghe thì không ảnh hưởng.
+function dungThuyetMinhKhiRaNgoaiVung() {
+  const mapPlayer = document.getElementById("audioPlayer");
+  if (mapPlayer && !mapPlayer.paused) {
+    mapPlayer.pause();
+    try { mapPlayer.currentTime = 0; } catch (e) { /* chưa tải xong */ }
+  }
+  const detailPlayer = document.getElementById("audioPlayerDetail");
+  if (detailPlayer && !detailPlayer.paused && mapAudioPoiId && detailAudioPoiId === mapAudioPoiId) {
+    detailPlayer.pause();
+  }
+}
+
+// Thuyết minh tự động chỉ được phát khi khách vẫn đang ở trong vùng của điểm đó
+function vanOTrongVung(poi) {
+  return Boolean(poi) && currentSimulatedPoiId === poi.poi_code;
+}
+
 async function loadAndPlayAudio(poi, autoPlay = false) {
   if (!poi) return;
 
@@ -1023,6 +1058,7 @@ async function loadAndPlayAudio(poi, autoPlay = false) {
   const available = await setPlayerSource(activePlayer, poi);
   if (!available) return; // thiếu audio: đã báo và khóa trình phát
   if (mapAudioPoiId !== poi.poi_code) return; // đã chuyển sang điểm khác trong lúc chờ
+  if (autoPlay && !vanOTrongVung(poi)) return; // đã ra ngoài vùng trong lúc chờ tải
 
   activePlayer.onerror = () => {
     console.error(`[Audio] Không tải được: ${audioSrc}`);
@@ -1035,6 +1071,8 @@ async function loadAndPlayAudio(poi, autoPlay = false) {
       setGpsStatus(t("status.arrivedTapToPlay", "Đã tới {poi}. Chạm vào màn hình để nghe thuyết minh.", { poi: getPoiLocalizedName(poi) }));
       
       const unlockAudio = () => {
+        // Chạm màn hình sau khi đã rời điểm (vd. bấm "Sân trống") thì không phát nữa
+        if (!vanOTrongVung(poi) || mapAudioPoiId !== poi.poi_code) return;
         activePlayer.play();
         document.removeEventListener("click", unlockAudio);
       };
@@ -1080,7 +1118,7 @@ function batDauTraiNghiemP00() {
 
   // 3. Ghi nhận phân loại thống kê lượt truy cập
   recordAccessClassification("demo_simulation", false);
-  setGpsStatus(t("status.visiting", "Đang tham quan: {poi} ({code})", { poi: getPoiLocalizedName(poisData.find((p) => p.poi_code === DEFAULT_POI_CODE)) || "Cổng Văn Miếu", code: DEFAULT_POI_CODE }));
+  setGpsStatus(t("status.visiting", "Bạn đang ở {poi}", { poi: getPoiLocalizedName(poisData.find((p) => p.poi_code === DEFAULT_POI_CODE)) || "Cổng Văn Miếu", code: DEFAULT_POI_CODE }));
 
   // 4. Lấy dữ liệu POI P00 từ danh sách đã tải
   const gate = poisData.find((p) => p.poi_code === DEFAULT_POI_CODE) || {
@@ -1099,7 +1137,7 @@ function batDauTraiNghiemP00() {
   // 5. Di chuyển góc nhìn bản đồ và đặt vị trí người dùng tại P00
   if (leafletMap && typeof gate.lat === "number" && typeof gate.lng === "number") {
     leafletMap.setView([gate.lat, gate.lng], 19);
-    updatePersonMarker(gate.lat, gate.lng, t("marker.youAt", "Vị trí của bạn ({code})", { code: "P00" }));
+    updatePersonMarker(gate.lat, gate.lng, t("marker.youAt", "Vị trí của bạn", { code: "P00" }));
   }
 
   // 6. Hiển thị thanh trình phát âm thanh nổi ở góc dưới

@@ -58,7 +58,7 @@
             class="text-xs text-sky-600 font-medium"
             data-i18n="header.subtitle"
           >
-            Hệ thống Thuyết minh tự động GPS & Geofence
+            Hướng dẫn tham quan bằng âm thanh
           </p>
         </div>
       </div>
@@ -98,19 +98,20 @@
             ></span>
 
             <span id="gpsStatusText" data-i18n="map.gpsStatus"
-              >Đang định vị Nội tự (Geofence)</span
+              >Đang xác định vị trí của bạn</span
             >
           </div>
 
           <div class="flex items-center space-x-1.5">
             <button
               id="btnGpsMap"
+              style="display: none"
               type="button"
               onclick="batDauGpsThat()"
               class="bg-white hover:bg-sky-50 border border-sky-600 text-sky-700 text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5 cursor-pointer"
             >
               <i class="fa-solid fa-satellite-dish"></i>
-              <span data-i18n="map.realGps">GPS thật</span>
+              <span data-i18n="map.realGps">Vị trí thật</span>
             </button>
 
             <button
@@ -134,8 +135,8 @@
             class="text-xs font-bold text-slate-700 mb-2"
             data-i18n="map.chooseLocation"
           >
-            <i class="fa-solid fa-compass text-sky-600 mr-1"></i> Chọn nhanh vị
-            trí tham quan (Mô phỏng):
+            <i class="fa-solid fa-compass text-sky-600 mr-1"></i> Chọn vị trí
+            muốn giả lập:
           </p>
 
           <div id="simulatorButtons" class="grid grid-cols-5 gap-1.5"></div>
@@ -231,7 +232,7 @@
                 id="audioModeBadge"
                 class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded-full"
                 data-i18n="audio.geofence"
-                >Geofence</span
+                >Tự động phát</span
               >
 
               <button
@@ -260,7 +261,7 @@
       >
         <div class="mb-3">
           <h2 class="text-sm font-bold text-slate-800" data-i18n="poi.title">
-            Danh sách điểm tham quan
+            Các điểm tham quan
           </h2>
 
           <p class="text-xs text-slate-500" data-i18n="poi.description">
@@ -385,7 +386,7 @@
               <span
                 class="bg-sky-50 text-sky-600 border border-sky-200 text-[10px] font-semibold px-2 py-0.5 rounded-full"
                 data-i18n="audio.manual"
-                >Phát thủ công</span
+                >Nghe theo yêu cầu</span
               >
             </div>
 
@@ -433,7 +434,7 @@
         </h2>
 
         <p class="mt-2 text-xs leading-relaxed text-slate-600" data-i18n="welcome.intro">
-          Chào mừng bạn đến với di tích. Bấm bắt đầu để khám phá và nghe thuyết minh tự động tại điểm đầu tiên: Cổng Văn Miếu (P00).
+          Chào mừng bạn đến Văn Miếu – Quốc Tử Giám. Thuyết minh sẽ tự phát khi bạn đi tới từng điểm tham quan.
         </p>
 
         <!-- Nút bấm bắt đầu với POI P00 -->
@@ -444,7 +445,7 @@
           class="mt-5 w-full rounded-xl bg-sky-600 hover:bg-sky-700 px-4 py-3 text-xs font-bold text-white transition shadow-md shadow-sky-600/20 cursor-pointer flex items-center justify-center space-x-2"
         >
           <i class="fa-solid fa-play"></i>
-          <span data-i18n="welcome.startP00">Bắt đầu với điểm P00 (mô phỏng)</span>
+          <span data-i18n="welcome.startP00">Bắt đầu tại Cổng Văn Miếu (nghe thử)</span>
         </button>
 
         <!-- Dùng vị trí GPS thật (từ chối vẫn dùng được thủ công) -->
@@ -455,8 +456,15 @@
           class="mt-2 w-full rounded-xl border border-sky-600 px-4 py-3 text-xs font-bold text-sky-700 hover:bg-sky-50 transition cursor-pointer flex items-center justify-center space-x-2"
         >
           <i class="fa-solid fa-location-crosshairs"></i>
-          <span data-i18n="welcome.useGps">Dùng vị trí GPS thật</span>
+          <span data-i18n="welcome.useGps">Dùng vị trí thật của tôi</span>
         </button>
+
+        <!-- Thông báo khi không dùng được GPS thật (ở xa khu di tích, từ chối quyền...) -->
+        <p
+          id="welcomeGpsNotice"
+          role="alert"
+          class="hidden mt-3 text-left text-xs leading-relaxed text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2"
+        ></p>
 
         <p class="mt-3 text-[11px] text-slate-400" data-i18n="welcome.tap">Chạm để bắt đầu</p>
       </div>
@@ -494,7 +502,8 @@
     <!-- File JS riêng -->
 
     <script src="ticket-gate.js?v=1"></script>
-    <script src="js/main.js?v=6"></script>
+    <script src="js/main.js?v=8"></script>
     <script src="js/gps.js?v=5"></script>
+    <script src="js/audio-controls.js?v=1"></script>
   </body>
 </html>
