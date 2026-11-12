@@ -18,10 +18,38 @@ docker compose up -d --build
 |---|---|
 | `http://localhost` | Khách tham quan |
 | `http://localhost/admin.html` | Quản trị: thống kê, vé, báo cáo |
-| `http://localhost/admin-content.html` | Quản trị: điểm tham quan và nội dung thuyết minh |
+| `http://localhost/admin.html#poi` | Quản trị: điểm tham quan và nội dung thuyết minh (tab "Quản lý POI & Audio"; link cũ `admin-content.html` tự chuyển về đây) |
 
 Tài khoản quản trị mặc định: `admin` / `admin123` (đổi trong `.env`, biến `ADMIN_PASSWORD`).
 Dừng hệ thống: `docker compose down`.
+
+## Cho mọi điện thoại quét được mã QR
+
+Mã QR trên vé chứa đường dẫn `USER_WEB_BASE_URL?ticket=<mã vé>`. Mặc định là `http://localhost/index.html`,
+chỉ mở được trên chính máy chạy Docker; điện thoại quét sẽ báo không vào được trang.
+Để **bất kỳ điện thoại nào, ở bất kỳ mạng nào** cũng mở được, web phải có địa chỉ công khai trên Internet.
+Cách nhanh cho demo là dùng [ngrok](https://ngrok.com) (gói miễn phí có sẵn 1 tên miền cố định dạng `ten-cua-ban.ngrok-free.app`):
+
+```bash
+brew install ngrok                       # cài một lần
+ngrok config add-authtoken <TOKEN>       # token lấy ở dashboard.ngrok.com sau khi đăng ký
+ngrok http 80                            # để cửa sổ này chạy suốt buổi demo
+```
+
+Lấy địa chỉ `https://....ngrok-free.app` mà ngrok in ra, sửa trong `.env`:
+
+```
+USER_WEB_BASE_URL=https://ten-cua-ban.ngrok-free.app/index.html
+```
+
+rồi chạy lại ticket-service để nhận cấu hình mới: `docker compose up -d --force-recreate ticket-service`.
+Từ đó mã QR trong tab "Quản lý Vé & Quét Mã" trỏ về địa chỉ công khai; điện thoại nào quét cũng mở được trang khách,
+và vì là `https` nên điện thoại dùng được cả GPS thật. Tên miền dev của ngrok không đổi khi khởi động lại, nên vé đã in vẫn dùng được.
+
+Lưu ý: máy chạy Docker và ngrok phải đang bật thì QR mới mở được. Gói miễn phí của ngrok hiện một trang cảnh báo
+ở lần đầu mở (bấm "Visit Site" là vào, trình duyệt nhớ 7 ngày) và giới hạn 1 GB dữ liệu mỗi tháng.
+Muốn chạy lâu dài thì triển khai lên máy chủ có tên miền riêng và đặt `USER_WEB_BASE_URL` theo tên miền đó.
+Nếu `USER_WEB_BASE_URL` vẫn là localhost, tab Vé sẽ hiện cảnh báo màu vàng.
 
 ## Kiến trúc
 
@@ -63,7 +91,7 @@ curl -s -X POST http://localhost:8000/api/narrations/generate-all \
 find data/audio -name "*.mp3" | wc -l
 ```
 
-Sửa một bài thuyết minh trong `admin-content.html` thì audio của bài đó tự được sinh lại.
+Sửa một bài thuyết minh ở tab "Quản lý POI & Audio" của `admin.html` thì audio của bài đó tự được sinh lại.
 Nếu thiếu audio, giao diện khách hiện thông báo dự phòng, không phát nhầm ngôn ngữ khác.
 
 ## Kiểm thử

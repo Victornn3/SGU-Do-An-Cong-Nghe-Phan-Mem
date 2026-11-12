@@ -160,6 +160,16 @@ def hide_poi(poi_id: str):
     return change_poi_status(poi_id, StatusPayload(status="HIDDEN"))
 
 
+@app.delete("/api/pois/{poi_id}/permanent")
+def delete_poi_permanently(poi_id: str):
+    """Xóa hẳn POI khỏi database (khác DELETE /api/pois/{id} chỉ ẩn POI).
+    Thuyết minh và file MP3 do narration-service xóa riêng qua DELETE /api/narrations/{id}."""
+    result = db.pois.delete_one({"_id": poi_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Không tìm thấy POI: " + poi_id)
+    return {"success": True, "deleted": poi_id}
+
+
 @app.get("/api/pois/{poi_id}")
 def get_poi_detail(poi_id: str):
     """Chi tiết 1 POI đã xuất bản, tìm theo poi_code (vd P00)."""

@@ -22,14 +22,14 @@ function handleRealPosition(position) {
   lastRealPosition = { lat, lng, accuracy };
 
   if (leafletMap) {
-    updatePersonMarker(lat, lng, t("marker.real", "Vị trí thật (±{acc}m)", { acc: Math.round(accuracy) }));
+    updatePersonMarker(lat, lng, t("marker.real", "Vị trí của bạn", { acc: Math.round(accuracy) }));
   }
 
   const distToCenter = getDistanceMeters(lat, lng, VAN_MIEU_CENTER[0], VAN_MIEU_CENTER[1]);
   if (distToCenter <= LOCATION_CONFIG.siteRadiusMeters) {
     checkGeofenceTrigger(lat, lng, accuracy);
   } else {
-    setGpsStatus(t("status.gpsOutside", "Bạn đang ở ngoài khuôn viên Văn Miếu. Hãy chọn điểm trong danh sách để nghe, hoặc dùng chế độ mô phỏng."));
+    setGpsStatus(t("status.gpsOutside", "Bạn đang ở ngoài khuôn viên Văn Miếu. Hãy chọn điểm trong danh sách để nghe, hoặc dùng chế độ giả lập vị trí."));
   }
 }
 
@@ -48,7 +48,7 @@ function startWatchingRealGps() {
 function batDauGpsThat() {
   // Đang dùng GPS thật rồi (bấm lại nút ở màn bản đồ): chỉ báo lại, không xin quyền lần nữa
   if (gpsMode === "real" && lastRealPosition) {
-    setGpsStatus(t("status.gpsActive", "Đang dùng GPS thật."));
+    setGpsStatus(t("status.gpsActive", "Đang dùng vị trí thật của bạn."));
     handleRealPosition({ coords: { latitude: lastRealPosition.lat, longitude: lastRealPosition.lng, accuracy: lastRealPosition.accuracy } });
     return;
   }
@@ -60,7 +60,7 @@ function batDauGpsThat() {
     return;
   }
 
-  setGpsStatus(t("status.gpsRequesting", "Đang xin quyền vị trí..."));
+  setGpsStatus(t("status.gpsRequesting", "Đang xin quyền truy cập vị trí..."));
   navigator.geolocation.getCurrentPosition(
     (position) => {
       closeWelcome();
@@ -78,7 +78,7 @@ function batDauGpsThat() {
       handleRealPosition(position);
       // Trình duyệt di động chặn tự phát âm thanh: nhắc khách chạm để bật (KL07)
       if (!autoPlayedPois.size) {
-        setGpsStatus(t("status.gpsGranted", "Đã bật GPS. Chạm vào màn hình để bật âm thanh, rồi đi tới các điểm tham quan."));
+        setGpsStatus(t("status.gpsGranted", "Đã bật định vị. Chạm vào màn hình để bật âm thanh, rồi đi tới các điểm tham quan."));
       }
     },
     (err) => {

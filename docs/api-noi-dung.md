@@ -91,6 +91,13 @@ Lưu nội dung thuyết minh theo ngôn ngữ và tạo MP3 ở nền (gTTS).
 | 400 | Có mã ngôn ngữ chưa khai báo |
 | 422 | `contents` rỗng |
 
+### POST `/api/narrations/auto` (cần token)
+Admin chỉ nhập tiếng Việt. Service tự dịch tên, mô tả, thuyết minh sang mọi ngôn ngữ đang bật (Google Translate), lưu thuyết minh và tạo MP3 ở nền cho tất cả ngôn ngữ. Tab "Quản lý POI & Audio" của `admin.html` (`js/admin-poi.js`) gọi API này khi bấm "Lưu & tạo audio", rồi lưu tên/mô tả đã dịch vào `translations` của POI.
+```json
+{ "poi_id": "P11", "name": "Tên tiếng Việt", "description": "Mô tả", "narration": "Thuyết minh (bỏ trống thì dùng mô tả)" }
+```
+Phản hồi: `translations` (tên/mô tả theo mã ngôn ngữ), `narration_languages` (các ngôn ngữ đang tạo MP3), `failed_languages` (ngôn ngữ không dịch được và lý do). Cần container có Internet, giống gTTS.
+
 ### POST `/api/narrations/generate-all` (cần token)
 Tạo lại MP3 cho mọi POI và mọi ngôn ngữ đang bật. 400 nếu chưa có dữ liệu thuyết minh.
 
@@ -126,6 +133,12 @@ Cập nhật một phần: chỉ trường có gửi lên mới được kiểm 
 ```
 Giá trị hợp lệ: `DRAFT`, `PUBLISHED`, `HIDDEN`. POI `HIDDEN` biến mất khỏi `/api/pois` ngay lập tức. Mã trả về: 200, 404, 422.
 
+### DELETE `/api/pois/{poi_code}/permanent`
+Xóa hẳn POI khỏi database (nút "Xóa" ở tab "Quản lý POI & Audio"). 404 nếu không có mã đó. Trang quản trị gọi tiếp `DELETE /api/narrations/{poi_code}` để xóa thuyết minh và mọi file MP3 của điểm.
+
+### DELETE `/api/narrations/{poi_code}`
+Xóa bản ghi thuyết minh và các file `/audio/<ngôn_ngữ>/<poi_code>.mp3`. Trả về số bản ghi và danh sách file đã xóa.
+
 ### DELETE `/api/pois/{poi_code}`
 Xóa mềm: chuyển POI sang `HIDDEN`, **không** xóa dữ liệu khỏi cơ sở dữ liệu. Mã trả về: 200, 404.
 
@@ -139,7 +152,7 @@ Xóa mềm: chuyển POI sang `HIDDEN`, **không** xóa dữ liệu khỏi cơ s
 ## 7. Quyền truy cập tại gateway (do Người 2 cài, JWT)
 - **Công khai (không cần token):** `GET /api/languages`, `GET /api/pois`, `GET /api/pois/{poi_code}`, `GET /api/narrations/{poi_code}`.
 - **Cần token quản trị (`Authorization: Bearer <token>`):** `GET /api/pois/admin/all`, `POST/PUT/PATCH/DELETE /api/pois…`, `POST /api/narrations`, `POST /api/narrations/generate-all`.
-- Lấy token: `POST /api/auth/login` (xem tài liệu của Người 2). Trang `admin-content.html` dùng token do `admin.html` lưu trong `localStorage` với khóa `admin_token`.
+- Lấy token: `POST /api/auth/login` (xem tài liệu của Người 2). Tab quản lý POI dùng token do `admin.html` lưu trong `localStorage` với khóa `admin_token`.
 - Ví dụ sinh audio khi gateway đã bật JWT:
   `curl -X POST http://localhost:8000/api/narrations/generate-all -H "Authorization: Bearer <token>"`
 - Giao diện khách gọi `VMTicketGate.verify()` (file `ticket-gate.js` của Người 2) trước khi nạp dữ liệu; vé không hợp lệ thì bị chặn, bấm "Chế độ Demo" thì vào thẳng.
