@@ -45,7 +45,7 @@
           </div>
           <h3 class="text-xl font-bold text-slate-900">Quản Trị Văn Miếu</h3>
           <p class="text-xs text-slate-500 mt-1">
-            Đăng nhập hệ thống Microservices (Mặc định: admin / admin123)
+            Đăng nhập vào hệ thống quản trị Microservices
           </p>
         </div>
 
@@ -150,7 +150,9 @@
             id="nav-poi"
             class="w-full flex items-center justify-center lg:justify-start px-3 py-3 rounded-xl transition-all group hover:bg-slate-100 text-slate-600 hover:text-slate-900 font-medium cursor-pointer"
           >
-            <i class="fa-solid fa-map-location-dot text-lg lg:mr-3 w-6 text-center"></i>
+            <i
+              class="fa-solid fa-map-location-dot text-lg lg:mr-3 w-6 text-center"
+            ></i>
             <span class="hidden lg:inline text-sm">Quản lý POI & Audio</span>
           </button>
         </nav>
@@ -325,14 +327,17 @@
                   Vé Đã Quét
                 </h4>
                 <p class="text-3xl font-extrabold text-slate-900 mt-1">
-                  <span id="thong-ke-da-quet">0</span><span
-                    class="text-lg font-semibold text-slate-400"
-                  > / <span id="thong-ke-da-quet-tren">0</span></span>
+                  <span id="thong-ke-da-quet">0</span
+                  ><span class="text-lg font-semibold text-slate-400">
+                    / <span id="thong-ke-da-quet-tren">0</span></span
+                  >
                 </p>
               </div>
               <div class="mt-4 text-xs text-slate-500 border-t pt-2">
                 <span
-                  ><strong id="thong-ke-ty-le" class="text-emerald-600">0%</strong>
+                  ><strong id="thong-ke-ty-le" class="text-emerald-600"
+                    >0%</strong
+                  >
                   vé đã được sử dụng</span
                 >
               </div>
@@ -367,7 +372,9 @@
                 </p>
               </div>
               <div class="mt-4 text-xs text-slate-500 border-t pt-2">
-                <span id="thong-ke-diem-dong-nhat-chu">Chưa có khách tại điểm nào</span>
+                <span id="thong-ke-diem-dong-nhat-chu"
+                  >Chưa có khách tại điểm nào</span
+                >
               </div>
             </div>
           </div>
@@ -464,7 +471,8 @@
                 0
               </p>
               <p class="text-[11px] text-slate-400 mt-1">
-                Mỗi vé chỉ tính 1 lần, dù quét lại nhiều lần hay trên nhiều thiết bị
+                Mỗi vé chỉ tính 1 lần, dù quét lại nhiều lần hay trên nhiều
+                thiết bị
               </p>
             </div>
             <div
@@ -479,22 +487,34 @@
               >
                 —
               </p>
-              <p id="bao-cao-diem-dong-nhat-chu" class="text-[11px] text-slate-400 mt-1">
+              <p
+                id="bao-cao-diem-dong-nhat-chu"
+                class="text-[11px] text-slate-400 mt-1"
+              >
                 Chưa có lượt ghé thăm nào
               </p>
             </div>
           </div>
 
           <!-- XẾP HẠNG CÁC ĐIỂM THEO LƯỢT GHÉ THĂM -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+          <div
+            class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6"
+          >
             <div class="flex items-start justify-between mb-5">
               <div>
-                <h3 class="font-bold text-slate-900 text-base">Điểm tham quan có nhiều khách nhất</h3>
+                <h3 class="font-bold text-slate-900 text-base">
+                  Điểm tham quan có nhiều khách nhất
+                </h3>
                 <p class="text-xs text-slate-500 mt-0.5">
-                  Xếp hạng theo số lượt khách ghé vào từng điểm, theo khoảng ngày đang lọc (để trống là toàn thời gian)
+                  Xếp hạng theo số lượt khách ghé vào từng điểm, theo khoảng
+                  ngày đang lọc (để trống là toàn thời gian)
                 </p>
               </div>
-              <span id="bao-cao-tong-luot-ghe" class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full">0 lượt ghé</span>
+              <span
+                id="bao-cao-tong-luot-ghe"
+                class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full"
+                >0 lượt ghé</span
+              >
             </div>
             <div id="bao-cao-xep-hang-poi" class="space-y-2.5">
               <p class="text-xs text-slate-400">Chưa có dữ liệu.</p>
@@ -504,97 +524,235 @@
         <!-- TAB 3: QUẢN LÝ VÉ & QUÉT MÃ -->
         <section id="tab-ve-qr" class="noi-dung-tab hidden space-y-6">
           <!-- Cảnh báo khi mã QR đang trỏ về localhost: điện thoại khác sẽ không mở được -->
-          <div id="canh-bao-qr-localhost" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs leading-relaxed">
-            <p class="font-bold text-sm mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Mã QR đang trỏ về <span id="dia-chi-qr-hien-tai" class="font-mono"></span></p>
-            <p>Điện thoại quét mã này sẽ không mở được trang, vì địa chỉ đó chỉ có trên máy chủ. Để mọi điện thoại đều quét được, hãy đưa web ra Internet (ví dụ bằng ngrok) rồi đặt
-              <span class="font-mono bg-white px-1 rounded">USER_WEB_BASE_URL</span> trong file <span class="font-mono bg-white px-1 rounded">.env</span>. Xem mục "Cho mọi điện thoại quét được mã QR" trong README.</p>
+          <div
+            id="canh-bao-qr-localhost"
+            class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs leading-relaxed"
+          >
+            <p class="font-bold text-sm mb-1">
+              <i class="fa-solid fa-triangle-exclamation mr-1"></i> Mã QR đang
+              trỏ về <span id="dia-chi-qr-hien-tai" class="font-mono"></span>
+            </p>
+            <p>
+              Điện thoại quét mã này sẽ không mở được trang, vì địa chỉ đó chỉ
+              có trên máy chủ. Để mọi điện thoại đều quét được, hãy đưa web ra
+              Internet (ví dụ bằng ngrok) rồi đặt
+              <span class="font-mono bg-white px-1 rounded"
+                >USER_WEB_BASE_URL</span
+              >
+              trong file
+              <span class="font-mono bg-white px-1 rounded">.env</span>. Xem mục
+              "Cho mọi điện thoại quét được mã QR" trong README.
+            </p>
           </div>
           <!-- Hàng 1: số liệu nhanh -->
           <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Vé hiệu lực</p>
-              <p id="ve-tong" class="text-2xl font-extrabold text-slate-900 mt-1">0</p>
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"
+            >
+              <p
+                class="text-[11px] font-bold uppercase tracking-wider text-slate-500"
+              >
+                Vé hiệu lực
+              </p>
+              <p
+                id="ve-tong"
+                class="text-2xl font-extrabold text-slate-900 mt-1"
+              >
+                0
+              </p>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Đã quét</p>
-              <p id="ve-da-quet" class="text-2xl font-extrabold text-emerald-600 mt-1">0</p>
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"
+            >
+              <p
+                class="text-[11px] font-bold uppercase tracking-wider text-slate-500"
+              >
+                Đã quét
+              </p>
+              <p
+                id="ve-da-quet"
+                class="text-2xl font-extrabold text-emerald-600 mt-1"
+              >
+                0
+              </p>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Chưa quét</p>
-              <p id="ve-chua-quet" class="text-2xl font-extrabold text-slate-500 mt-1">0</p>
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"
+            >
+              <p
+                class="text-[11px] font-bold uppercase tracking-wider text-slate-500"
+              >
+                Chưa quét
+              </p>
+              <p
+                id="ve-chua-quet"
+                class="text-2xl font-extrabold text-slate-500 mt-1"
+              >
+                0
+              </p>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Vé ưu tiên</p>
-              <p id="ve-uu-tien" class="text-2xl font-extrabold text-amber-600 mt-1">0</p>
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"
+            >
+              <p
+                class="text-[11px] font-bold uppercase tracking-wider text-slate-500"
+              >
+                Vé ưu tiên
+              </p>
+              <p
+                id="ve-uu-tien"
+                class="text-2xl font-extrabold text-amber-600 mt-1"
+              >
+                0
+              </p>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Đã hủy</p>
-              <p id="ve-da-huy" class="text-2xl font-extrabold text-red-500 mt-1">0</p>
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"
+            >
+              <p
+                class="text-[11px] font-bold uppercase tracking-wider text-slate-500"
+              >
+                Đã hủy
+              </p>
+              <p
+                id="ve-da-huy"
+                class="text-2xl font-extrabold text-red-500 mt-1"
+              >
+                0
+              </p>
             </div>
           </div>
 
           <!-- Hàng 2: sinh vé -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div
+            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"
+          >
             <div class="flex flex-col lg:flex-row lg:items-end gap-4">
               <div class="lg:w-64">
-                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <i class="fa-solid fa-qrcode text-blue-600"></i> Sinh mã QR in vé
+                <h3
+                  class="text-base font-bold text-slate-900 flex items-center gap-2"
+                >
+                  <i class="fa-solid fa-qrcode text-blue-600"></i> Sinh mã QR in
+                  vé
                 </h3>
-                <p class="text-xs text-slate-500 mt-1">Tạo mã vé và QR để in lên phôi vé giấy.</p>
+                <p class="text-xs text-slate-500 mt-1">
+                  Tạo mã vé và QR để in lên phôi vé giấy.
+                </p>
               </div>
               <div class="grid grid-cols-2 gap-3 flex-1">
                 <div>
-                  <label class="block text-xs font-semibold text-slate-700 mb-1">Loại vé</label>
-                  <select id="select-loai-ve" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs font-semibold">
+                  <label class="block text-xs font-semibold text-slate-700 mb-1"
+                    >Loại vé</label
+                  >
+                  <select
+                    id="select-loai-ve"
+                    class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs font-semibold"
+                  >
                     <option value="STANDARD">Vé thường (VM-STD)</option>
                     <option value="PRIORITY">Vé ưu tiên (VM-PRI)</option>
                   </select>
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-slate-700 mb-1">Số lượng (1–50)</label>
-                  <input type="number" id="input-so-luong" value="5" min="1" max="50" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                  <label class="block text-xs font-semibold text-slate-700 mb-1"
+                    >Số lượng (1–50)</label
+                  >
+                  <input
+                    type="number"
+                    id="input-so-luong"
+                    value="5"
+                    min="1"
+                    max="50"
+                    class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
                 </div>
               </div>
-              <button onclick="sinhMaQrInVe()" class="lg:w-48 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-blue-600/20 cursor-pointer">
+              <button
+                onclick="sinhMaQrInVe()"
+                class="lg:w-48 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-blue-600/20 cursor-pointer"
+              >
                 <i class="fa-solid fa-plus mr-1"></i> Sinh vé
               </button>
             </div>
           </div>
 
           <!-- Hàng 3: danh sách vé toàn chiều rộng -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div
+            class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+          >
+            <div
+              class="p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3"
+            >
               <div class="flex items-center gap-3">
                 <h3 class="font-bold text-slate-900 text-base">Danh sách vé</h3>
-                <span id="nhan-so-luong-ve" class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full">Tổng: 0 vé</span>
+                <span
+                  id="nhan-so-luong-ve"
+                  class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full"
+                  >Tổng: 0 vé</span
+                >
               </div>
               <div class="flex flex-wrap items-center gap-2">
-                <div id="loc-ve" class="flex bg-slate-100 rounded-xl p-1 text-xs font-semibold">
-                  <button data-loc="tat-ca" class="px-3 py-1.5 rounded-lg cursor-pointer">Tất cả</button>
-                  <button data-loc="chua-quet" class="px-3 py-1.5 rounded-lg cursor-pointer">Chưa quét</button>
-                  <button data-loc="da-quet" class="px-3 py-1.5 rounded-lg cursor-pointer">Đã quét</button>
-                  <button data-loc="da-huy" class="px-3 py-1.5 rounded-lg cursor-pointer">Đã hủy</button>
+                <div
+                  id="loc-ve"
+                  class="flex bg-slate-100 rounded-xl p-1 text-xs font-semibold"
+                >
+                  <button
+                    data-loc="tat-ca"
+                    class="px-3 py-1.5 rounded-lg cursor-pointer"
+                  >
+                    Tất cả
+                  </button>
+                  <button
+                    data-loc="chua-quet"
+                    class="px-3 py-1.5 rounded-lg cursor-pointer"
+                  >
+                    Chưa quét
+                  </button>
+                  <button
+                    data-loc="da-quet"
+                    class="px-3 py-1.5 rounded-lg cursor-pointer"
+                  >
+                    Đã quét
+                  </button>
+                  <button
+                    data-loc="da-huy"
+                    class="px-3 py-1.5 rounded-lg cursor-pointer"
+                  >
+                    Đã hủy
+                  </button>
                 </div>
                 <div class="relative">
-                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                  <input id="tim-ve" type="text" placeholder="Tìm số vé hoặc mã vé" oninput="hienThiBangVe()" class="pl-8 pr-3 py-2 w-56 text-xs border border-slate-300 rounded-xl bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                  <i
+                    class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+                  ></i>
+                  <input
+                    id="tim-ve"
+                    type="text"
+                    placeholder="Tìm số vé hoặc mã vé"
+                    oninput="hienThiBangVe()"
+                    class="pl-8 pr-3 py-2 w-56 text-xs border border-slate-300 rounded-xl bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
                 </div>
               </div>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                  <tr
+                    class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200"
+                  >
                     <th class="py-3 px-4 w-20">Số vé</th>
                     <th class="py-3 px-4">Mã vé</th>
                     <th class="py-3 px-4">Loại</th>
                     <th class="py-3 px-4">Trạng thái</th>
                     <th class="py-3 px-4">Quét lần đầu</th>
                     <th class="py-3 px-4">Quét lần cuối</th>
-                                        <th class="py-3 px-4 text-right">Thao tác</th>
+                    <th class="py-3 px-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody id="bang-danh-sach-ve" class="divide-y divide-slate-100 text-xs text-slate-700">
+                <tbody
+                  id="bang-danh-sach-ve"
+                  class="divide-y divide-slate-100 text-xs text-slate-700"
+                >
                   <!-- Nạp động qua JS -->
                 </tbody>
               </table>
@@ -602,38 +760,102 @@
           </div>
 
           <!-- Hộp thoại xem / in mã QR của một vé -->
-          <div id="hop-thoai-qr" class="hidden absolute inset-0 z-30 bg-slate-900/40 flex items-start justify-center overflow-y-auto p-4 lg:p-10" onclick="if(event.target===this)dongQrVe()">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-sm">
-              <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-                <h3 class="font-bold text-slate-900 text-base">Vé số <span id="qr-so-ve"></span></h3>
-                <button onclick="dongQrVe()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
+          <div
+            id="hop-thoai-qr"
+            class="hidden absolute inset-0 z-30 bg-slate-900/40 flex items-start justify-center overflow-y-auto p-4 lg:p-10"
+            onclick="if (event.target === this) dongQrVe();"
+          >
+            <div
+              class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-sm"
+            >
+              <div
+                class="p-5 border-b border-slate-200 flex items-center justify-between"
+              >
+                <h3 class="font-bold text-slate-900 text-base">
+                  Vé số <span id="qr-so-ve"></span>
+                </h3>
+                <button
+                  onclick="dongQrVe()"
+                  class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer"
+                  title="Đóng"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
               </div>
               <div class="p-6 flex flex-col items-center gap-3">
-                <img id="qr-anh" alt="Mã QR vé" class="w-56 h-56 rounded-xl border border-slate-200 bg-slate-50" />
-                <p id="qr-ma-ve" class="font-mono font-bold text-slate-900 text-lg"></p>
+                <img
+                  id="qr-anh"
+                  alt="Mã QR vé"
+                  class="w-56 h-56 rounded-xl border border-slate-200 bg-slate-50"
+                />
+                <p
+                  id="qr-ma-ve"
+                  class="font-mono font-bold text-slate-900 text-lg"
+                ></p>
                 <div id="qr-loai-ve"></div>
-                <p id="qr-da-huy" class="hidden w-full text-center text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-xl p-2"></p>
-                <p id="qr-link" class="text-[11px] text-slate-400 break-all text-center"></p>
+                <p
+                  id="qr-da-huy"
+                  class="hidden w-full text-center text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-xl p-2"
+                ></p>
+                <p
+                  id="qr-link"
+                  class="text-[11px] text-slate-400 break-all text-center"
+                ></p>
               </div>
               <div class="p-5 border-t border-slate-200 grid grid-cols-2 gap-2">
-                <a id="qr-tai" target="_blank" class="text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold"><i class="fa-solid fa-download mr-1"></i> Mở ảnh để in</a>
-                <a id="qr-mo-link" target="_blank" class="text-center px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Mở trang khách</a>
+                <a
+                  id="qr-tai"
+                  target="_blank"
+                  class="text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold"
+                  ><i class="fa-solid fa-download mr-1"></i> Mở ảnh để in</a
+                >
+                <a
+                  id="qr-mo-link"
+                  target="_blank"
+                  class="text-center px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold"
+                  ><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>
+                  Mở trang khách</a
+                >
               </div>
             </div>
           </div>
 
           <!-- Hộp thoại hủy vé (không xóa: bản ghi được giữ lại để đối soát) -->
-          <div id="hop-thoai-huy-ve" class="hidden absolute inset-0 z-30 bg-slate-900/40 flex items-start justify-center overflow-y-auto p-4 lg:p-10" onclick="if(event.target===this)dongHuyVe()">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md">
-              <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-                <h3 class="font-bold text-slate-900 text-base">Hủy vé <span id="huy-so-ve" class="font-mono"></span></h3>
-                <button onclick="dongHuyVe()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
+          <div
+            id="hop-thoai-huy-ve"
+            class="hidden absolute inset-0 z-30 bg-slate-900/40 flex items-start justify-center overflow-y-auto p-4 lg:p-10"
+            onclick="if (event.target === this) dongHuyVe();"
+          >
+            <div
+              class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md"
+            >
+              <div
+                class="p-5 border-b border-slate-200 flex items-center justify-between"
+              >
+                <h3 class="font-bold text-slate-900 text-base">
+                  Hủy vé <span id="huy-so-ve" class="font-mono"></span>
+                </h3>
+                <button
+                  onclick="dongHuyVe()"
+                  class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer"
+                  title="Đóng"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
               </div>
               <div class="p-5 space-y-4 text-xs">
-                <p class="text-slate-600">Vé <b id="huy-ma-ve" class="font-mono"></b> sẽ không quét được nữa. Thông tin vé vẫn được lưu lại và có thể khôi phục.</p>
+                <p class="text-slate-600">
+                  Vé <b id="huy-ma-ve" class="font-mono"></b> sẽ không quét được
+                  nữa. Thông tin vé vẫn được lưu lại và có thể khôi phục.
+                </p>
                 <div>
-                  <label class="block font-semibold text-slate-700 mb-1">Lý do hủy</label>
-                  <select id="huy-ly-do" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-red-400 focus:outline-none">
+                  <label class="block font-semibold text-slate-700 mb-1"
+                    >Lý do hủy</label
+                  >
+                  <select
+                    id="huy-ly-do"
+                    class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-red-400 focus:outline-none"
+                  >
                     <option value="PRINT_ERROR">In lỗi / in nhầm</option>
                     <option value="LOST">Khách báo mất vé</option>
                     <option value="REFUNDED">Khách trả vé</option>
@@ -641,13 +863,31 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block font-semibold text-slate-700 mb-1">Ghi chú</label>
-                  <input id="huy-ghi-chu" maxlength="200" placeholder="VD: vé in mờ, đã in lại vé khác" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-red-400 focus:outline-none" />
+                  <label class="block font-semibold text-slate-700 mb-1"
+                    >Ghi chú</label
+                  >
+                  <input
+                    id="huy-ghi-chu"
+                    maxlength="200"
+                    placeholder="VD: vé in mờ, đã in lại vé khác"
+                    class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-red-400 focus:outline-none"
+                  />
                 </div>
               </div>
               <div class="p-5 border-t border-slate-200 flex justify-end gap-2">
-                <button onclick="dongHuyVe()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer">Đóng</button>
-                <button id="nut-xac-nhan-huy" onclick="xacNhanHuyVe()" class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold cursor-pointer">Hủy vé</button>
+                <button
+                  onclick="dongHuyVe()"
+                  class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer"
+                >
+                  Đóng
+                </button>
+                <button
+                  id="nut-xac-nhan-huy"
+                  onclick="xacNhanHuyVe()"
+                  class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold cursor-pointer"
+                >
+                  Hủy vé
+                </button>
               </div>
             </div>
           </div>
@@ -655,23 +895,35 @@
         <!-- TAB 4: QUẢN LÝ POI & AUDIO (logic: js/admin-poi.js) -->
         <section id="tab-poi" class="noi-dung-tab hidden space-y-6">
           <div id="poi-msg" class="hidden"></div>
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div
+            class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+          >
+            <div
+              class="p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3"
+            >
               <div>
-                <h3 class="font-bold text-slate-900 text-base">Danh sách điểm tham quan (POI)</h3>
-                <p class="text-xs text-slate-500 mt-1">Chỉ POI ở trạng thái <b>PUBLISHED</b> mới hiện cho khách. Thêm/sửa chỉ cần nhập tiếng Việt, hệ thống tự dịch và tạo audio.</p>
+                <h3 class="font-bold text-slate-900 text-base">
+                  Danh sách điểm tham quan (POI)
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">
+                  Chỉ POI ở trạng thái <b>PUBLISHED</b> mới hiện cho khách.
+                  Chỉnh sửa nội dung POI, quản lý bản dịch và audio thuyết minh.
+                </p>
               </div>
               <div class="flex items-center gap-2">
-                <span id="poi-count" class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full">Tổng: 0 POI</span>
-                <button id="poi-btn-new" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition shadow cursor-pointer">
-                  <i class="fa-solid fa-plus mr-1"></i> Thêm POI
-                </button>
+                <span
+                  id="poi-count"
+                  class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full"
+                  >Tổng: 0 POI</span
+                >
               </div>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                  <tr
+                    class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200"
+                  >
                     <th class="py-3 px-4">Mã</th>
                     <th class="py-3 px-4">Tên (vi)</th>
                     <th class="py-3 px-4">Bán kính</th>
@@ -681,58 +933,170 @@
                     <th class="py-3 px-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody id="poi-rows" class="divide-y divide-slate-100 text-xs text-slate-700">
-                  <tr><td colspan="7" class="py-6 text-center text-slate-400">Đang tải danh sách POI...</td></tr>
+                <tbody
+                  id="poi-rows"
+                  class="divide-y divide-slate-100 text-xs text-slate-700"
+                >
+                  <tr>
+                    <td colspan="7" class="py-6 text-center text-slate-400">
+                      Đang tải danh sách POI...
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
           <!-- Hộp thoại thêm / sửa POI: chỉ phủ khung nội dung bên phải, sidebar vẫn hiện -->
-          <div id="poi-modal" class="hidden absolute inset-0 z-30 bg-slate-900/40 overflow-y-auto p-4 lg:p-8">
-            <form id="poi-form" class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-3xl mx-auto">
-              <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-                <h3 id="poi-form-title" class="font-bold text-slate-900 text-base">Thêm POI mới</h3>
-                <button type="button" id="poi-btn-close" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer" title="Đóng">
+          <div
+            id="poi-modal"
+            class="hidden absolute inset-0 z-30 bg-slate-900/40 overflow-y-auto p-4 lg:p-8"
+          >
+            <form
+              id="poi-form"
+              class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-3xl mx-auto"
+            >
+              <div
+                class="p-5 border-b border-slate-200 flex items-center justify-between"
+              >
+                <h3
+                  id="poi-form-title"
+                  class="font-bold text-slate-900 text-base"
+                >
+                  Chỉnh sửa POI
+                </h3>
+                <button
+                  type="button"
+                  id="poi-btn-close"
+                  class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer"
+                  title="Đóng"
+                >
                   <i class="fa-solid fa-xmark"></i>
                 </button>
               </div>
               <div class="p-5 space-y-4">
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                  <div><label class="block text-xs font-semibold text-slate-700 mb-1">Mã POI *</label><input id="poi-f-code" placeholder="VD: P11" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase" /></div>
-                  <div><label class="block text-xs font-semibold text-slate-700 mb-1">Bán kính (10–25 m) *</label><input id="poi-f-radius" type="number" min="10" max="25" step="1" value="15" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" /></div>
-                  <div><label class="block text-xs font-semibold text-slate-700 mb-1">Vĩ độ (latitude) *</label><input id="poi-f-lat" type="number" step="any" placeholder="21.0285" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" /></div>
-                  <div><label class="block text-xs font-semibold text-slate-700 mb-1">Kinh độ (longitude) *</label><input id="poi-f-lng" type="number" step="any" placeholder="105.8355" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" /></div>
+                  <div>
+                    <label
+                      class="block text-xs font-semibold text-slate-700 mb-1"
+                      >Bán kính (10–25 m) *</label
+                    ><input
+                      id="poi-f-radius"
+                      type="number"
+                      min="10"
+                      max="25"
+                      step="1"
+                      value="15"
+                      class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-semibold text-slate-700 mb-1"
+                      >Vĩ độ (latitude) *</label
+                    ><input
+                      id="poi-f-lat"
+                      type="number"
+                      step="any"
+                      placeholder="21.0285"
+                      class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-semibold text-slate-700 mb-1"
+                      >Kinh độ (longitude) *</label
+                    ><input
+                      id="poi-f-lng"
+                      type="number"
+                      step="any"
+                      placeholder="105.8355"
+                      class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
                 <div class="border border-slate-200 rounded-xl p-4 space-y-3">
                   <p class="text-sm font-bold text-slate-900">🇻🇳 Tiếng Việt</p>
-                  <div><label class="block text-xs font-semibold text-slate-700 mb-1">Tên điểm *</label><input id="poi-f-name" placeholder="VD: Khuê Văn Các" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" /></div>
-                  <div><label class="block text-xs font-semibold text-slate-700 mb-1">Mô tả *</label><textarea id="poi-f-desc" rows="3" placeholder="Mô tả ngắn về điểm tham quan" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea></div>
                   <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nội dung thuyết minh</label>
-                    <textarea id="poi-f-narr" rows="4" placeholder="Để trống sẽ đọc phần mô tả" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                    <label
+                      class="block text-xs font-semibold text-slate-700 mb-1"
+                      >Tên điểm *</label
+                    ><input
+                      id="poi-f-name"
+                      placeholder="VD: Khuê Văn Các"
+                      class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-semibold text-slate-700 mb-1"
+                      >Mô tả *</label
+                    ><textarea
+                      id="poi-f-desc"
+                      rows="3"
+                      placeholder="Mô tả ngắn về điểm tham quan"
+                      class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    ></textarea>
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-semibold text-slate-700 mb-1"
+                      >Nội dung thuyết minh</label
+                    >
+                    <textarea
+                      id="poi-f-narr"
+                      rows="4"
+                      placeholder="Để trống sẽ đọc phần mô tả"
+                      class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    ></textarea>
                   </div>
                 </div>
-                <p class="text-xs text-slate-500">Chỉ cần nhập tiếng Việt. Khi bấm Lưu, hệ thống <b>tự dịch</b> tên, mô tả và thuyết minh sang các ngôn ngữ còn lại (<span id="poi-other-langs"></span>) rồi <b>tự tạo audio MP3</b> cho tất cả ngôn ngữ.</p>
-                <div id="poi-preview" class="hidden text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1"></div>
+                <p class="text-xs text-slate-500">
+                  Cập nhật nội dung tiếng Việt. Hệ thống xử lý bản dịch và audio
+                  theo quy trình đã cấu hình.
+                </p>
+                <div
+                  id="poi-preview"
+                  class="hidden text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1"
+                ></div>
                 <!-- Không bắt buộc: admin tự chỉnh bản dịch của từng ngôn ngữ -->
-                <button type="button" id="poi-btn-detail" class="w-full px-4 py-2.5 border border-dashed border-blue-300 hover:bg-blue-50 text-blue-700 rounded-xl text-xs font-semibold transition cursor-pointer">
-                  <i class="fa-solid fa-language mr-1"></i> <span id="poi-detail-label">Sửa chi tiết các ngôn ngữ khác</span>
+                <button
+                  type="button"
+                  id="poi-btn-detail"
+                  class="w-full px-4 py-2.5 border border-dashed border-blue-300 hover:bg-blue-50 text-blue-700 rounded-xl text-xs font-semibold transition cursor-pointer"
+                >
+                  <i class="fa-solid fa-language mr-1"></i>
+                  <span id="poi-detail-label"
+                    >Sửa chi tiết các ngôn ngữ khác</span
+                  >
                 </button>
                 <div id="poi-lang-detail" class="hidden space-y-3">
-                  <p class="text-[11px] text-slate-500 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                    Ô nào bạn sửa sẽ được giữ <b>nguyên văn</b>; ô nào để trống thì vẫn được dịch tự động từ tiếng Việt.
-                    Sửa nội dung thuyết minh của ngôn ngữ nào thì audio của ngôn ngữ đó được tạo lại.
+                  <p
+                    class="text-[11px] text-slate-500 bg-blue-50 border border-blue-100 rounded-xl p-3"
+                  >
+                    Ô nào bạn sửa sẽ được giữ <b>nguyên văn</b>; ô nào để trống
+                    thì vẫn được dịch tự động từ tiếng Việt. Sửa nội dung thuyết
+                    minh của ngôn ngữ nào thì audio của ngôn ngữ đó được tạo
+                    lại.
                   </p>
                   <div id="poi-lang-blocks" class="space-y-3"></div>
                 </div>
                 <div id="poi-form-status" class="hidden"></div>
-                <p class="text-[11px] text-slate-400">POI mới luôn ở trạng thái DRAFT. Bấm "Xuất bản" ở danh sách để hiện cho khách.</p>
               </div>
               <div class="p-5 border-t border-slate-200 flex justify-end gap-2">
-                <button type="button" id="poi-btn-cancel" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer">Đóng</button>
-                <button type="submit" id="poi-btn-save" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold cursor-pointer">
-                  <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu &amp; tạo audio
+                <button
+                  type="button"
+                  id="poi-btn-cancel"
+                  class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="submit"
+                  id="poi-btn-save"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold cursor-pointer"
+                >
+                  <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu thay đổi
                 </button>
               </div>
             </form>
@@ -818,12 +1182,8 @@
             taiDuLieuTuBackend();
             if (window.PoiAdmin) window.PoiAdmin.load();
           } else {
-            // Fallback nếu tài khoản mật khẩu khớp cấu hình mặc định
-            errorDiv.textContent = "Tên đăng nhập hoặc mật khẩu không chính xác!";
-            errorDiv.classList.remove("hidden");
-            return;
             errorDiv.textContent =
-              data.detail || "Mật khẩu hoặc tài khoản không đúng!";
+              data.detail || "Tên đăng nhập hoặc mật khẩu không đúng!";
             errorDiv.classList.remove("hidden");
           }
         } catch (err) {
@@ -1005,6 +1365,19 @@
         hienThiXepHangPoi(stats.historical_poi_visits);
       }
 
+      function escapeHtml(value) {
+        return String(value ?? "").replace(
+          /[&<>"']/g,
+          (char) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[char],
+        );
+      }
       // Xếp hạng điểm tham quan theo lượt khách ghé vào (historical_poi_visits
       // của statistics-service, đã lọc theo khoảng ngày nếu có).
       function hienThiXepHangPoi(luotGhe) {
@@ -1014,17 +1387,25 @@
         const tenDiem = {};
         (danhSachPoiThucTe || []).forEach((p) => {
           const ma = p.poi_code || p.code;
-          const ten = (p.translations && p.translations.vi && p.translations.vi.name) || p.name || ma;
-          tenDiem[ma] = String(ten).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+          const ten =
+            (p.translations && p.translations.vi && p.translations.vi.name) ||
+            p.name ||
+            ma;
+          tenDiem[ma] = String(ten);
         });
         const xepHang = Object.entries(luotGhe)
-          .map(([ma, so]) => ({ ma, ten: tenDiem[ma] || ma, so: Number(so) || 0 }))
+          .map(([ma, so]) => ({
+            ma: escapeHtml(ma),
+            ten: escapeHtml(tenDiem[ma] || ma),
+            so: Number(so) || 0,
+          }))
           .sort((a, b) => b.so - a.so || a.ma.localeCompare(b.ma));
         const tong = xepHang.reduce((s, d) => s + d.so, 0);
         const lonNhat = Math.max(1, ...xepHang.map((d) => d.so));
         const fmt = (n) => Number(n).toLocaleString("vi-VN");
 
-        document.getElementById("bao-cao-tong-luot-ghe").textContent = `${fmt(tong)} lượt ghé`;
+        document.getElementById("bao-cao-tong-luot-ghe").textContent =
+          `${fmt(tong)} lượt ghé`;
         const elTop = document.getElementById("bao-cao-diem-dong-nhat");
         const elTopChu = document.getElementById("bao-cao-diem-dong-nhat-chu");
         if (tong && xepHang.length) {
@@ -1036,10 +1417,13 @@
         }
 
         if (!xepHang.length) {
-          khung.innerHTML = '<p class="text-xs text-slate-400">Chưa có dữ liệu.</p>';
+          khung.innerHTML =
+            '<p class="text-xs text-slate-400">Chưa có dữ liệu.</p>';
           return;
         }
-        khung.innerHTML = xepHang.map((d, i) => `
+        khung.innerHTML = xepHang
+          .map(
+            (d, i) => `
           <div class="grid items-center gap-3" style="grid-template-columns: 28px 160px 1fr 110px" title="${d.ten}: ${fmt(d.so)} lượt ghé">
             <span class="w-6 h-6 rounded-md ${i === 0 && d.so ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"} text-[11px] font-bold flex items-center justify-center">${i + 1}</span>
             <span class="text-xs text-slate-700 truncate">${d.ten}</span>
@@ -1047,7 +1431,9 @@
               <div class="h-full bg-blue-600 rounded-r transition-all duration-700" style="width: ${(d.so / lonNhat) * 100}%; min-width: ${d.so ? 4 : 0}px; border-top-left-radius: 2px; border-bottom-left-radius: 2px"></div>
             </div>
             <span class="text-xs text-right ${d.so ? "text-slate-900 font-semibold" : "text-slate-300"}">${fmt(d.so)}</span>
-          </div>`).join("");
+          </div>`,
+          )
+          .join("");
       }
 
       // Ngày hôm nay theo giờ máy (dạng yyyy-mm-dd, giống giá trị của ô chọn ngày)
@@ -1064,8 +1450,12 @@
         });
       }
       gioiHanNgayLoc();
-      document.getElementById("filter-tu-ngay")?.addEventListener("focus", gioiHanNgayLoc);
-      document.getElementById("filter-den-ngay")?.addEventListener("focus", gioiHanNgayLoc);
+      document
+        .getElementById("filter-tu-ngay")
+        ?.addEventListener("focus", gioiHanNgayLoc);
+      document
+        .getElementById("filter-den-ngay")
+        ?.addEventListener("focus", gioiHanNgayLoc);
 
       function apDungBoLocBaoCao() {
         const tuNgay = document.getElementById("filter-tu-ngay").value;
@@ -1080,7 +1470,9 @@
         }
         const homNay = ngayHomNay();
         if (tuNgay > homNay || denNgay > homNay) {
-          alert(`Không thể lọc ngày trong tương lai. Vui lòng chọn ngày từ hôm nay (${homNay.split("-").reverse().join("/")}) trở về trước.`);
+          alert(
+            `Không thể lọc ngày trong tương lai. Vui lòng chọn ngày từ hôm nay (${homNay.split("-").reverse().join("/")}) trở về trước.`,
+          );
           return;
         }
         hienThBaoNhanh(`Đang lọc báo cáo từ ${tuNgay} đến ${denNgay}...`);
@@ -1162,16 +1554,24 @@
           },
           poi: {
             "tieu de": "Quản lý POI & Audio",
-            "mo ta": "Thêm, sửa, xuất bản, xóa điểm tham quan; tự dịch và tạo audio thuyết minh",
+            "mo ta":
+              "Thêm, sửa, xuất bản, xóa điểm tham quan; tự dịch và tạo audio thuyết minh",
           },
         };
 
         // Nhớ tab trên URL (admin.html#poi) để tải lại trang vẫn đứng đúng tab
-        history.replaceState(null, "", maTab === "thong-ke" ? location.pathname : "#" + maTab);
+        history.replaceState(
+          null,
+          "",
+          maTab === "thong-ke" ? location.pathname : "#" + maTab,
+        );
         if (maTab === "poi" && window.PoiAdmin) window.PoiAdmin.load();
         // Tab Thống kê và Báo cáo dùng chung một lần tải: tải lại ngay khi chuyển tab để
         // tab Báo cáo không hiện tạm số liệu chưa lọc (và ngược lại)
-        if (["thong-ke", "bao-cao"].includes(maTab) && localStorage.getItem("admin_token")) {
+        if (
+          ["thong-ke", "bao-cao"].includes(maTab) &&
+          localStorage.getItem("admin_token")
+        ) {
           taiLaiTheoTabDangMo();
         }
 
@@ -1188,26 +1588,41 @@
         const ketQua = new Map();
         if (!duLieu) return ketQua;
 
-        if (!Array.isArray(duLieu) && typeof duLieu === "object") {
-          Object.entries(duLieu).forEach(([poiCode, count]) => {
-            ketQua.set(poiCode, Number(count ?? 0));
+        // Trường hợp API trả về object có items hoặc data
+        const items = Array.isArray(duLieu)
+          ? duLieu
+          : Array.isArray(duLieu.items)
+            ? duLieu.items
+            : Array.isArray(duLieu.data)
+              ? duLieu.data
+              : null;
+
+        if (items) {
+          items.forEach((item) => {
+            const maPoi = item.poi_id ?? item.poi_code ?? item.code;
+            if (!maPoi) return;
+
+            const soLuong =
+              item.active_simulated_visitors ??
+              item.active_visitors ??
+              item.current_visitors ??
+              0;
+
+            ketQua.set(maPoi, Number(soLuong) || 0);
           });
+
           return ketQua;
         }
 
-        const items = Array.isArray(duLieu)
-          ? duLieu
-          : (duLieu.items ?? duLieu.data ?? []);
-        items.forEach((item) => {
-          const maPoi = item.poi_id ?? item.poi_code ?? item.code;
-          if (!maPoi) return;
-          const soLuong =
-            item.active_simulated_visitors ??
-            item.active_visitors ??
-            item.current_visitors ??
-            0;
-          ketQua.set(maPoi, Number(soLuong));
-        });
+        // Trường hợp API trả về object dạng { P01: 5, P02: 3 }
+        if (typeof duLieu === "object") {
+          Object.entries(duLieu).forEach(([poiCode, count]) => {
+            const soLuong = Number(count);
+            if (Number.isFinite(soLuong)) {
+              ketQua.set(poiCode, soLuong);
+            }
+          });
+        }
 
         return ketQua;
       }
@@ -1221,17 +1636,20 @@
         danhSachPoi.forEach((poi) => {
           const ma = poi.poi_code || poi.code;
           const so = mapSoNguoi.has(ma) ? Number(mapSoNguoi.get(ma)) || 0 : 0;
-          if (so > 0 && (!top || so > top.so)) top = { ten: poi.name || ma, so };
+          if (so > 0 && (!top || so > top.so))
+            top = { ten: poi.name || ma, so };
         });
         if (top) {
           elTen.textContent = top.ten;
           elTen.title = top.ten;
-          elTen.className = "text-2xl font-extrabold text-purple-600 mt-1 truncate";
+          elTen.className =
+            "text-2xl font-extrabold text-purple-600 mt-1 truncate";
           elChu.textContent = `${top.so.toLocaleString("vi-VN")} người đang có mặt`;
         } else {
           elTen.textContent = "—";
           elTen.title = "";
-          elTen.className = "text-2xl font-extrabold text-slate-400 mt-1 truncate";
+          elTen.className =
+            "text-2xl font-extrabold text-slate-400 mt-1 truncate";
           elChu.textContent = "Chưa có khách tại điểm nào";
         }
       }
@@ -1282,10 +1700,10 @@
         capNhatDiemDongNhatLucNay(danhSachHienThi, mapSoNguoi);
 
         danhSachHienThi.forEach((poi) => {
-          const ma = poi.poi_code || poi.code;
+          const ma = poi.poi_code || poi.code || "";
           const ten = poi.name || ma;
-          const banKinh = poi.geofence_radius ?? poi.radius ?? 12;
-          const soLuong = mapSoNguoi.has(ma) ? mapSoNguoi.get(ma) : 0;
+          const banKinh = Number(poi.geofence_radius ?? poi.radius ?? 12);
+          const soLuong = Number(mapSoNguoi.get(ma) ?? 0) || 0;
 
           const mauSoNguoi =
             soLuong > 0
@@ -1293,19 +1711,25 @@
               : "text-slate-400 bg-slate-100 font-medium";
 
           thanBang.innerHTML += `
-            <tr class="hover:bg-slate-50 transition">
-              <td class="py-3 px-4 font-bold text-blue-700 font-mono">${ma}</td>
-              <td class="py-3 px-4 font-semibold text-slate-900">${ten}</td>
-              <td class="py-3 px-4">
-                <span class="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">${banKinh}m</span>
-              </td>
-              <td class="py-3 px-4 text-right">
-                <span class="${mauSoNguoi} px-2.5 py-1 rounded-full text-xs">
-                  ${soLuong} người
-                </span>
-              </td>
-            </tr>
-          `;
+    <tr class="hover:bg-slate-50 transition">
+      <td class="py-3 px-4 font-bold text-blue-700 font-mono">
+        ${escapeHtml(ma)}
+      </td>
+      <td class="py-3 px-4 font-semibold text-slate-900">
+        ${escapeHtml(ten)}
+      </td>
+      <td class="py-3 px-4">
+        <span class="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+          ${Number.isFinite(banKinh) ? banKinh : 12}m
+        </span>
+      </td>
+      <td class="py-3 px-4 text-right">
+        <span class="${mauSoNguoi} px-2.5 py-1 rounded-full text-xs">
+          ${soLuong} người
+        </span>
+      </td>
+    </tr>
+  `;
         });
       }
 
@@ -1317,7 +1741,9 @@
       function laDiaChiNoiBo(url) {
         try {
           const host = new URL(url).hostname;
-          return host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
+          return (
+            host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0"
+          );
         } catch (e) {
           return false;
         }
@@ -1329,7 +1755,8 @@
         const khung = document.getElementById("canh-bao-qr-localhost");
         if (!khung) return;
         khung.classList.toggle("hidden", !diaChiQrNoiBo);
-        document.getElementById("dia-chi-qr-hien-tai").textContent = diaChiQrNoiBo;
+        document.getElementById("dia-chi-qr-hien-tai").textContent =
+          diaChiQrNoiBo;
       }
 
       function hienThiBangVe() {
@@ -1344,7 +1771,8 @@
       const veTheoMa = {};
 
       function dinhDangThoiGian(timeStr) {
-        if (!timeStr || timeStr === "-") return '<span class="text-slate-300">—</span>';
+        if (!timeStr || timeStr === "-")
+          return '<span class="text-slate-300">—</span>';
         // Giờ từ server là UTC; chuỗi nào thiếu múi giờ thì coi là UTC để hiển thị đúng giờ Việt Nam
         const coMuiGio = /(Z|[+-]\d{2}:?\d{2})$/.test(timeStr);
         const d = new Date(coMuiGio ? timeStr : timeStr + "Z");
@@ -1362,29 +1790,41 @@
           : `${window.location.origin}/index.html?ticket=${encodeURIComponent(ma)}`;
       }
 
-      const soVe = (ve) => (ve.ticket_no ? `#${String(ve.ticket_no).padStart(3, "0")}` : "—");
+      const soVe = (ve) =>
+        ve.ticket_no ? `#${String(ve.ticket_no).padStart(3, "0")}` : "—";
 
       function hienThiBangVeChiTiet() {
         const thanBang = document.getElementById("bang-danh-sach-ve");
         if (!thanBang) return;
 
-        const daQuet = (ve) => Boolean(ve.is_used || ve.scanned || ve.is_scanned);
+        const daQuet = (ve) =>
+          Boolean(ve.is_used || ve.scanned || ve.is_scanned);
         const daHuy = (ve) => Boolean(ve.is_cancelled);
         const tong = danhSachVe.length;
         const hieuLuc = danhSachVe.filter((v) => !daHuy(v));
         const soDaQuet = hieuLuc.filter(daQuet).length;
         document.getElementById("ve-tong").textContent = hieuLuc.length;
         document.getElementById("ve-da-quet").textContent = soDaQuet;
-        document.getElementById("ve-chua-quet").textContent = hieuLuc.length - soDaQuet;
-        document.getElementById("ve-uu-tien").textContent = hieuLuc.filter((v) => (v.ticket_type || "").toUpperCase() === "PRIORITY").length;
-        document.getElementById("ve-da-huy").textContent = tong - hieuLuc.length;
+        document.getElementById("ve-chua-quet").textContent =
+          hieuLuc.length - soDaQuet;
+        document.getElementById("ve-uu-tien").textContent = hieuLuc.filter(
+          (v) => (v.ticket_type || "").toUpperCase() === "PRIORITY",
+        ).length;
+        document.getElementById("ve-da-huy").textContent =
+          tong - hieuLuc.length;
 
         document.querySelectorAll("#loc-ve [data-loc]").forEach((nut) => {
-          nut.className = "px-3 py-1.5 rounded-lg cursor-pointer " +
-            (nut.dataset.loc === locVe ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800");
+          nut.className =
+            "px-3 py-1.5 rounded-lg cursor-pointer " +
+            (nut.dataset.loc === locVe
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-500 hover:text-slate-800");
         });
 
-        const tuKhoa = (document.getElementById("tim-ve")?.value || "").trim().toUpperCase().replace(/^#0*/, "");
+        const tuKhoa = (document.getElementById("tim-ve")?.value || "")
+          .trim()
+          .toUpperCase()
+          .replace(/^#0*/, "");
         const danhSachHienThi = danhSachVe.filter((ve) => {
           if (locVe === "da-quet" && !daQuet(ve)) return false;
           if (locVe === "chua-quet" && (daQuet(ve) || daHuy(ve))) return false;
@@ -1395,11 +1835,15 @@
         });
 
         diaChiQrNoiBo = "";
-        if (danhSachVe.length === 0 && laDiaChiNoiBo(window.location.origin)) diaChiQrNoiBo = window.location.origin;
+        if (danhSachVe.length === 0 && laDiaChiNoiBo(window.location.origin))
+          diaChiQrNoiBo = window.location.origin;
 
         const nhanSoLuong = document.getElementById("nhan-so-luong-ve");
         if (nhanSoLuong) {
-          nhanSoLuong.innerText = danhSachHienThi.length === tong ? `Tổng: ${tong} vé` : `${danhSachHienThi.length} / ${tong} vé`;
+          nhanSoLuong.innerText =
+            danhSachHienThi.length === tong
+              ? `Tổng: ${tong} vé`
+              : `${danhSachHienThi.length} / ${tong} vé`;
         }
 
         if (danhSachHienThi.length === 0) {
@@ -1407,31 +1851,34 @@
           return;
         }
 
-        thanBang.innerHTML = danhSachHienThi.map((ve) => {
-          const maVe = ve.ticket_code || ve.code || "-";
-          veTheoMa[maVe] = ve;
-          const link = linkVe(ve);
-          if (laDiaChiNoiBo(link)) diaChiQrNoiBo = link.split("/index.html")[0];
-          const uuTien = (ve.ticket_type || "STANDARD").toUpperCase() === "PRIORITY";
-          const quet = daQuet(ve);
-          const huy = daHuy(ve);
+        thanBang.innerHTML = danhSachHienThi
+          .map((ve) => {
+            const maVe = ve.ticket_code || ve.code || "-";
+            veTheoMa[maVe] = ve;
+            const link = linkVe(ve);
+            if (laDiaChiNoiBo(link))
+              diaChiQrNoiBo = link.split("/index.html")[0];
+            const uuTien =
+              (ve.ticket_type || "STANDARD").toUpperCase() === "PRIORITY";
+            const quet = daQuet(ve);
+            const huy = daHuy(ve);
 
-          const loai = uuTien
-            ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">Ưu tiên</span>`
-            : `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold">Thường</span>`;
-          const lyDo = LY_DO_HUY[ve.cancel_reason] || "";
-          const trangThai = huy
-            ? `<span title="${lyDo}${ve.cancel_note ? ": " + ve.cancel_note.replace(/"/g, "&quot;") : ""}" class="px-2.5 py-1 rounded-full bg-red-50 text-red-700 text-[11px] font-bold cursor-help"><i class="fa-solid fa-ban mr-1"></i>Đã hủy</span><div class="text-[10px] text-red-400 mt-1">${lyDo}</div>`
-            : quet
-            ? `<span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold"><i class="fa-solid fa-check mr-1"></i>Đã quét</span>`
-            : `<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[11px] font-medium">Chưa quét</span>`;
-          const nutHuy = huy
-            ? `<button onclick="khoiPhucVe('${maVe}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold cursor-pointer"><i class="fa-solid fa-rotate-left mr-1"></i>Khôi phục</button>`
-            : quet
-            ? `<button disabled title="Vé đã quét không thể hủy (giữ để thống kê lượt khách)" class="px-2.5 py-1.5 text-slate-300 rounded-lg text-[11px] font-semibold cursor-not-allowed">Hủy</button>`
-            : `<button onclick="moHuyVe('${maVe}')" class="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-[11px] font-semibold cursor-pointer">Hủy</button>`;
+            const loai = uuTien
+              ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">Ưu tiên</span>`
+              : `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold">Thường</span>`;
+            const lyDo = LY_DO_HUY[ve.cancel_reason] || "";
+            const trangThai = huy
+              ? `<span title="${lyDo}${ve.cancel_note ? ": " + ve.cancel_note.replace(/"/g, "&quot;") : ""}" class="px-2.5 py-1 rounded-full bg-red-50 text-red-700 text-[11px] font-bold cursor-help"><i class="fa-solid fa-ban mr-1"></i>Đã hủy</span><div class="text-[10px] text-red-400 mt-1">${lyDo}</div>`
+              : quet
+                ? `<span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold"><i class="fa-solid fa-check mr-1"></i>Đã quét</span>`
+                : `<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[11px] font-medium">Chưa quét</span>`;
+            const nutHuy = huy
+              ? `<button onclick="khoiPhucVe('${maVe}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold cursor-pointer"><i class="fa-solid fa-rotate-left mr-1"></i>Khôi phục</button>`
+              : quet
+                ? `<button disabled title="Vé đã quét không thể hủy (giữ để thống kê lượt khách)" class="px-2.5 py-1.5 text-slate-300 rounded-lg text-[11px] font-semibold cursor-not-allowed">Hủy</button>`
+                : `<button onclick="moHuyVe('${maVe}')" class="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-[11px] font-semibold cursor-pointer">Hủy</button>`;
 
-          return `
+            return `
             <tr class="transition ${huy ? "bg-red-50/30" : "hover:bg-slate-50"}">
               <td class="py-3 px-4 font-mono font-extrabold text-sm ${huy ? "text-slate-400" : "text-blue-700"}">${soVe(ve)}</td>
               <td class="py-3 px-4 font-mono font-semibold ${huy ? "text-slate-400 line-through" : "text-slate-900"}">${maVe}</td>
@@ -1446,7 +1893,8 @@
                 </div>
               </td>
             </tr>`;
-        }).join("");
+          })
+          .join("");
       }
 
       function xemQrVe(maVe) {
@@ -1457,13 +1905,16 @@
         document.getElementById("qr-so-ve").textContent = soVe(ve);
         document.getElementById("qr-anh").src = anh;
         document.getElementById("qr-ma-ve").textContent = maVe;
-        document.getElementById("qr-loai-ve").innerHTML = (ve.ticket_type || "").toUpperCase() === "PRIORITY"
-          ? '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">Vé ưu tiên</span>'
-          : '<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold">Vé thường</span>';
+        document.getElementById("qr-loai-ve").innerHTML =
+          (ve.ticket_type || "").toUpperCase() === "PRIORITY"
+            ? '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">Vé ưu tiên</span>'
+            : '<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold">Vé thường</span>';
         document.getElementById("qr-link").textContent = link;
         const oHuy = document.getElementById("qr-da-huy");
         oHuy.classList.toggle("hidden", !ve.is_cancelled);
-        oHuy.textContent = ve.is_cancelled ? `Vé đã hủy (${LY_DO_HUY[ve.cancel_reason] || "lý do khác"}), quét sẽ bị từ chối.` : "";
+        oHuy.textContent = ve.is_cancelled
+          ? `Vé đã hủy (${LY_DO_HUY[ve.cancel_reason] || "lý do khác"}), quét sẽ bị từ chối.`
+          : "";
         document.getElementById("qr-tai").href = anh;
         document.getElementById("qr-mo-link").href = link;
         document.getElementById("hop-thoai-qr").classList.remove("hidden");
@@ -1534,7 +1985,12 @@
 
       async function khoiPhucVe(maVe) {
         const ve = veTheoMa[maVe] || {};
-        if (!confirm(`Khôi phục vé ${soVe(ve)} (${maVe})? Vé sẽ quét được trở lại.`)) return;
+        if (
+          !confirm(
+            `Khôi phục vé ${soVe(ve)} (${maVe})? Vé sẽ quét được trở lại.`,
+          )
+        )
+          return;
         try {
           await goiApiVe(`${encodeURIComponent(maVe)}/restore`);
           hienThBaoNhanh(`Đã khôi phục vé ${soVe(ve)} (${maVe}).`);
@@ -1558,7 +2014,10 @@
           if (main && hopThoai) main.parentElement.appendChild(hopThoai);
         });
         document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape") { dongQrVe(); dongHuyVe(); }
+          if (e.key === "Escape") {
+            dongQrVe();
+            dongHuyVe();
+          }
         });
       });
 
@@ -1573,28 +2032,55 @@
           return;
         }
 
-        const nutSinhMa = document.querySelector('button[onclick="sinhMaQrInVe()"]');
+        const nutSinhMa = document.querySelector(
+          'button[onclick="sinhMaQrInVe()"]',
+        );
         if (nutSinhMa) nutSinhMa.disabled = true;
 
         try {
           const token = localStorage.getItem("admin_token");
           let taoThanhCong = 0;
+          let taoThatBai = 0;
+          const danhSachLoi = [];
 
           for (let i = 0; i < soLuong; i++) {
-            const res = await fetch(`${DUONG_DAN_API}/tickets/create`, {
-              method: "POST",
-              headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              },
-              body: JSON.stringify({ ticket_type: loaiVe }),
-            });
-            if (res.ok) taoThanhCong++;
+            try {
+              const res = await fetch(`${DUONG_DAN_API}/tickets/create`, {
+                method: "POST",
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ ticket_type: loaiVe }),
+              });
+
+              if (res.ok) {
+                taoThanhCong++;
+              } else {
+                taoThatBai++;
+
+                const data = await res.json().catch(() => ({}));
+                danhSachLoi.push(
+                  `Lần ${i + 1}: ${data.detail || `HTTP ${res.status}`}`,
+                );
+              }
+            } catch (error) {
+              taoThatBai++;
+              danhSachLoi.push(`Lần ${i + 1}: ${error.message}`);
+            }
           }
 
-          await taiDuLieuTuBackend();
-          hienThBaoNhanh(`Đã sinh thành công ${taoThanhCong} mã QR vé loại ${loaiVe}.`);
+          await taiDuLieuTuBackend(true);
+
+          let thongDiep = `Tạo thành công ${taoThanhCong}/${soLuong} vé.`;
+
+          if (taoThatBai > 0) {
+            thongDiep += ` Thất bại: ${taoThatBai} vé.`;
+            console.error("Chi tiết lỗi tạo vé:", danhSachLoi);
+          }
+
+          hienThBaoNhanh(thongDiep);
         } catch (error) {
           console.error("Lỗi sinh mã QR:", error);
           alert("Lỗi kết nối khi sinh mã QR. Hãy kiểm tra Ticket Service.");
@@ -1632,7 +2118,9 @@
         if (dangTaiDuLieu || !localStorage.getItem("admin_token")) return;
 
         // Đang ở tab Thống kê hoặc tab Báo cáo thì tự động cập nhật (tải ngầm, không hiện thông báo)
-        if (dangOtabThongKe || dangOtabBaoCao) taiLaiTheoTabDangMo();
+        if (dangOtabThongKe) {
+          taiDuLieuTuBackend(true);
+        }
       }, 3000);
 
       // Tải ngầm theo tab đang mở: tab Báo cáo giữ nguyên khoảng ngày đang lọc (nếu đã chọn đủ 2 ngày)
@@ -1642,7 +2130,11 @@
           const tuNgay = document.getElementById("filter-tu-ngay").value;
           const denNgay = document.getElementById("filter-den-ngay").value;
           const coLoc = tuNgay && denNgay && tuNgay <= denNgay;
-          taiDuLieuTuBackend(true, coLoc ? tuNgay : null, coLoc ? denNgay : null);
+          taiDuLieuTuBackend(
+            true,
+            coLoc ? tuNgay : null,
+            coLoc ? denNgay : null,
+          );
         } else {
           taiDuLieuTuBackend(true);
         }

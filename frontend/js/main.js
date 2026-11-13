@@ -44,17 +44,33 @@ function getPoiTranslation(poi) {
   return (poi && poi.translations && poi.translations[currentLang]) || null;
 }
 
+
 function getPoiLocalizedName(poi) {
   if (!poi) return "";
-  const tr = getPoiTranslation(poi);
-  return (tr && tr.name) || poi.name || "";
+
+  const translations = poi.translations || {};
+
+  return (
+    (translations[currentLang] && translations[currentLang].name) ||
+    (translations.en && translations.en.name) ||
+    poi.name ||
+    ""
+  );
 }
 
 function getPoiLocalizedDescription(poi) {
   if (!poi) return "";
-  const tr = getPoiTranslation(poi);
-  return (tr && tr.description) || poi.description || "";
+
+  const translations = poi.translations || {};
+
+  return (
+    (translations[currentLang] && translations[currentLang].description) ||
+    (translations.en && translations.en.description) ||
+    poi.description ||
+    ""
+  );
 }
+
 
 function updateAudioTitles() {
   const mapPoi = poisData.find(
@@ -98,14 +114,48 @@ function getDisplayRadius() {
   return best ? Number(best[0]) : DEFAULT_GEOFENCE_RADIUS;
 }
 
-function t(key, fallback, extra = {}) {
-  const lang = getCurrentLanguage();
-  const raw = lang && lang.ui ? lang.ui[key] : undefined;
-  const template = raw !== undefined ? raw : fallback;
-  if (template === undefined) return undefined;
-  const vars = { radius: getDisplayRadius(), count: poisData.length, ...extra };
-  return String(template).replace(/\{(\w+)\}/g, (m, name) => (name in vars ? vars[name] : m));
+
+// Ngôn ngữ dự phòng cho giao diện
+const UI_FALLBACK_LANG = "en";
+
+function uiText(lang, key) {
+  const value = lang && lang.ui ? lang.ui[key] : undefined;
+
+  return value !== undefined && String(value).trim() !== ""
+    ? value
+    : undefined;
 }
+
+function t(key, fallback, extra = {}) {
+  // Ưu tiên ngôn ngữ đang chọn
+  let raw = uiText(getCurrentLanguage(), key);
+
+  // Nếu thiếu thì lấy tiếng Anh
+  if (raw === undefined) {
+    const englishLang = languagesData.find(
+      (lang) => lang.code === UI_FALLBACK_LANG
+    );
+
+    raw = uiText(englishLang, key);
+  }
+
+  // Nếu tiếng Anh cũng thiếu thì dùng fallback có sẵn
+  const template = raw !== undefined ? raw : fallback;
+
+  if (template === undefined) return undefined;
+
+  const vars = {
+    radius: getDisplayRadius(),
+    count: poisData.length,
+    ...extra
+  };
+
+  return String(template).replace(
+    /\{(\w+)\}/g,
+    (m, name) => (name in vars ? vars[name] : m)
+  );
+}
+
 
 function htmlLangOf(code) {
   const lang = languagesData.find((l) => l.code === code);
