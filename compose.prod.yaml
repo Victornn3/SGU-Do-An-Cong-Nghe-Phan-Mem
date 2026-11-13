@@ -1,0 +1,227 @@
+
+name: van-mieu
+
+services:
+  # ==========================================
+  # 1. DATABASE
+  # ==========================================
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    expose:
+      - "27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "db.adminCommand('ping').ok"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ==========================================
+  # 2. AUTH SERVICE
+  # ==========================================
+  auth-service:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-auth-service:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: vm_auth
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ==========================================
+  # 3. POI SERVICE
+  # ==========================================
+  poi-service:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-poi-service:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: vm_poi
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ==========================================
+  # 4. NARRATION SERVICE
+  # ==========================================
+  narration-service:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-narration-service:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: vm_narration
+      POI_SERVICE_URL: http://poi-service:8002
+      AUDIO_BASE_DIR: /data/audio
+    volumes:
+      - ./data/audio:/data/audio
+    depends_on:
+      mongo:
+        condition: service_healthy
+      poi-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ==========================================
+  # 5. TICKET SERVICE
+  # ==========================================
+  ticket-service:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-ticket-service:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: vm_ticket
+      USER_WEB_BASE_URL: ${USER_WEB_BASE_URL:-http://localhost/index.html}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ==========================================
+  # 6. STATISTICS SERVICE
+  # ==========================================
+  statistics-service:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-statistics-service:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: vm_stats
+      TICKET_SERVICE_URL: http://ticket-service:8004
+    depends_on:
+      mongo:
+        condition: service_healthy
+      ticket-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ==========================================
+  # 7. API GATEWAY
+  # ==========================================
+  api-gateway:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-api-gateway:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      AUTH_SERVICE_URL: http://auth-service:8001
+      POI_SERVICE_URL: http://poi-service:8002
+      NARRATION_SERVICE_URL: http://narration-service:8003
+      TICKET_SERVICE_URL: http://ticket-service:8004
+      STATISTICS_SERVICE_URL: http://statistics-service:8005
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      poi-service:
+        condition: service_healthy
+      narration-service:
+        condition: service_healthy
+      ticket-service:
+        condition: service_healthy
+      statistics-service:
+        condition: service_healthy
+
+  # ==========================================
+  # 8. SEED DATA
+  # Chỉ chạy khi được gọi chủ động
+  # ==========================================
+  seed-data:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-seed-data:${IMAGE_TAG:?IMAGE_TAG is required}
+    profiles:
+      - seed
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DB_AUTH: vm_auth
+      MONGODB_DB_POI: vm_poi
+      MONGODB_DB_NARRATION: vm_narration
+      MONGODB_DB_TICKET: vm_ticket
+      SEED_DATA_DIR: /app/data/seed
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+    volumes:
+      - ./data/seed:/app/data/seed:ro
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: "no"
+
+  # ==========================================
+  # 9. FRONTEND
+  # ==========================================
+  frontend:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-frontend:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./data/audio:/app-data/audio:ro
+      - ./data/images:/app-data/images:ro
+    depends_on:
+      - api-gateway
+
+volumes:
+  mongo_data:

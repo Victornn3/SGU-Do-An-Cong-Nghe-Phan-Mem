@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional, List
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
-from pymongo import MongoClient, UpdateOne
+from pymongo import MongoClient, UpdateOne, ReturnDocument
 
 app = FastAPI(title="Statistics Service", version="2.0.0")
 
@@ -71,15 +71,10 @@ def update_session_location(data: SessionLocationPayload):
 
     valid_poi = data.poi_id if (data.inside_geofence and data.poi_id in ALL_POIS) else None
 
-    # Mỗi khách (session_id gắn với mã vé, xem getOrCreateSessionId ở frontend) chỉ được tính
-    # MỘT lượt ghé cho mỗi điểm, dù ra vào lại, mở lại trang, quét lại vé hay dùng máy khác. Kiểm tra trong lịch sử (bền vững) chứ không
-    # dựa vào active_sessions, vì bản ghi đó tự xóa sau 25 giây không có heartbeat.
-    already_visited = bool(valid_poi) and db.poi_history.find_one(
-        {"session_id": data.session_id, "poi_id": valid_poi}, {"_id": 1}
-    ) is not None
-
-    # Lưu / Cập nhật phiên trực tiếp vào MongoDB
-    db.active_sessions.update_one(
+    
+    # Lưu trạng thái mới và lấy trạng thái trước đó trong cùng thao tác.
+    # Việc này giúp tránh ghi trùng khi nhiều heartbeat đến gần như đồng thời.
+    previous_session = db.active_sessions.find_one_and_update(
         {"session_id": data.session_id},
         {
             "$set": {
@@ -90,16 +85,26 @@ def update_session_location(data: SessionLocationPayload):
                 "last_seen": now_utc,
             }
         },
-        upsert=True
+        upsert=True,
+        return_document=ReturnDocument.BEFORE
     )
 
-    # Ghi nhận lượt ghé lần đầu khách này tới điểm này
-    if valid_poi and not already_visited:
+    # Xác định POI khách đang ở trước khi cập nhật.
+    previous_poi = None
+    if previous_session and previous_session.get("inside_geofence"):
+        previous_poi = previous_session.get("poi_id")
+
+    # Chỉ ghi lịch sử khi khách vừa vào một POI khác với POI trước đó.
+    # Nếu vẫn ở cùng POI và GPS tiếp tục gửi heartbeat thì không ghi thêm.
+    entered_new_poi = bool(valid_poi) and (valid_poi != previous_poi)
+
+    if entered_new_poi:
         db.poi_history.insert_one({
             "session_id": data.session_id,
             "poi_id": valid_poi,
             "created_at": now_utc
         })
+
 
     return {
         "success": True,
