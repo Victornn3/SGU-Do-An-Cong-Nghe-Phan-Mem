@@ -10,6 +10,21 @@
     />
     <title>Văn Miếu – Quốc Tử Giám | Thuyết minh tự động GPS</title>
 
+    <!-- Chống nháy chữ tiếng Việt: vé mới mặc định tiếng Anh; khi chưa có bản ngôn ngữ lưu sẵn
+         thì tạm ẩn trang tới khi chữ đã đổi sang đúng ngôn ngữ (tối đa 3 giây) -->
+    <style>html.i18n-cho body { visibility: hidden; }</style>
+    <script>
+      try {
+        var daLuu = localStorage.getItem("vm_languages_cache");
+        var ve = (new URLSearchParams(location.search).get("ticket") || "demo").trim().toUpperCase();
+        var ngonNgu = localStorage.getItem("vm_lang_" + ve) || "en";
+        if (!daLuu && !/^vi/i.test(ngonNgu)) {
+          document.documentElement.classList.add("i18n-cho");
+          setTimeout(function () { document.documentElement.classList.remove("i18n-cho"); }, 3000);
+        }
+      } catch (e) {}
+    </script>
+
     <!-- Tailwind CSS CDN -->
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -502,7 +517,7 @@
     <!-- File JS riêng -->
 
     <script src="ticket-gate.js?v=1"></script>
-    <script src="js/main.js?v=8"></script>
+    <script src="js/main.js?v=11"></script>
     <script src="js/gps.js?v=5"></script>
     <script src="js/audio-controls.js?v=1"></script>
   </body>

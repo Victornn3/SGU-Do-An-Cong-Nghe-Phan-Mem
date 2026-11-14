@@ -162,16 +162,22 @@ function htmlLangOf(code) {
   return (lang && lang.html_lang) || code;
 }
 
+// Bộ nhớ trình duyệt: ngôn ngữ khách đã chọn và bản ngôn ngữ tải lần trước (để lần sau
+// mở/tải lại trang hiện ngay đúng ngôn ngữ, không nháy tiếng Việt rồi mới đổi).
+// Ngôn ngữ khách chọn được nhớ RIÊNG cho từng vé: quét vé mới luôn bắt đầu bằng tiếng Anh.
+const START_LANG = "en";
+const LANG_KEY = "vm_lang_" + ((new URLSearchParams(window.location.search).get("ticket") || "demo").trim().toUpperCase());
+const LANG_CACHE_KEY = "vm_languages_cache";
+function docBoNho(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+function ghiBoNho(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* bỏ qua */ } }
+
 function detectInitialLanguage() {
   const codes = languagesData.map((l) => l.code);
-  const prefs = (navigator.languages && navigator.languages.length)
-    ? navigator.languages
-    : [navigator.language || DEFAULT_LANG];
-  for (const pref of prefs) {
-    const norm = String(pref).toLowerCase();
-    const hit = codes.find((c) => norm === c.toLowerCase() || norm.startsWith(c.toLowerCase() + '-'));
-    if (hit) return hit;
-  }
+  // 1. Vé này đã chọn ngôn ngữ trước đó (tải lại, quét lại) thì giữ nguyên
+  const daChon = docBoNho(LANG_KEY);
+  if (daChon && codes.includes(daChon)) return daChon;
+  // 2. Vé mới: mặc định tiếng Anh (khách đổi ở ô chọn ngôn ngữ)
+  if (codes.includes(START_LANG)) return START_LANG;
   return codes.includes(DEFAULT_LANG) ? DEFAULT_LANG : codes[0];
 }
 
@@ -188,13 +194,28 @@ function renderLanguageSelector() {
   selector.value = currentLang;
 }
 
+// Áp dụng ngay bản ngôn ngữ đã lưu từ lần trước (chạy đồng bộ khi trang vừa tải)
+function apDungNgonNguDaLuu() {
+  try {
+    const list = JSON.parse(docBoNho(LANG_CACHE_KEY) || "null");
+    if (!Array.isArray(list) || !list.length) return;
+    languagesData = list;
+    currentLang = detectInitialLanguage();
+    document.documentElement.lang = htmlLangOf(currentLang);
+    applyTranslations();
+  } catch (e) { /* bản lưu hỏng: bỏ qua, chờ tải mới */ }
+}
+
 async function loadLanguages() {
   try {
     const res = await fetch("/api/languages");
     if (res.ok) {
       const json = await res.json();
       const list = Array.isArray(json) ? json : (json && Array.isArray(json.data) ? json.data : []);
-      if (list.length) languagesData = list;
+      if (list.length) {
+        languagesData = list;
+        ghiBoNho(LANG_CACHE_KEY, JSON.stringify(list));
+      }
     }
   } catch (err) {
     console.warn("Không tải được danh sách ngôn ngữ:", err);
@@ -398,6 +419,8 @@ function applyTranslations() {
     const v = t(el.dataset.i18nAriaLabel);
     if (v !== undefined) el.setAttribute("aria-label", v);
   });
+
+  capNhatNutBatDau();
 }
 
 function normalizePoi(raw) {
@@ -494,8 +517,9 @@ async function changeLanguage(lang) {
   const resumeMap = false;
   const resumeDetail = false;
 
-  // Cập nhật ngôn ngữ hiện tại.
+  // Cập nhật ngôn ngữ hiện tại (và nhớ lựa chọn cho lần mở sau).
   currentLang = lang;
+  ghiBoNho(LANG_KEY, lang);
   document.documentElement.lang = htmlLangOf(lang);
 
   const selector = document.getElementById("langSelect");
@@ -640,9 +664,29 @@ function renderPoiList() {
   });
 }
 
+// Điểm bắt đầu trải nghiệm: Cổng Văn Miếu (P00) nếu đang hiển thị; nếu admin đã ẩn
+// P00 thì lấy điểm đang hiển thị đầu tiên theo thứ tự (danh sách API đã sắp theo display_order).
+// Không có điểm nào thì trả về null (không tự đặt khách vào một điểm đã ẩn).
+function layDiemBatDau() {
+  const coToaDo = (p) => typeof p.lat === "number" && typeof p.lng === "number";
+  return poisData.find((p) => p.poi_code === DEFAULT_POI_CODE && coToaDo(p))
+    || poisData.find(coToaDo)
+    || null;
+}
+
+// Nút bắt đầu ở màn hình chào ghi đúng tên điểm bắt đầu khi P00 đã bị ẩn
+function capNhatNutBatDau() {
+  const label = document.querySelector('#btnBatDauP00 [data-i18n="welcome.startP00"]');
+  if (!label) return;
+  const diem = layDiemBatDau();
+  if (diem && diem.poi_code !== DEFAULT_POI_CODE) {
+    label.textContent = t("welcome.startAt", "Bắt đầu tại {poi} (nghe thử)", { poi: getPoiLocalizedName(diem) });
+  }
+}
+
 function centerMapOnGate() {
   if (!leafletMap) return;
-  const gate = poisData.find((p) => p.poi_code === DEFAULT_POI_CODE && typeof p.lat === "number");
+  const gate = layDiemBatDau();
   if (!gate) return;
   leafletMap.setView([gate.lat, gate.lng], MAP_DEFAULT_ZOOM);
 }
@@ -1168,16 +1212,15 @@ function batDauTraiNghiemP00() {
 
   // 3. Ghi nhận phân loại thống kê lượt truy cập
   recordAccessClassification("demo_simulation", false);
-  setGpsStatus(t("status.visiting", "Bạn đang ở {poi}", { poi: getPoiLocalizedName(poisData.find((p) => p.poi_code === DEFAULT_POI_CODE)) || "Cổng Văn Miếu", code: DEFAULT_POI_CODE }));
-
-  // 4. Lấy dữ liệu POI P00 từ danh sách đã tải
-  const gate = poisData.find((p) => p.poi_code === DEFAULT_POI_CODE) || {
-    poi_code: "P00",
-    name: "Cổng Văn Miếu",
-    lat: 21.02875,
-    lng: 105.83615,
-    geofence_radius: DEFAULT_GEOFENCE_RADIUS
-  };
+  // 4. Điểm bắt đầu: P00 nếu đang hiển thị, không thì điểm hiển thị đầu tiên.
+  // Không dùng dữ liệu P00 viết cứng: nếu admin đã ẩn P00 thì khách không được đặt vào
+  // đó và cũng không phát thuyết minh của điểm đã ẩn.
+  const gate = layDiemBatDau();
+  if (!gate) {
+    setGpsStatus(t("status.noStartPoi", "Hiện chưa có điểm tham quan nào đang mở. Vui lòng quay lại sau."));
+    return;
+  }
+  setGpsStatus(t("status.visiting", "Bạn đang ở {poi}", { poi: getPoiLocalizedName(gate), code: gate.poi_code }));
 
   activePoiId = gate.poi_code;
   mapAudioPoiId = gate.poi_code;
@@ -1187,7 +1230,7 @@ function batDauTraiNghiemP00() {
   // 5. Di chuyển góc nhìn bản đồ và đặt vị trí người dùng tại P00
   if (leafletMap && typeof gate.lat === "number" && typeof gate.lng === "number") {
     leafletMap.setView([gate.lat, gate.lng], 19);
-    updatePersonMarker(gate.lat, gate.lng, t("marker.youAt", "Vị trí của bạn", { code: "P00" }));
+    updatePersonMarker(gate.lat, gate.lng, t("marker.youAt", "Vị trí của bạn", { code: gate.poi_code }));
   }
 
   // 6. Hiển thị thanh trình phát âm thanh nổi ở góc dưới
@@ -1220,9 +1263,13 @@ async function kiemTraCongVe() {
   return true;
 }
 
+// Script nằm cuối trang nên các phần tử đã có: đổi chữ ngay theo bản ngôn ngữ đã lưu
+apDungNgonNguDaLuu();
+
 document.addEventListener("DOMContentLoaded", async () => {
   await loadLanguages();
   applyTranslations();
+  document.documentElement.classList.remove("i18n-cho");
   await kiemTraCongVe();
   initLeafletMap();
   await fetchPoisAndNarrations();
