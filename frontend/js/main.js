@@ -710,12 +710,58 @@ function initLeafletMap() {
   renderMapMarkers();
 }
 
+// ===== POI MỚI THÊM VÀ CÁC POI GẦN NÓ (tô màu vàng trên bản đồ) =====
+// Bán kính coi là "gần" POI mới (mét). Đổi số này nếu muốn rộng/hẹp hơn.
+const BAN_KINH_GAN_POI_MOI = 50;
+
+// Tìm POI mới thêm (created_at lớn nhất), XÁC ĐỊNH các POI ở gần nó
+// (trong vòng BAN_KINH_GAN_POI_MOI mét) và POI GẦN NHẤT (sẽ tô màu vàng).
+// Khoảng cách tính bằng công thức Haversine (getDistanceMeters trong gps.js).
+function timPoiGanPoiMoi() {
+  const coToaDo = (p) => typeof p.lat === "number" && typeof p.lng === "number";
+  const thoiGian = (p) => Date.parse(p.created_at) || 0;
+  const ds = poisData.filter(coToaDo).sort((a, b) => thoiGian(b) - thoiGian(a));
+  // Cần ít nhất 2 POI, và POI mới nhất phải được thêm sau các POI còn lại ít nhất 1 phút
+  // (các POI nạp sẵn từ seed được tạo cùng lúc, chỉ lệch nhau vài mili giây)
+  const rong = { moi: null, gan: [], ganNhat: null };
+  if (ds.length < 2 || typeof getDistanceMeters !== "function") return rong;
+  if (thoiGian(ds[0]) - thoiGian(ds[1]) < 60 * 1000) return rong;
+
+  const moi = ds[0];
+  const khoangCach = ds.slice(1)
+    .map((p) => ({ ma: p.poi_code, ten: getPoiLocalizedName(p), m: getDistanceMeters(moi.lat, moi.lng, p.lat, p.lng) }))
+    .sort((a, b) => a.m - b.m);
+  // Các POI ở gần (trong bán kính) và POI gần nhất (đứng đầu danh sách đã sắp xếp)
+  const gan = khoangCach.filter((x) => x.m <= BAN_KINH_GAN_POI_MOI);
+  const ganNhat = khoangCach[0];
+
+  console.log(`[POI mới] ${moi.poi_code} – các POI trong ${BAN_KINH_GAN_POI_MOI} m:`,
+    gan.length ? gan.map((x) => `${x.ma} (${Math.round(x.m)} m)`).join(", ") : "không có",
+    `| gần nhất: ${ganNhat.ma} (${Math.round(ganNhat.m)} m)`);
+  return { moi: moi.poi_code, gan, ganNhat };
+}
+
 function renderMapMarkers() {
   if (!leafletMap || !Array.isArray(poisData)) return;
+
+  const { moi: maPoiMoi, gan: dsPoiGan, ganNhat: poiGanNhat } = timPoiGanPoiMoi();
 
   Object.values(poiMarkers).forEach((marker) => marker.remove());
   poiMarkers = {};
   if (geofenceLayer) geofenceLayer.clearLayers();
+
+  // Vẽ vòng tròn đứt nét bán kính BAN_KINH_GAN_POI_MOI quanh POI mới: vùng xác định "POI gần"
+  const poiMoiObj = maPoiMoi && poisData.find((p) => p.poi_code === maPoiMoi);
+  if (poiMoiObj && geofenceLayer) {
+    L.circle([poiMoiObj.lat, poiMoiObj.lng], {
+      radius: BAN_KINH_GAN_POI_MOI,
+      color: "#dc2626",
+      weight: 1.5,
+      dashArray: "6 6",
+      fill: false,
+      interactive: false
+    }).addTo(geofenceLayer);
+  }
 
   poisData.forEach((poi) => {
     if (typeof poi.lat !== "number" || typeof poi.lng !== "number") return;
@@ -723,10 +769,19 @@ function renderMapMarkers() {
     const imgUrl = poi.image_url || `/images/poi_${poi.poi_code}.jpg`;
     const localizedName = getPoiLocalizedName(poi);
 
+    // Tô màu: POI mới thêm (đỏ), POI GẦN NHẤT (vàng),
+    // các POI khác ở gần trong bán kính (viền cam – phần "xác định POI gần")
+    const laPoiMoi = poi.poi_code === maPoiMoi;
+    const laPoiGan = Boolean(poiGanNhat) && poi.poi_code === poiGanNhat.ma;
+    const laPoiLanCan = !laPoiGan && dsPoiGan.some((x) => x.ma === poi.poi_code);
+    const lopMau = laPoiMoi ? " poi-marker-container--moi"
+      : laPoiGan ? " poi-marker-container--gan"
+      : laPoiLanCan ? " poi-marker-container--lancan" : "";
+
     const icon = L.divIcon({
       className: "poi-custom-marker",
       html: `
-        <div class="poi-marker-container">
+        <div class="poi-marker-container${lopMau}">
           <div class="poi-marker__frame">
             <img src="${imgUrl}" alt="${escapeHtml(localizedName)}" class="poi-marker__img" onerror="this.src='/images/poi_P00_cong_van_mieu.jpg'" />
           </div>
@@ -739,9 +794,18 @@ function renderMapMarkers() {
       popupAnchor: [0, -48]
     });
 
+    // Popup: POI mới liệt kê các POI ở gần; POI gần nhất ghi khoảng cách
+    const dsGanHtml = dsPoiGan.length
+      ? dsPoiGan.map((x) => `${escapeHtml(x.ma)} – ${escapeHtml(x.ten)} (${Math.round(x.m)} m)`).join("<br>")
+      : `Không có POI nào trong ${BAN_KINH_GAN_POI_MOI} m`;
+    const ghiChuMau = laPoiMoi
+      ? `<br><i>POI mới thêm</i><br><b>POI ở gần (≤ ${BAN_KINH_GAN_POI_MOI} m):</b><br>${dsGanHtml}`
+        + (poiGanNhat ? `<br><b>Gần nhất:</b> ${escapeHtml(poiGanNhat.ma)} (${Math.round(poiGanNhat.m)} m)` : "")
+      : laPoiGan ? `<br><i>POI gần nhất với POI mới ${escapeHtml(maPoiMoi)}: ${Math.round(poiGanNhat.m)} m</i>`
+      : laPoiLanCan ? `<br><i>Ở gần POI mới ${escapeHtml(maPoiMoi)}: ${Math.round(dsPoiGan.find((x) => x.ma === poi.poi_code).m)} m</i>` : "";
     const marker = L.marker([poi.lat, poi.lng], { icon, title: `${poi.poi_code} - ${localizedName}` })
       .addTo(leafletMap)
-      .bindPopup(`<b>${escapeHtml(poi.poi_code)}</b><br>${escapeHtml(localizedName)}`);
+      .bindPopup(`<b>${escapeHtml(poi.poi_code)}</b><br>${escapeHtml(localizedName)}${ghiChuMau}`);
 
     marker.on("click", () => openDetailView(poi.poi_code));
     poiMarkers[poi.poi_code] = marker;
@@ -749,10 +813,11 @@ function renderMapMarkers() {
     const radius = Number(poi.geofence_radius) || DEFAULT_GEOFENCE_RADIUS;
     L.circle([poi.lat, poi.lng], {
       radius,
-      color: "#0284c7",
-      weight: 1.5,
-      fillColor: "#38bdf8",
-      fillOpacity: 0.15,
+      color: laPoiMoi ? "#dc2626" : laPoiGan ? "#ca8a04" : laPoiLanCan ? "#ea580c" : "#0284c7",
+      weight: laPoiMoi || laPoiGan || laPoiLanCan ? 2.5 : 1.5,
+      dashArray: laPoiLanCan ? "4 4" : null,
+      fillColor: laPoiMoi ? "#f87171" : laPoiGan ? "#facc15" : laPoiLanCan ? "#fdba74" : "#38bdf8",
+      fillOpacity: laPoiGan ? 0.3 : 0.15,
       interactive: false
     }).addTo(geofenceLayer);
   });
