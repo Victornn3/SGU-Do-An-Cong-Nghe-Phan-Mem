@@ -3,8 +3,15 @@
  * Kiểm soát quyền truy cập của khách dựa trên mã vé QR.
  */
 (function () {
+  // Sau khi quét vé, ứng dụng chỉ được dùng trong 1 phút (60 giây).
+  // Hết thời gian này, ứng dụng bị khóa và khách phải quét lại vé mới xem tiếp được.
+  const SESSION_TTL_MS = 60 * 1000;
+  // Mốc hết hạn được lưu lại để tải lại trang (F5) không tự cộng thêm 1 phút.
+  const SESSION_EXPIRES_KEY = "vm_ticket_session_expires_at";
+
   const TicketGate = {
     ticketInfo: null,
+    sessionTimer: null,
 
     // Hàm lấy tham số từ URL
     getTicketFromUrl() {
@@ -26,8 +33,9 @@
       }
     },
 
-    // Hiển thị màn hình chặn khi không có vé hoặc vé lỗi
-    showGateOverlay(errorMessage = "") {
+    // Hiển thị màn hình chặn khi không có vé / vé lỗi / hết 1 phút sử dụng
+    showGateOverlay(errorMessage = "", options = {}) {
+      const allowDemo = options.allowDemo !== false;
       let overlay = document.getElementById("ticket-gate-overlay");
       if (!overlay) {
         overlay = document.createElement("div");
@@ -56,12 +64,13 @@
             <button type="submit" style="background: #d97706; hover:background: #b45309; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Vào</button>
           </form>
 
+          ${allowDemo ? `
           <div style="border-top: 1px dashed #334155; padding-top: 16px; margin-top: 16px;">
             <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">Chưa có vé?</p>
             <button id="btn-demo-mode" style="background: #334155; color: #cbd5e1; border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer;">
               Xem thử ứng dụng
             </button>
-          </div>
+          </div>` : ""}
         </div>
       `;
 
@@ -69,17 +78,26 @@
       document.getElementById("gate-form").addEventListener("submit", (e) => {
         e.preventDefault();
         const code = document.getElementById("manual-ticket-input").value.trim();
-        if (code) {
-          window.location.search = `?ticket=${encodeURIComponent(code)}`;
+        if (!code) return;
+        const target = `?ticket=${encodeURIComponent(code)}`;
+        // Hết 1 phút mà nhập lại đúng vé cũ: ép tải lại trang để quét lại vé
+        if (window.location.search === target) {
+          window.location.reload();
+        } else {
+          window.location.search = target;
         }
       });
 
-      // Xử lý nút Demo
-      document.getElementById("btn-demo-mode").addEventListener("click", () => {
-        sessionStorage.setItem("vm_ticket_demo", "true");
-        overlay.remove();
-        console.log("Đã kích hoạt chế độ Demo.");
-      });
+      // Xử lý nút Demo (không hiện khi phiên 1 phút đã hết hạn)
+      const demoBtn = document.getElementById("btn-demo-mode");
+      if (demoBtn) {
+        demoBtn.addEventListener("click", () => {
+          this.clearSessionCountdown();
+          sessionStorage.setItem("vm_ticket_demo", "true");
+          overlay.remove();
+          console.log("Đã kích hoạt chế độ Demo.");
+        });
+      }
     },
 
     // Hiển thị lời chào theo loại vé
@@ -103,6 +121,42 @@
       setTimeout(() => toast.remove(), 4000);
     },
 
+    // --- Phiên sử dụng 1 phút kể từ khi quét vé thành công ---
+    startSessionCountdown() {
+      this.clearSessionCountdown();
+      let expiresAt = 0;
+      try {
+        expiresAt = Number(sessionStorage.getItem(SESSION_EXPIRES_KEY)) || 0;
+      } catch (e) { /* trình duyệt chặn bộ nhớ: chỉ đếm trong RAM */ }
+      if (!expiresAt || expiresAt <= Date.now()) {
+        expiresAt = Date.now() + SESSION_TTL_MS;
+        try { sessionStorage.setItem(SESSION_EXPIRES_KEY, String(expiresAt)); } catch (e) { /* bỏ qua */ }
+      }
+      this.sessionTimer = setTimeout(() => this.expireSession(), Math.max(0, expiresAt - Date.now()));
+    },
+
+    clearSessionCountdown() {
+      if (this.sessionTimer) {
+        clearTimeout(this.sessionTimer);
+        this.sessionTimer = null;
+      }
+    },
+
+    // Hết 1 phút: khóa ứng dụng, dừng âm thanh, bắt buộc quét lại vé.
+    expireSession() {
+      this.clearSessionCountdown();
+      this.ticketInfo = null;
+      try { sessionStorage.removeItem(SESSION_EXPIRES_KEY); } catch (e) { /* bỏ qua */ }
+      // Dừng mọi âm thanh đang phát để ứng dụng thực sự ngừng hoạt động
+      document.querySelectorAll("audio").forEach((el) => {
+        try { el.pause(); } catch (e) { /* bỏ qua */ }
+      });
+      this.showGateOverlay(
+        "⏱️ Đã hết 1 phút sử dụng sau khi quét vé. Vui lòng quét lại mã QR trên vé để tiếp tục.",
+        { allowDemo: false }
+      );
+    },
+
     // HÀM CHÍNH: Gọi hàm này để kiểm tra vé (Điểm giao duy nhất với Người 1)
     async verify() {
       // 1. Kiểm tra nếu đang ở chế độ Demo
@@ -121,6 +175,8 @@
       const result = await this.scanTicket(ticketCode);
       if (result.success) {
         this.ticketInfo = result.ticket;
+        // Bắt đầu tính 1 phút sử dụng ứng dụng kể từ lúc vé được xác thực
+        this.startSessionCountdown();
         this.showWelcomeToast(result.ticket);
         return { 
           allowed: true, 
