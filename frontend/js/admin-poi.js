@@ -333,6 +333,8 @@
 
     // 1. Hiển thị thông tin POI
     $("poi-form-title").textContent = "Sửa POI " + code;
+    $("poi-f-code").value = code;
+    $("poi-f-code").disabled = true; // sửa thì không đổi mã
 
     $("poi-f-radius").value = p.geofence_radius ?? 15;
     $("poi-f-lat").value = p.latitude ?? "";
@@ -383,6 +385,36 @@
     $("poi-form-status").classList.add("hidden");
   }
 
+  // Mở form THÊM POI MỚI: để trống các ô, gợi ý mã kế tiếp (P13, P14...)
+  function openNewForm() {
+    editingCode = null;
+    const soLonNhat = Object.keys(pois)
+      .map((c) => parseInt(String(c).replace(/\D/g, ""), 10))
+      .filter((n) => Number.isFinite(n))
+      .reduce((a, b) => Math.max(a, b), -1);
+
+    $("poi-form-title").textContent = "Thêm POI mới";
+    $("poi-f-code").value = "P" + String(soLonNhat + 1).padStart(2, "0");
+    $("poi-f-code").disabled = false;
+    $("poi-f-radius").value = 15;
+    $("poi-f-lat").value = "";
+    $("poi-f-lng").value = "";
+    $("poi-f-name").value = "";
+    $("poi-f-desc").value = "";
+    $("poi-f-narr").value = "";
+    renderPreview({});
+
+    originalVi = null;
+    originalDetail = {};
+    detailLoaded = false;
+    $("poi-lang-blocks").innerHTML = "";
+    setDetailOpen(false);
+
+    $("poi-form-status").classList.add("hidden");
+    $("poi-btn-save").disabled = false;
+    $("poi-modal").classList.remove("hidden");
+  }
+
   function closeForm() {
     $("poi-modal").classList.add("hidden");
     editingCode = null;
@@ -427,12 +459,37 @@
     const name = $("poi-f-name").value.trim();
     const description = $("poi-f-desc").value.trim();
     const narrationVi = $("poi-f-narr").value.trim() || description;
-    const code = editingCode;
+    const laThemMoi = !editingCode;
+    const code = editingCode || $("poi-f-code").value.trim().toUpperCase();
 
-    if (!code) return;
+    if (!code) {
+      return setFormStatus("error", "Vui lòng nhập mã POI (ví dụ P13).");
+    }
 
     if (!name || !description) {
       return setFormStatus("error", "Vui lòng nhập tên và mô tả tiếng Việt.");
+    }
+
+    // THÊM MỚI: tạo POI trước (trạng thái DRAFT), sau đó đi tiếp luồng lưu như khi sửa
+    // để hệ thống tự dịch và tạo audio cho POI mới.
+    if (laThemMoi) {
+      $("poi-btn-save").disabled = true;
+      try {
+        setFormStatus("info", '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tạo POI mới...');
+        const taoMoi = await call("POST", "/pois", {
+          poi_code: code,
+          latitude: Number($("poi-f-lat").value),
+          longitude: Number($("poi-f-lng").value),
+          geofence_radius: Number($("poi-f-radius").value),
+          translations: { vi: { name, description } },
+        });
+        pois[code] = taoMoi.data || { poi_code: code, translations: { vi: { name, description } } };
+        editingCode = code;
+        $("poi-f-code").disabled = true;
+      } catch (err) {
+        $("poi-btn-save").disabled = false;
+        return setFormStatus("error", "Không tạo được POI: " + (err.message || err));
+      }
     }
 
     const existing = pois[code]?.translations || {};
@@ -743,6 +800,7 @@
       main.parentElement.appendChild($("poi-modal"));
     }
 
+    $("poi-btn-new").onclick = openNewForm;
     $("poi-btn-detail").onclick = toggleDetail;
     $("poi-btn-cancel").onclick = closeForm;
     $("poi-btn-close").onclick = closeForm;
