@@ -168,6 +168,50 @@ def fetch_ticket_summary(start=None, end=None) -> dict:
                 "priority_scanned": 0, "scanned_in_range": 0}
 
 
+VN_TZ = timezone(timedelta(hours=7))
+
+
+def dem_ve_tao_theo_ngay(start: datetime, end: datetime) -> List[dict]:
+    """
+    Đếm số mã vé được tạo trong TỪNG NGÀY (giờ Việt Nam) trong khoảng start–end.
+    Không đọc thẳng database vé: gọi API có sẵn GET /api/tickets của ticket-service
+    (trả tối đa 1000 vé mới nhất, mỗi vé có created_at và is_cancelled) rồi tự đếm.
+    Ngày nào không tạo vé vẫn có một dòng với số 0.
+    """
+    url = f"{TICKET_SERVICE_URL}/api/tickets?limit=1000"
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            tickets = json.loads(resp.read().decode("utf-8")).get("data", [])
+    except Exception as e:
+        print(f"Không lấy được danh sách vé từ ticket-service: {e}")
+        tickets = []
+
+    dem = {}  # {"2026-11-23": {"created": 3, "cancelled": 1}}
+    for ve in tickets:
+        try:
+            tao_luc = datetime.fromisoformat(ve["created_at"])  # dạng "...+00:00"
+        except (KeyError, TypeError, ValueError):
+            continue
+        if tao_luc.tzinfo is None:
+            tao_luc = tao_luc.replace(tzinfo=timezone.utc)
+        if not (start <= tao_luc <= end):
+            continue
+        ngay = tao_luc.astimezone(VN_TZ).date().isoformat()  # đổi sang ngày giờ Việt Nam
+        o = dem.setdefault(ngay, {"created": 0, "cancelled": 0})
+        o["created"] += 1
+        if ve.get("is_cancelled"):
+            o["cancelled"] += 1
+
+    ket_qua = []
+    ngay = start.astimezone(VN_TZ).date()
+    ngay_cuoi = end.astimezone(VN_TZ).date()
+    while ngay <= ngay_cuoi:
+        o = dem.get(ngay.isoformat(), {"created": 0, "cancelled": 0})
+        ket_qua.append({"date": ngay.isoformat(), **o, "valid": o["created"] - o["cancelled"]})
+        ngay += timedelta(days=1)
+    return ket_qua
+
+
 @app.get("/api/stats/tickets")
 def get_ticket_stats():
     """
@@ -246,5 +290,7 @@ def get_overview_dashboard(start_date: Optional[str] = None, end_date: Optional[
         "poi_occupancy": occupancy_stats,
         "historical_poi_visits": historical_poi_visits,
         "total_historical_visits": total_historical_visits,
+        # Số mã vé tạo theo từng ngày (chỉ có khi lọc khoảng ngày)
+        "tickets_created_by_day": dem_ve_tao_theo_ngay(range_start, range_end) if range_start else [],
         "tickets": ticket_stats,
     }

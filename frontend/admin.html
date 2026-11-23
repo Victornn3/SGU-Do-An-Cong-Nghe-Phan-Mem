@@ -520,6 +520,52 @@
               <p class="text-xs text-slate-400">Chưa có dữ liệu.</p>
             </div>
           </div>
+
+          <!-- SỐ MÃ VÉ TẠO THEO TỪNG NGÀY -->
+          <div
+            class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6"
+          >
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900 text-base">
+                  Số mã vé tạo theo từng ngày
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Theo khoảng ngày đang lọc (giờ Việt Nam)
+                </p>
+              </div>
+              <span
+                id="bao-cao-tong-ve-tao"
+                class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full"
+                >0 mã</span
+              >
+            </div>
+            <table class="w-full text-sm">
+              <thead>
+                <tr
+                  class="text-xs text-slate-500 uppercase border-b border-slate-200"
+                >
+                  <th class="py-2 px-3 text-left">Ngày</th>
+                  <th class="py-2 px-3 text-right">Mã đã tạo</th>
+                  <th class="py-2 px-3 text-right">Đã hủy</th>
+                  <th class="py-2 px-3 text-right">Còn hiệu lực</th>
+                </tr>
+              </thead>
+              <tbody
+                id="bao-cao-ve-theo-ngay"
+                class="divide-y divide-slate-100"
+              >
+                <tr>
+                  <td
+                    colspan="4"
+                    class="py-4 text-center text-xs text-slate-400"
+                  >
+                    Chọn khoảng ngày rồi bấm "Lọc dữ liệu" để xem.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
         <!-- TAB 3: QUẢN LÝ VÉ & QUÉT MÃ -->
         <section id="tab-ve-qr" class="noi-dung-tab hidden space-y-6">
@@ -1381,6 +1427,36 @@
         const tongVeQuet = stats.total_tickets_scanned ?? 0;
         if (elVe) elVe.textContent = Number(tongVeQuet).toLocaleString();
         hienThiXepHangPoi(stats.historical_poi_visits);
+        hienThiVeTheoNgay(stats.tickets_created_by_day);
+      }
+
+      // Bảng số mã vé tạo theo từng ngày (statistics-service lấy từ ticket-service)
+      function hienThiVeTheoNgay(danhSach) {
+        const than = document.getElementById("bao-cao-ve-theo-ngay");
+        const elTong = document.getElementById("bao-cao-tong-ve-tao");
+        if (!than) return;
+
+        if (!Array.isArray(danhSach) || danhSach.length === 0) {
+          than.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-xs text-slate-400">Chọn khoảng ngày rồi bấm "Lọc dữ liệu" để xem.</td></tr>`;
+          if (elTong) elTong.textContent = "0 mã";
+          return;
+        }
+
+        const fmt = (n) => Number(n || 0).toLocaleString("vi-VN");
+        let tong = 0;
+        than.innerHTML = danhSach
+          .map((d) => {
+            tong += Number(d.created) || 0;
+            const ngay = String(d.date).split("-").reverse().join("/"); // 2026-11-23 -> 23/11/2026
+            return `<tr class="hover:bg-slate-50">
+              <td class="py-2 px-3 font-medium text-slate-700">${escapeHtml(ngay)}</td>
+              <td class="py-2 px-3 text-right font-semibold text-slate-900">${fmt(d.created)}</td>
+              <td class="py-2 px-3 text-right text-red-600">${fmt(d.cancelled)}</td>
+              <td class="py-2 px-3 text-right text-emerald-700">${fmt(d.valid)}</td>
+            </tr>`;
+          })
+          .join("");
+        if (elTong) elTong.textContent = `${fmt(tong)} mã`;
       }
 
       function escapeHtml(value) {
